@@ -1,33 +1,49 @@
 # Agent Handoff
 
-## Current status
+## Current status summary
 
-The repository now has a clean application foundation with a public landing page, a placeholder authenticated app area, and lightweight Supabase helpers for future auth work.
+- `implemented`: Next.js + TypeScript + Tailwind scaffold
+- `implemented`: public landing page at `/`
+- `implemented`: placeholder routes for `/login` and `/app`
+- `implemented`: Supabase environment handling and browser/server session helpers
+- `implemented`: initial project docs
+- `placeholder only`: login page UX
+- `placeholder only`: app area shell and signed-in experience framing
+- `still open`: real auth flow, protected routes, persisted data model, image upload, AI identification, watering workflows, reminders, and calendar sync
 
-## Important decisions already made
+## Confirmed product boundaries
 
-- Use Next.js App Router with TypeScript and Tailwind.
-- Keep source code under `src/`.
-- Keep the first slice intentionally light on abstractions.
-- Use Supabase-ready helpers now, but defer the real auth implementation to the next slice.
-- Keep UI simple, mobile-friendly, and easy to understand.
+- The app is a personal plant care web app for houseplants.
+- The MVP is watering-first: identify the plant, know when it needs water, and track whether watering happened.
+- AI is assistive only and should not be presented as authoritative.
+- Care guidance should remain editable by the user.
+- Plant health diagnosis is not a core v1 feature and should not be overclaimed.
+- Calendar sync is not part of the immediate next slice.
 
-## Constraints to preserve
+## Known assumptions and risks
 
-- Do not introduce AI plant identification yet.
-- Do not introduce calendar sync yet.
-- Avoid speculative architecture, complex state management, or premature domain layers.
-- Prefer changes that are obvious to a junior/intermediate developer reading the code for the first time.
+- A Supabase project and credentials may not be fully provisioned yet outside local placeholders.
+- Auth middleware and cookie refresh behavior still need implementation choices during the auth slice.
+- Onboarding should stay intentionally light so it does not spill into plant setup or profile design.
+- The current repo should still be treated as an early scaffold, not as a partially built product workflow.
 
 ## Recommended next slice
 
-Implement a real authentication flow:
+Implement real auth only:
 
-- add a simple Supabase email-based sign-in flow
+- add a working Supabase Auth sign-in flow
 - protect `/app`
-- add a signed-in shell state
-- keep the plant domain out of that slice unless it is required for onboarding
+- introduce a real signed-in shell
+- keep onboarding minimal and tied to entering the signed-in experience
 
-## Verification still needed
+## Follow-up after that slice
 
-Node.js was not available in the current execution environment, so installation, linting, and build verification still need to be run locally once the toolchain is available.
+- add the first user-owned plant collection model
+- add plant creation with photo, nickname, and room/location
+- add the first plant profile with watering fields
+- add watering completion tracking and basic dashboard visibility
+
+## Verification note
+
+- `npm run lint` passes in the current repo state.
+- The next coding agent should rerun lint after changes and manually verify the auth flow locally, including anonymous access protection, sign-in, session persistence, and sign-out behavior.

@@ -1,6 +1,8 @@
 # Plant Care App
 
-Plant Care App is a personal web app for tracking plants, care routines, and notes. This repository is set up for slice-by-slice development with a simple Next.js foundation and Supabase-ready wiring.
+Plant Care App is a personal web app for helping users keep houseplants alive and healthy with as little friction as possible. The v1 direction is watering-first: identify the plant, store basic care info, remind the user when watering is due, and track whether watering happened.
+
+This repository is still at the beginning of that product journey. Today it contains a simple Next.js foundation, placeholder routes, and Supabase-ready helpers so the first real implementation slices can start from a clean base.
 
 ## Stack
 
@@ -58,21 +60,24 @@ Optional for future server-side admin tasks only:
 
 - `SUPABASE_SERVICE_ROLE_KEY`
 
-## Current routes
+## Current state
 
-- `/` public landing page
-- `/login` auth placeholder
-- `/app` future authenticated app area placeholder
+- `/` is a public landing page.
+- `/login` exists, but it is still a placeholder route.
+- `/app` exists, but it is still a placeholder route and is not protected yet.
+- Supabase environment and session helpers exist, but the real auth flow is not complete.
+- There is no plant CRUD, image upload, AI identification, watering workflow, or calendar sync yet.
 
 ## Docs
 
-- `docs/roadmap.md` outlines the planned slices
-- `docs/current-task.md` records the active slice and definition of done
-- `docs/agent-handoff.md` captures current state and next-step guidance
-- `docs/architecture.md` explains the current structure and boundaries
+- `docs/roadmap.md` outlines the current sequence of work and future phases.
+- `docs/current-task.md` records the next implementation slice and definition of done.
+- `docs/agent-handoff.md` captures current repo truth and next-step guidance.
+- `docs/architecture.md` explains the current technical direction and product boundaries.
 
 ## Notes
 
-- AI plant identification is intentionally not implemented yet.
-- Calendar sync is intentionally not implemented yet.
-- The current `/app` route is a placeholder foundation, not a finished protected experience.
+- Plant identification is part of the product direction, but it is not implemented yet.
+- The MVP stays focused on the personal plant collection and watering loop before richer plant knowledge or automation.
+- AI features should remain assistive and should not overclaim diagnosis or certainty.
+- Calendar sync is planned later, with Google Calendar first and Outlook later.
