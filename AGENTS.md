@@ -1,20 +1,58 @@
 # AGENTS.md
 
-Use this repository in a simple, slice-by-slice way.
+## Purpose
+This repository contains a personal plant care web app focused on helping users keep houseplants alive, starting with watering workflows.
 
-## Working rules
+## Product priorities
+1. Watering workflow is the core product value.
+2. Plant identification supports setup but is not authoritative.
+3. Dashboard clarity and low-friction task completion matter more than feature breadth.
+4. Health diagnosis is a later phase and should not distort v1 scope.
 
-- Read `docs/current-task.md` before making changes.
-- Use `docs/agent-handoff.md` as the source of truth for current status and recommended next work.
-- Keep the setup easy for a junior/intermediate developer to follow.
-- Keep the MVP centered on the watering-first core loop.
-- Avoid unnecessary abstractions and speculative architecture.
-- Treat AI as assistive only and avoid overclaiming certainty or diagnosis.
-- Do not add AI plant identification or calendar sync until the roadmap calls for them.
+## Architecture direction
+- Frontend/app: Next.js + TypeScript + Tailwind
+- Backend platform: Supabase
+- Database: Postgres
+- Auth: Supabase Auth
+- File storage: Supabase Storage
+- Hosting: Vercel
+- AI usage: assistive only, user-editable outputs
+- Calendar: Google first, Outlook later
 
-## Project docs
+## Development principles
+- Prefer the simplest thing that works.
+- Make small, reviewable changes.
+- Avoid premature abstraction.
+- Use clear naming and modular structure.
+- Keep database changes migration-safe.
+- Preserve backward compatibility where practical.
 
-- `docs/roadmap.md`
-- `docs/current-task.md`
-- `docs/agent-handoff.md`
-- `docs/architecture.md`
+## Repository docs are the source of truth
+Keep these files updated when relevant:
+- docs/roadmap.md
+- docs/current-task.md
+- docs/agent-handoff.md
+- docs/architecture.md
+
+## Slice workflow
+For each slice:
+- restate scope
+- state why it is next
+- state explicit non-goals
+- implement only that slice
+- provide verification steps
+- note follow-up risks or deferred items
+
+## Guardrails
+- Do not expand scope to “smart plant doctor” in v1
+- Do not assume AI identification is correct
+- Do not hardcode plant care truth that the user cannot edit
+- Do not introduce Google + Outlook calendar sync together unless requested
+- Do not add unnecessary infrastructure or services
+
+## UX guidance
+- Mobile-first
+- Clear dashboard
+- Fast plant setup
+- Strong empty/loading/error states
+- Minimize user friction for watering completion
