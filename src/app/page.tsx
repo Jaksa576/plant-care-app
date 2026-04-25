@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { SectionCard } from "@/components/section-card";
 import { StatusPill } from "@/components/status-pill";
+import { getAuthState } from "@/lib/auth";
 import { hasSupabaseEnv } from "@/lib/env";
 
 const highlights = [
@@ -19,14 +20,17 @@ const highlights = [
   },
   {
     eyebrow: "Setup",
-    title: "Supabase is wired in, but auth is intentionally light",
+    title: "Signed-in access now anchors the app shell",
     description:
-      "This first slice keeps the repo ready for real auth without burying the project in placeholder abstractions.",
+      "The product can now protect the app area early, before plant records and watering workflows arrive.",
   },
 ];
 
-export default function HomePage() {
-  const supabaseConfigured = hasSupabaseEnv();
+export default async function HomePage() {
+  const [supabaseConfigured, authState] = await Promise.all([
+    Promise.resolve(hasSupabaseEnv()),
+    getAuthState(),
+  ]);
 
   return (
     <main className="px-4 py-5 sm:px-6 lg:px-8">
@@ -44,23 +48,23 @@ export default function HomePage() {
                 A calm foundation for tracking plants, care routines, and notes.
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-8 text-[color:var(--muted)] sm:text-lg">
-                This repository starts small on purpose: a public landing page, a future
-                authenticated app area, and the minimum structure needed to build the next
-                slices with confidence.
+                The foundation is now focused on real account access first, so future plant
+                records and watering workflows can belong to the right signed-in person from
+                the beginning.
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link
-                  href="/app"
+                  href={authState.user ? "/app" : "/login"}
                   className="inline-flex items-center justify-center rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-95"
                 >
-                  Open app placeholder
+                  {authState.user ? "Open your app" : "Sign in to continue"}
                 </Link>
                 <Link
                   href="/login"
                   className="inline-flex items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-5 py-3 text-sm font-semibold text-[color:var(--foreground)] transition hover:bg-[color:var(--accent-soft)]"
                 >
-                  View auth placeholder
+                  {authState.user ? "Manage sign-in" : "Create an account"}
                 </Link>
               </div>
             </div>
@@ -70,10 +74,10 @@ export default function HomePage() {
                 Current v1 focus
               </p>
               <ul className="mt-4 space-y-4 text-sm leading-6 text-[color:var(--muted)]">
-                <li>Simple App Router foundation</li>
-                <li>Supabase-ready environment and helpers</li>
-                <li>Docs that support slice-by-slice delivery</li>
-                <li>Mobile-friendly UI without premature design system work</li>
+                <li>Protected app entry built around Supabase Auth</li>
+                <li>Session-aware browser, server, and middleware helpers</li>
+                <li>Docs that stay aligned with slice-by-slice delivery</li>
+                <li>Mobile-friendly UI without premature product sprawl</li>
               </ul>
             </div>
           </div>

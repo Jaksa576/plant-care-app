@@ -2,6 +2,8 @@ import Link from "next/link";
 
 type AppShellProps = {
   children: React.ReactNode;
+  userEmail: string;
+  actions?: React.ReactNode;
 };
 
 const navItems = [
@@ -9,7 +11,7 @@ const navItems = [
   { href: "/", label: "Home" },
 ];
 
-export function AppShell({ children }: AppShellProps) {
+export function AppShell({ children, userEmail, actions }: AppShellProps) {
   return (
     <div className="min-h-screen px-4 py-5 sm:px-6 lg:px-8">
       <div className="mx-auto flex max-w-6xl flex-col gap-6">
@@ -19,20 +21,24 @@ export function AppShell({ children }: AppShellProps) {
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--muted)]">
                 Plant Care App
               </p>
-              <h1 className="mt-1 text-xl font-semibold">Authenticated app placeholder</h1>
+              <h1 className="mt-1 text-xl font-semibold">Your signed-in app shell</h1>
+              <p className="mt-2 text-sm text-[color:var(--muted)]">{userEmail}</p>
             </div>
 
-            <nav className="flex flex-wrap items-center gap-2">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="rounded-full border border-[color:var(--border)] px-4 py-2 text-sm font-medium text-[color:var(--foreground)] transition hover:bg-[color:var(--accent-soft)]"
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
+            <div className="flex flex-col items-start gap-3 sm:items-end">
+              <nav className="flex flex-wrap items-center gap-2">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="rounded-full border border-[color:var(--border)] px-4 py-2 text-sm font-medium text-[color:var(--foreground)] transition hover:bg-[color:var(--accent-soft)]"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
+              {actions}
+            </div>
           </div>
         </header>
 

@@ -4,12 +4,12 @@
 
 - `implemented`: Next.js + TypeScript + Tailwind scaffold
 - `implemented`: public landing page at `/`
-- `implemented`: placeholder routes for `/login` and `/app`
+- `implemented`: real `/login` auth entry with email sign-in and sign-up states
+- `implemented`: protected `/app` route with a signed-in shell and minimal empty state
 - `implemented`: Supabase environment handling and browser/server session helpers
+- `implemented`: Supabase middleware session refresh for `/app` and `/login`
 - `implemented`: initial project docs
-- `placeholder only`: login page UX
-- `placeholder only`: app area shell and signed-in experience framing
-- `still open`: real auth flow, protected routes, persisted data model, image upload, AI identification, watering workflows, reminders, and calendar sync
+- `still open`: final browser verification of sign-up or sign-in with a valid test account, persisted data model, image upload, AI identification, watering workflows, reminders, and calendar sync
 
 ## Confirmed product boundaries
 
@@ -22,19 +22,18 @@
 
 ## Known assumptions and risks
 
-- A Supabase project and credentials may not be fully provisioned yet outside local placeholders.
-- Auth middleware and cookie refresh behavior still need implementation choices during the auth slice.
+- A Supabase project is configured locally, but this environment did not have a valid inbox-backed test account for full auth QA.
+- Middleware now refreshes auth cookies for `/app` and `/login`; future protected routes should follow the same pattern.
 - Onboarding should stay intentionally light so it does not spill into plant setup or profile design.
 - The current repo should still be treated as an early scaffold, not as a partially built product workflow.
 
 ## Recommended next slice
 
-Implement real auth only:
+Finish manual QA for the auth slice:
 
-- add a working Supabase Auth sign-in flow
-- protect `/app`
-- introduce a real signed-in shell
-- keep onboarding minimal and tied to entering the signed-in experience
+- verify sign-up or sign-in in a real browser with a valid account
+- verify refresh persistence inside `/app`
+- verify sign-out and blocked re-entry to `/app`
 
 ## Follow-up after that slice
 
@@ -45,5 +44,8 @@ Implement real auth only:
 
 ## Verification note
 
-- `npm run lint` passes in the current repo state.
-- The next coding agent should rerun lint after changes and manually verify the auth flow locally, including anonymous access protection, sign-in, session persistence, and sign-out behavior.
+- `npm run lint` passes after the auth implementation.
+- `npm run dev` starts locally on `http://localhost:3001`.
+- Anonymous access to `/app` redirects to `/login`.
+- A direct Supabase auth call with invalid credentials reaches the configured project and returns `Invalid login credentials`.
+- Manual browser verification is still needed for successful sign-in or sign-up, refresh persistence, and sign-out behavior with a real account.

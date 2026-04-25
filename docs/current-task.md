@@ -7,11 +7,12 @@ Slice 1: real auth, protected app access, and signed-in shell/onboarding state.
 ## Current state
 
 - The initial Next.js + TypeScript + Tailwind scaffold is present.
-- The public landing page at `/` exists and is usable as a placeholder.
-- `/login` exists, but it is still a placeholder route.
-- `/app` exists, but it is still a placeholder route and is not protected.
+- The public landing page at `/` exists and now points users toward the real auth flow.
+- `/login` now renders a real Supabase email auth entry page with sign-in and sign-up modes.
+- `/app` now has middleware and server-side protection plus a minimal signed-in shell.
 - Supabase environment handling plus browser/server session helpers exist.
-- There is no verified production auth flow yet.
+- Middleware-based Supabase session refresh is now part of the auth path.
+- The auth implementation is in place, but full browser verification is still pending.
 - There is no plant CRUD yet.
 - There is no image upload yet.
 - There is no AI identification yet.
@@ -21,11 +22,11 @@ Slice 1: real auth, protected app access, and signed-in shell/onboarding state.
 
 ## Goal
 
-Implement the first real authenticated slice:
+Complete verification of the first real authenticated slice:
 
-- add a working Supabase Auth entry flow
-- protect app access for signed-in users
-- replace the current app placeholder framing with a minimal signed-in shell or first-run onboarding state
+- confirm the Supabase Auth entry flow in a real browser
+- confirm protected app access for signed-in users
+- confirm sign-out and refresh persistence behavior in the signed-in shell
 
 ## Why This Slice Is Next
 
@@ -45,17 +46,34 @@ Implement the first real authenticated slice:
 ## Acceptance criteria
 
 - A working sign-in path exists using Supabase Auth.
+- A working sign-up path exists using Supabase Auth.
 - Anonymous users cannot use `/app` directly.
 - Signed-in users can reach `/app`.
+- Session persists across normal navigation and refresh.
+- Sign-out returns the user to the logged-out state.
 - The signed-in shell clearly differs from the current placeholder-only state.
 - Logged-out and logged-in states are easy to understand.
 - The onboarding state, if needed, stays minimal and only helps the user reach the signed-in app shell.
 
-## Verification steps
+## What was completed
 
-1. Run `npm run lint`.
-2. Run the app locally with `npm run dev`.
-3. Verify that an anonymous visitor who opens `/app` is redirected or blocked appropriately.
-4. Verify that sign-in succeeds and the session persists across navigation.
-5. Verify that a signed-in user can reach the app shell.
-6. Verify that signing out returns the user to the correct logged-out state.
+- Added a real `/login` auth page backed by Supabase email/password sign-in and sign-up.
+- Added middleware-based route protection and session refresh for `/app` and `/login`.
+- Replaced the `/app` placeholder with a signed-in shell, empty state, and sign-out control.
+- Added concise env-missing handling so auth setup failures do not degrade into a blank route.
+
+## Verification results
+
+1. `npm run lint` passes.
+2. `npm run dev` starts successfully locally on port `3001` because `3000` was already in use.
+3. Anonymous access to `/app` redirects to `/login` in the running app.
+4. Supabase auth connectivity was confirmed against the configured project:
+   - invalid credential sign-in reaches Supabase and returns `Invalid login credentials`
+5. Full browser verification is still open:
+   - sign-up could not be completed from the terminal because the project rejects reserved fake email domains and no valid inbox-backed test account was available here
+   - signed-in `/app` refresh persistence and post-sign-out browser behavior still need a manual browser pass with a real account
+
+## Recommended next slice
+
+- Stay on Slice 1 until manual browser verification is completed.
+- Once verified, move to the first user-owned plant collection slice without expanding into watering or reminders yet.

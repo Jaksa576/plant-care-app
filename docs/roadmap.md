@@ -148,7 +148,7 @@ Notes:
 Goal: make the app usable as a real signed-in product shell.
 
 ### Slice 1.1 — real auth + protected app shell
-Status: **planned**
+Status: **in progress**
 
 Scope:
 - Supabase email-based sign up
@@ -167,6 +167,10 @@ Non-goals:
 - no image upload yet
 - no AI identification yet
 - no calendar sync yet
+
+Notes:
+- Core implementation is in the repo: `/login` now uses Supabase email auth, `/app` is protected, and sign-out returns the user to the logged-out state.
+- Keep this slice `in progress` until a full browser pass confirms sign-up or sign-in, refresh persistence on `/app`, and sign-out behavior against a valid Supabase test account.
 
 ---
 

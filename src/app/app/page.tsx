@@ -1,62 +1,76 @@
 import { AppShell } from "@/components/app-shell";
-import { AuthPlaceholderNotice } from "@/components/auth-placeholder-notice";
 import { SectionCard } from "@/components/section-card";
-import { getAppAccessState } from "@/lib/auth";
+import { SignOutButton } from "@/components/sign-out-button";
+import { getAuthState } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 const nextSlices = [
   {
     eyebrow: "Next",
-    title: "Auth and account onboarding",
+    title: "Plant collection comes next",
     description:
-      "Turn the placeholder route into a genuinely protected area backed by Supabase Auth and a minimal first-user flow.",
+      "The next slice can introduce the first user-owned plant records without mixing setup into this auth pass.",
   },
   {
     eyebrow: "Soon",
-    title: "Plant collection model",
+    title: "Watering workflows follow the collection model",
     description:
-      "Add the first persisted plant records with a small schema: name, nickname, room, and a few care-related fields.",
+      "Once plants exist, the app can add due dates, completion actions, and a simple dashboard with much less guesswork.",
   },
   {
     eyebrow: "Later",
-    title: "Care logs and reminders",
+    title: "Photos, reminders, and assistive AI stay deferred",
     description:
-      "Layer in watering history and reminder logic after the core collection flow is reliable and easy to follow.",
+      "Those features can layer in after the signed-in shell and core records feel reliable and easy to use.",
   },
 ];
 
 export default async function AppPage() {
-  const accessState = await getAppAccessState();
+  const authState = await getAuthState();
+
+  if (!authState.supabaseConfigured) {
+    redirect("/login?missingEnv=1");
+  }
+
+  if (!authState.user) {
+    redirect("/login");
+  }
 
   return (
-    <AppShell>
+    <AppShell userEmail={authState.user.email ?? "Signed-in user"} actions={<SignOutButton />}>
       <div className="flex flex-col gap-6">
-        <AuthPlaceholderNotice
-          supabaseConfigured={accessState.supabaseConfigured}
-          userEmail={accessState.userEmail}
-        />
-
-        <section className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-          <div className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-6 shadow-[var(--shadow)]">
+        <section className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
+          <div className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface)] p-6 shadow-[var(--shadow)] backdrop-blur sm:p-8">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--muted)]">
-              Current behavior
+              Signed-in space
             </p>
-            <h2 className="mt-4 text-2xl font-semibold">What this route does today</h2>
-            <ul className="mt-5 space-y-3 text-sm leading-7 text-[color:var(--muted)]">
-              <li>Reads the current server-side session if Supabase environment variables are present.</li>
-              <li>Shows whether the project is configured for Supabase and whether a user session exists.</li>
-              <li>Stays intentionally usable without a completed auth flow so the repo remains easy to boot up.</li>
-            </ul>
+            <h2 className="mt-4 text-3xl font-semibold">Welcome inside the app.</h2>
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-[color:var(--muted)] sm:text-base">
+              Your account is working and this protected shell is ready for the first real
+              product data. The next slices can add plants, watering setup, and reminders on
+              top of this foundation.
+            </p>
+
+            <div className="mt-6 rounded-[1.75rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--muted)]">
+                Empty state
+              </p>
+              <h3 className="mt-3 text-xl font-semibold">No plant setup yet, by design.</h3>
+              <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
+                This slice stops at account access. Plant collection and watering setup come
+                next, so nothing here asks you to name a plant or enter care guidance yet.
+              </p>
+            </div>
           </div>
 
-          <div className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface)] p-6 shadow-[var(--shadow)] backdrop-blur">
+          <div className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-6 shadow-[var(--shadow)]">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--muted)]">
-              Guardrail
+              This slice includes
             </p>
-            <h2 className="mt-4 text-2xl font-semibold">What this route does not do yet</h2>
             <ul className="mt-5 space-y-3 text-sm leading-7 text-[color:var(--muted)]">
-              <li>It does not block anonymous visitors with middleware or redirects.</li>
-              <li>It does not implement sign-in, sign-up, password reset, or profile setup.</li>
-              <li>It does not fetch plant data, reminders, AI services, or calendar integrations.</li>
+              <li>Email sign-in and sign-up with Supabase Auth.</li>
+              <li>Route protection for the app area and redirect back to sign-in after sign-out.</li>
+              <li>A minimal app shell that sets up the next product steps without starting them.</li>
             </ul>
           </div>
         </section>

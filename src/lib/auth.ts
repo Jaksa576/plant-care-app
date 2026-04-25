@@ -1,17 +1,18 @@
-import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { hasSupabaseEnv } from "@/lib/env";
+import type { User } from "@supabase/supabase-js";
 
-export type AppAccessState = {
+import { hasSupabaseEnv } from "@/lib/env";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+
+export type AuthState = {
   supabaseConfigured: boolean;
-  isAuthenticated: boolean;
-  userEmail?: string;
+  user: User | null;
 };
 
-export async function getAppAccessState(): Promise<AppAccessState> {
+export async function getAuthState(): Promise<AuthState> {
   if (!hasSupabaseEnv()) {
     return {
       supabaseConfigured: false,
-      isAuthenticated: false,
+      user: null,
     };
   }
 
@@ -20,7 +21,7 @@ export async function getAppAccessState(): Promise<AppAccessState> {
   if (!supabase) {
     return {
       supabaseConfigured: true,
-      isAuthenticated: false,
+      user: null,
     };
   }
 
@@ -31,13 +32,12 @@ export async function getAppAccessState(): Promise<AppAccessState> {
 
     return {
       supabaseConfigured: true,
-      isAuthenticated: Boolean(user),
-      userEmail: user?.email,
+      user,
     };
   } catch {
     return {
       supabaseConfigured: true,
-      isAuthenticated: false,
+      user: null,
     };
   }
 }

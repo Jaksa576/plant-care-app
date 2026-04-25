@@ -24,13 +24,23 @@
 
 - The repo currently contains a Next.js App Router scaffold with TypeScript and Tailwind.
 - `/` is a public landing page.
-- `/login` is a placeholder login route.
-- `/app` is a placeholder app route and is not protected yet.
+- `/login` is a real email-based Supabase Auth entry route.
+- `/app` is protected and only intended for signed-in users.
 - Supabase environment handling exists.
 - Browser and server Supabase helpers exist.
-- Server-side session lookup groundwork exists.
+- Middleware-based session refresh exists for auth-sensitive routes.
 - No persisted product data model has been implemented yet.
-- No completed auth flow, plant workflow, upload flow, reminder system, or calendar sync exists yet.
+- The signed-in shell exists, but final browser verification of the auth flow is still pending.
+
+## Auth and session pattern
+
+- Client components use the browser Supabase helper for sign-in, sign-up, and sign-out actions.
+- Middleware refreshes Supabase auth cookies on `/app` and `/login` before route decisions are made.
+- Server components use the server Supabase helper plus `supabase.auth.getUser()` to gate protected rendering.
+- Protected routes should keep both layers:
+  - middleware for redirects and cookie refresh
+  - server-side checks as a second guard before rendering user-specific UI
+- Missing client env should degrade to a guided auth/setup state, not a blank page or crash.
 
 ## High-level data model direction
 
