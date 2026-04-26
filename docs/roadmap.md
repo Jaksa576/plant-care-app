@@ -43,20 +43,20 @@ Do not let the app become:
 - App scaffold with Next.js App Router — **implemented**
 - TypeScript and Tailwind setup — **implemented**
 - Public landing page — **implemented**
-- Placeholder `/login` route — **implemented**
-- Placeholder `/app` route — **implemented**
+- Real `/login` auth route — **implemented**
+- Protected `/app` route — **implemented**
+- Minimal signed-in shell — **implemented**
 - Supabase-ready helper structure — **implemented**
 - Initial docs set — **implemented**
 
 ### Not yet implemented
-- Real authentication — **planned**
-- Protected app access — **planned**
 - Plant CRUD — **planned**
 - Image upload — **planned**
 - AI plant identification — **planned**
 - Watering workflow — **planned**
 - Dashboard logic — **planned**
 - Reminder sync — **planned**
+- Calendar sync — **planned**
 
 ---
 
@@ -148,7 +148,7 @@ Notes:
 Goal: make the app usable as a real signed-in product shell.
 
 ### Slice 1.1 — real auth + protected app shell
-Status: **in progress**
+Status: **implemented**
 
 Scope:
 - Supabase email-based sign up
@@ -169,8 +169,8 @@ Non-goals:
 - no calendar sync yet
 
 Notes:
-- Core implementation is in the repo: `/login` now uses Supabase email auth, `/app` is protected, and sign-out returns the user to the logged-out state.
-- Keep this slice `in progress` until a full browser pass confirms sign-up or sign-in, refresh persistence on `/app`, and sign-out behavior against a valid Supabase test account.
+- `/login` now uses Supabase email auth, `/app` is protected, and the signed-in shell includes sign-out and a minimal empty state.
+- Manual QA confirmed auth entry, protected `/app` access, session persistence across refresh and navigation, sign-out, and blocked `/app` access after sign-out.
 
 ---
 
@@ -196,6 +196,9 @@ Why this comes before AI:
 - proves the core data model first
 - makes the app useful even without AI
 - avoids blocking progress on vision/API decisions
+
+Next recommended slice:
+- implement the first user-owned plant collection with manual plant CRUD before adding photo, AI, watering, reminder, or calendar features
 
 ### Slice 2.2 — plant detail/profile view
 Status: **planned**

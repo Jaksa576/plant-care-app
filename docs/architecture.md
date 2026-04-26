@@ -24,13 +24,14 @@
 
 - The repo currently contains a Next.js App Router scaffold with TypeScript and Tailwind.
 - `/` is a public landing page.
-- `/login` is a real email-based Supabase Auth entry route.
-- `/app` is protected and only intended for signed-in users.
+- Supabase Auth is implemented through the real email-based `/login` entry route.
+- `/app` protection is implemented and only intended for signed-in users.
+- A minimal signed-in shell is implemented, including sign-out and an empty-state experience.
 - Supabase environment handling exists.
 - Browser and server Supabase helpers exist.
 - Middleware-based session refresh exists for auth-sensitive routes.
 - No persisted product data model has been implemented yet.
-- The signed-in shell exists, but final browser verification of the auth flow is still pending.
+- Manual QA has verified auth entry, route protection, session persistence, and sign-out behavior.
 
 ## Auth and session pattern
 
