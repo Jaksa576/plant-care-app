@@ -47,6 +47,12 @@ Keep this slice out of scope for:
 - Soft archive hides plants from the default collection view but does not yet include restore UX.
 - Care guidance remains user-editable rather than hardcoded as plant truth.
 
+## Known local development risk
+
+- A Next dev server with many `.next/dev/build/postcss.js` workers previously exhausted WSL memory/swap.
+- When VS Code Remote WSL, the dev server, or local shell responsiveness looks broken, check memory/CPU usage before assuming WSL or VS Code itself is corrupted.
+- Do not add broad Tailwind source scanning patterns that include the full repo, generated folders, dependencies, build output, coverage, or `.git`.
+
 ## Verification note
 
 - Auth QA has been completed manually with no issues found.
