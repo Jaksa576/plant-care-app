@@ -36,8 +36,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             A calm front door for the real app.
           </h2>
           <p className="mt-4 text-sm leading-7 text-[color:var(--muted)] sm:text-base">
-            This slice keeps the account flow focused: sign in, reach the protected app
-            shell, and leave plant setup for the next step.
+            Sign in to reach your protected plant collection, where manual records now live
+            before photos, reminders, and watering workflow automation.
           </p>
 
           <div className="mt-8 rounded-[1.75rem] border border-[color:var(--border)] bg-white/80 p-5">
@@ -45,9 +45,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               What happens next
             </p>
             <ul className="mt-4 space-y-3 text-sm leading-6 text-[color:var(--muted)]">
-              <li>Your account becomes the home for future plant records.</li>
-              <li>The app shell stays intentionally light in this slice.</li>
-              <li>Plant collection and watering setup come next, not here.</li>
+              <li>Your account owns every plant record in the protected app.</li>
+              <li>Manual plant setup is available right after sign-in.</li>
+              <li>Watering workflows, reminders, and AI stay out of this slice.</li>
             </ul>
           </div>
 

@@ -6,12 +6,13 @@
 - `implemented`: public landing page at `/`
 - `implemented`: Supabase Auth entry at `/login`
 - `implemented`: protected `/app` access for signed-in users
-- `implemented`: signed-in app shell with minimal empty state
+- `implemented`: signed-in app shell with user-owned plant collection, empty state, and manual add/edit flows
 - `implemented`: sign-out flow
 - `implemented`: Supabase environment handling and browser/server session helpers
 - `implemented`: Supabase middleware session refresh for auth-sensitive routes
-- `verified`: manual QA passed for auth entry, `/app` protection, signed-in access, refresh persistence, navigation persistence, sign-out, and blocked `/app` access after sign-out
-- `not yet implemented`: plant CRUD, image upload, AI identification, watering workflows, dashboard logic, reminders, and calendar sync
+- `implemented`: persisted `plants` table with RLS ownership policies and soft archive support
+- `verified`: manual QA passed for auth entry, `/app` protection, signed-in access, refresh persistence, navigation persistence, sign-out, blocked `/app` access after sign-out, and plant CRUD happy paths
+- `not yet implemented`: photo upload, AI identification, watering workflows, dashboard logic, reminders, and calendar sync
 
 ## Confirmed product boundaries
 
@@ -24,12 +25,11 @@
 
 ## Recommended next slice
 
-Build the first user-owned plant collection with manual plant CRUD only:
+Build Slice 2.2 around a dedicated plant detail/profile experience:
 
-- create plant records manually for the signed-in user
-- view the signed-in user's plant collection
-- edit plant fields
-- include delete or archive only if it remains small and reviewable
+- add a cleaner single-plant profile/detail view on top of the new collection model
+- keep plant editing coherent between list and detail experiences
+- avoid widening into watering workflow, reminders, or AI setup
 
 Keep this slice out of scope for:
 
@@ -42,14 +42,14 @@ Keep this slice out of scope for:
 
 ## Known assumptions and risks for the next slice
 
-- Product data must be scoped to the authenticated user from the first plant table and query onward.
-- Database changes should be additive and migration-safe so later watering and reminder slices can build on them cleanly.
-- The slice should stay focused on manual plant records and avoid scope creep into watering state, care history, photos, or AI-assisted setup.
-- The signed-in shell should continue to handle empty states clearly while the collection is still small.
-- Care guidance should stay user-editable rather than hardcoded as plant truth.
+- Product data is now scoped to the authenticated user via both app queries and database RLS, so future slices should preserve that pattern.
+- The current edit experience is route-based rather than a dedicated detail/profile page, which is the main UX gap for the next slice.
+- Soft archive hides plants from the default collection view but does not yet include restore UX.
+- Care guidance remains user-editable rather than hardcoded as plant truth.
 
 ## Verification note
 
 - Auth QA has been completed manually with no issues found.
-- Repo docs should now treat Slice 1.1 as implemented and verified.
-- The next active slice is manual plant CRUD for user-owned plant records.
+- Plant CRUD verification should include create, list, edit, persistence, archive hiding, protected route access, and guided missing-env handling.
+- Cross-user RLS enforcement should be re-checked in a Supabase-backed environment whenever schema or route behavior changes.
+- The next active slice is Slice 2.2 plant detail/profile view refinement.

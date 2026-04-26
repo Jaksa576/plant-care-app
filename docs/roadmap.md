@@ -37,29 +37,6 @@ Do not let the app become:
 
 ---
 
-## Current repo state
-
-### Foundation
-- App scaffold with Next.js App Router — **implemented**
-- TypeScript and Tailwind setup — **implemented**
-- Public landing page — **implemented**
-- Real `/login` auth route — **implemented**
-- Protected `/app` route — **implemented**
-- Minimal signed-in shell — **implemented**
-- Supabase-ready helper structure — **implemented**
-- Initial docs set — **implemented**
-
-### Not yet implemented
-- Plant CRUD — **planned**
-- Image upload — **planned**
-- AI plant identification — **planned**
-- Watering workflow — **planned**
-- Dashboard logic — **planned**
-- Reminder sync — **planned**
-- Calendar sync — **planned**
-
----
-
 ## Important planning note
 
 This roadmap separates:
@@ -178,7 +155,7 @@ Notes:
 Goal: let a signed-in user create and manage plant records without AI dependency.
 
 ### Slice 2.1 — manual plant CRUD
-Status: **planned**
+Status: **implemented**
 
 Scope:
 - create plant manually
@@ -197,8 +174,13 @@ Why this comes before AI:
 - makes the app useful even without AI
 - avoids blocking progress on vision/API decisions
 
+Notes:
+- The first persisted `plants` table now exists in Supabase/Postgres with authenticated user ownership, RLS policies, and soft archive support.
+- Signed-in users can view an empty collection state, manually add a plant through a review step, edit plant fields, and archive a plant from the protected app experience.
+- This slice intentionally stops before photos, AI identification, watering events, reminder logic, or calendar sync.
+
 Next recommended slice:
-- implement the first user-owned plant collection with manual plant CRUD before adding photo, AI, watering, reminder, or calendar features
+- build Slice 2.2 plant detail/profile refinement so each plant can grow beyond list-card editing without mixing in watering workflow yet
 
 ### Slice 2.2 — plant detail/profile view
 Status: **planned**
@@ -433,15 +415,3 @@ This order is intentional:
 - reduce implementation risk early
 
 ---
-
-## Current next slice
-
-### Next recommended slice
-**Slice 1.1 — real auth + protected app shell**
-
-Status: **planned**
-
-Why:
-- it is the smallest high-leverage next step
-- it unlocks user-specific data safely
-- it keeps the roadmap disciplined before plant features begin

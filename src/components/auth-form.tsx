@@ -160,8 +160,8 @@ export function AuthForm({
 
       <h1 className="mt-5 text-3xl font-semibold">Welcome back to your plant care space.</h1>
       <p className="mt-3 text-sm leading-7 text-[color:var(--muted)] sm:text-base">
-        Sign in to reach the app shell, or create your account so your future plant records
-        belong to a real signed-in user.
+        Sign in to reach your protected plant collection, or create your account so every
+        manual plant record belongs to a real signed-in user.
       </p>
 
       <div className="mt-7 grid grid-cols-2 rounded-full border border-[color:var(--border)] bg-white/70 p-1">

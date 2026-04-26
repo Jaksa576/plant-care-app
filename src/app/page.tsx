@@ -10,7 +10,7 @@ const highlights = [
     eyebrow: "Collection",
     title: "Track your plants without overcomplicating the model",
     description:
-      "Start with a clear home for each plant, a few core attributes, and room to grow the schema as the app earns it.",
+      "Signed-in users can now keep a small, user-owned collection of manual plant records with clear ownership from the start.",
   },
   {
     eyebrow: "Care",
@@ -20,9 +20,9 @@ const highlights = [
   },
   {
     eyebrow: "Setup",
-    title: "Signed-in access now anchors the app shell",
+    title: "Signed-in access anchors every protected plant record",
     description:
-      "The product can now protect the app area early, before plant records and watering workflows arrive.",
+      "Auth, route protection, and the first persisted plant model now fit together without introducing watering workflow scope too early.",
   },
 ];
 
@@ -48,9 +48,8 @@ export default async function HomePage() {
                 A calm foundation for tracking plants, care routines, and notes.
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-8 text-[color:var(--muted)] sm:text-lg">
-                The foundation is now focused on real account access first, so future plant
-                records and watering workflows can belong to the right signed-in person from
-                the beginning.
+                The app now supports real account access plus the first user-owned plant
+                collection, creating a clean base for later watering workflows and reminders.
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -75,6 +74,7 @@ export default async function HomePage() {
               </p>
               <ul className="mt-4 space-y-4 text-sm leading-6 text-[color:var(--muted)]">
                 <li>Protected app entry built around Supabase Auth</li>
+                <li>User-owned manual plant records with calm empty states</li>
                 <li>Session-aware browser, server, and middleware helpers</li>
                 <li>Docs that stay aligned with slice-by-slice delivery</li>
                 <li>Mobile-friendly UI without premature product sprawl</li>

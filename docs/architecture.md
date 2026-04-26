@@ -30,8 +30,8 @@
 - Supabase environment handling exists.
 - Browser and server Supabase helpers exist.
 - Middleware-based session refresh exists for auth-sensitive routes.
-- No persisted product data model has been implemented yet.
-- Manual QA has verified auth entry, route protection, session persistence, and sign-out behavior.
+- The first persisted product data model now exists for user-owned plant records.
+- Manual QA has verified auth entry, route protection, session persistence, sign-out behavior, and the basic plant CRUD path.
 
 ## Auth and session pattern
 
@@ -53,8 +53,23 @@
 ### Plants
 
 - Each plant belongs to one user.
-- Expected early fields include nickname, identified/common/species name, photo reference, room or location, notes, and basic watering guidance.
-- Plant identification should support confidence information and user override rather than locking the user into an AI guess.
+- The first implemented `plants` model stores:
+  - `id`
+  - `user_id`
+  - `nickname`
+  - `common_name`
+  - optional `scientific_name`
+  - optional `location`
+  - optional `notes`
+  - optional `watering_interval_days`
+  - optional `watering_guidance`
+  - optional `archived_at`
+  - `created_at`
+  - `updated_at`
+- The model requires at least one user-friendly label through application validation plus a database check on `nickname` or `common_name`.
+- Watering interval and watering guidance are user-entered guidance only in this slice. They are not treated as botanical truth and they do not drive next-watering calculations yet.
+- Archived plants are soft-hidden from the default collection view by filtering `archived_at is null`.
+- Plant identification, confidence information, and user override remain future concerns and should still avoid locking users into an AI guess.
 
 ### Care events
 
@@ -77,6 +92,8 @@
 
 - Prefer additive, migration-safe schema changes.
 - Keep auth concerns separate from plant-domain slices where possible.
+- Enforce plant ownership on the server by deriving `user_id` from the authenticated Supabase user rather than trusting client input.
+- Keep row-level security enabled on user-owned tables so database access matches route-level protection.
 - Avoid premature generalization into a plant encyclopedia, a generic task engine, or a diagnosis-heavy product.
 - Choose small, understandable slices that a junior or intermediate developer can follow.
 - Preserve user control over plant identity and care guidance when AI-assisted features are added later.
