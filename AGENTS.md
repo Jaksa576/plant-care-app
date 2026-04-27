@@ -27,34 +27,71 @@ This repository contains a personal plant care web app focused on helping users 
 - Keep database changes migration-safe.
 - Preserve backward compatibility where practical.
 
-## Local development and WSL resource guardrails
-- Assume local development runs inside WSL/Ubuntu.
-- Keep the repo under the WSL filesystem, such as `~/code/plant-care-app`, not under `/mnt/c/...`.
+## Development environment standard
+- OS: Windows native, not WSL.
+- Repo location: `C:\Code\plant-care-app`.
+- Shell: PowerShell.
+- Editor: VS Code standard, not Remote-WSL.
+- Implementation agent: Codex running Windows-native.
+- Bash and WSL assumptions are no longer valid.
+- All commands must be PowerShell-compatible.
 - Avoid running multiple dev servers for the same repo.
-- Before starting the dev server, check whether port 3000 is already in use:
-
-```bash
-ss -ltnp | grep ':3000'
-```
-
 - Avoid concurrent `npm install`, `npm update`, `npm run build`, and `npm run dev` runs.
-- Monitor memory and CPU when the dev server or VS Code Remote WSL feels unstable:
-
-```bash
-free -h
-ps aux --sort=-%cpu | head -15
-```
-
-- Stop runaway Next/PostCSS processes if needed:
-
-```bash
-pkill -f "next-server"
-pkill -f ".next/dev/build/postcss.js"
-```
-
 - Avoid Tailwind source patterns that scan the full repo or generated folders.
 - Never intentionally scan `.next`, `node_modules`, `dist`, `build`, `coverage`, or `.git`.
 - Avoid changing dependency specs to `latest`.
+
+## Execution model
+- Each implementation slice runs in its own git worktree.
+- Each slice uses a dedicated branch.
+- Do not develop in place on the main branch.
+- Workflow:
+  1. Create branch.
+  2. Create worktree.
+  3. Implement the scoped slice.
+  4. Run validation gates.
+  5. Push branch.
+  6. Review via Vercel preview.
+  7. Merge manually.
+
+## Responsibility split
+
+### ChatGPT
+- Product strategy.
+- Roadmap planning.
+- Slice definition.
+- QA triage.
+- Codex prompt generation.
+
+### Codex
+- Implementation.
+- Worktree execution.
+- Branch management.
+- Running checks.
+- Updating docs when instructed.
+- Committing and pushing.
+
+## Required validation gates
+Codex must run these before completing a slice:
+- `npm run typecheck`
+- `npm test` if present
+- `npm run build`
+
+If any validation gate fails, Codex must stop, report the errors, and not continue.
+
+## Stop conditions
+Codex must stop and report when:
+- Validation fails.
+- Requirements are ambiguous.
+- Task scope is exceeded.
+- Unexpected repo state occurs.
+
+## Environment handling
+- `.env.local` is not available in worktrees by default.
+- Before running the app in a worktree, Codex must:
+  1. Copy `.env.local` from the root repo.
+  2. Validate required environment variables exist.
+  3. Run `npm install`.
 
 ## Repository docs are the source of truth
 Keep these files updated when relevant:

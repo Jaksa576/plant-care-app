@@ -40,18 +40,42 @@ Keep this slice out of scope for:
 - reminders
 - calendar sync
 
+## Pre-execution setup
+
+Before starting any slice:
+
+1. Create a dedicated branch.
+2. Create a dedicated git worktree for that branch.
+3. Copy `.env.local` from the root repo into the worktree.
+4. Run `npm install` in the worktree.
+
+## Execution loop
+
+Codex must:
+
+1. Implement only the scoped slice.
+2. Run validation:
+   - `npm run typecheck`
+   - `npm test` if present
+   - `npm run build`
+3. If all validation passes, commit and push the branch.
+4. Stop and report.
+
+If validation fails, stop and report the errors without continuing.
+
+## Constraints
+
+- Do not modify unrelated files.
+- Do not expand scope.
+- Do not skip validation.
+- Do not merge branches.
+
 ## Known assumptions and risks for the next slice
 
 - Product data is now scoped to the authenticated user via both app queries and database RLS, so future slices should preserve that pattern.
 - The current edit experience is route-based rather than a dedicated detail/profile page, which is the main UX gap for the next slice.
 - Soft archive hides plants from the default collection view but does not yet include restore UX.
 - Care guidance remains user-editable rather than hardcoded as plant truth.
-
-## Known local development risk
-
-- A Next dev server with many `.next/dev/build/postcss.js` workers previously exhausted WSL memory/swap.
-- When VS Code Remote WSL, the dev server, or local shell responsiveness looks broken, check memory/CPU usage before assuming WSL or VS Code itself is corrupted.
-- Do not add broad Tailwind source scanning patterns that include the full repo, generated folders, dependencies, build output, coverage, or `.git`.
 
 ## Verification note
 

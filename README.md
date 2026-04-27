@@ -16,69 +16,41 @@ This repository is still at the beginning of that product journey. Today it cont
 - Node.js 20.9 or newer
 - npm 10 or newer
 
+## Development Workflow (Important)
+
+- Development is Windows-native, not WSL.
+- Use PowerShell for local commands.
+- Implementation slices use a dedicated git worktree and branch.
+- Codex is used for implementation, validation, documentation updates when instructed, commits, and pushes.
+- Review the Vercel preview before manually merging.
+
 ## Getting started
 
 1. Install dependencies:
 
-```bash
+```powershell
 npm install
 ```
 
 2. Create your local environment file:
 
-```bash
-cp .env.example .env.local
+```powershell
+Copy-Item .env.example .env.local
 ```
 
 3. Fill in the Supabase values in `.env.local`.
 
 4. Start the development server:
 
-```bash
+```powershell
 npm run dev
 ```
 
 5. Open `http://localhost:3000`.
 
-## Local development notes for WSL
-
-- Recommended repo location: `~/code/plant-care-app`.
-- Avoid running the repo from `/mnt/c/...`; WSL filesystem paths are more reliable for Node/Next development.
-- Before starting the dev server, check whether port 3000 is already in use:
-
-```bash
-ss -ltnp | grep ':3000'
-```
-
-- Normal dev command:
-
-```bash
-npm run dev
-```
-
-- Resource checks when WSL, VS Code Remote WSL, or the dev server feels unstable:
-
-```bash
-free -h
-ps aux --sort=-%cpu | head -15
-```
-
-- Clean generated Next files:
-
-```bash
-rm -rf .next
-```
-
-- Stop runaway Next/PostCSS processes if needed:
-
-```bash
-pkill -f "next-server"
-pkill -f ".next/dev/build/postcss.js"
-```
-
 ## Available scripts
 
-```bash
+```powershell
 npm run dev
 npm run dev:clean
 npm run build

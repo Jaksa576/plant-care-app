@@ -97,3 +97,9 @@
 - Avoid premature generalization into a plant encyclopedia, a generic task engine, or a diagnosis-heavy product.
 - Choose small, understandable slices that a junior or intermediate developer can follow.
 - Preserve user control over plant identity and care guidance when AI-assisted features are added later.
+
+## Development workflow model
+
+- Development uses git worktrees with a dedicated branch per implementation slice.
+- Vercel preview is used for validation before merge.
+- Merges are performed manually after review.
