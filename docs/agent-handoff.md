@@ -40,6 +40,8 @@ Keep this slice out of scope for:
 - reminders
 - calendar sync
 
+Slice 2.2 is part of the [Plant Profile + Watering Foundation Campaign](campaigns/plant-profile-watering-foundation.md), which groups Slice 2.2, Slice 3.1, Slice 3.2, and Slice 3.3 while keeping one implementation slice per PR.
+
 ## Pre-execution setup
 
 Before starting any slice:
@@ -76,6 +78,7 @@ If validation fails, stop and report the errors without continuing.
 - The current edit experience is route-based rather than a dedicated detail/profile page, which is the main UX gap for the next slice.
 - Soft archive hides plants from the default collection view but does not yet include restore UX.
 - Care guidance remains user-editable rather than hardcoded as plant truth.
+- After Slice 2.2, the next recommended slice is Slice 3.1 watering state and mark-watered action.
 
 ## Verification note
 

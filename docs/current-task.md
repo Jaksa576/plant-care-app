@@ -4,6 +4,8 @@
 
 Slice 2.2: plant detail/profile view refinement.
 
+This slice is the first slice in the [Plant Profile + Watering Foundation Campaign](campaigns/plant-profile-watering-foundation.md).
+
 ## Completed slice note
 
 - Slice 1.1, real auth plus protected app shell, is implemented.
@@ -61,5 +63,5 @@ Refine the plant experience with a dedicated plant detail/profile view now that 
 
 ## Recommended next slice after this one
 
-- Build Slice 2.2: plant detail/profile view refinement.
-- Keep photo upload, AI identification, watering workflow, reminders, dashboard logic, and calendar sync out of that slice.
+- Build Slice 3.1: watering state and mark-watered action.
+- Keep photo upload, AI identification, reminders, dashboard grouping, and calendar sync out of Slice 3.1.
