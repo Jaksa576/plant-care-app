@@ -1,5 +1,9 @@
 # Plant Profile + Watering Foundation Campaign
 
+## Current Status
+
+This is the active campaign. Slice 2.1 is implemented, and Slice 2.2 is the active slice. Stable product guardrails live in [Product](../product.md), and the current active-slice packet lives in [Current Task](../current-task.md).
+
 ## Campaign Goal
 
 Make the app feel like a real plant care product by turning manual plant records into usable plant profiles and then adding the core watering loop.
@@ -29,6 +33,8 @@ This campaign groups several PR-sized slices under one product objective while p
 **Acceptance criteria:** A signed-in user can open a plant profile from the collection; existing fields render clearly on mobile; edit and archive behavior still work; another user cannot access the plant.
 
 **Validation expectations:** Run `npm run typecheck`, `npm test` if present, and `npm run build`; manually verify profile navigation, mobile layout, edit/archive paths, and ownership protections in a Supabase-backed environment.
+
+**Completion criteria:** Dedicated plant detail/profile view is merged, current docs move the active slice to Slice 3.1, and no photos, AI, watering, reminders, or calendar sync are introduced as part of Slice 2.2.
 
 **Risks:** The existing edit route could become confusing if profile and edit flows are not clearly connected; ownership checks must stay server-derived and RLS-backed.
 

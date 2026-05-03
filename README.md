@@ -1,30 +1,29 @@
 # Plant Care App
 
-Plant Care App is a personal web app for helping users keep houseplants alive and healthy with as little friction as possible. The v1 direction is watering-first: identify the plant, store basic care info, remind the user when watering is due, and track whether watering happened.
-
-This repository is still at the beginning of that product journey. Today it contains a simple Next.js foundation, placeholder routes, and Supabase-ready helpers so the first real implementation slices can start from a clean base.
+Plant Care App is a watering-first personal web app for keeping houseplants alive with as little friction as possible. The core direction is: add a plant, identify it from a photo when useful, store editable care basics, track watering, show a clear dashboard, and sync reminders later.
 
 ## Stack
 
 - Next.js App Router
 - TypeScript
 - Tailwind CSS
-- Supabase client helpers
+- Supabase Auth, Postgres, and Storage
+- Vercel
 
 ## Prerequisites
 
 - Node.js 20.9 or newer
 - npm 10 or newer
+- PowerShell on Windows
 
-## Development Workflow (Important)
+## Development Workflow
 
 - Development is Windows-native, not WSL.
-- Use PowerShell for local commands.
 - Implementation slices use a dedicated git worktree and branch.
-- Codex is used for implementation, validation, documentation updates when instructed, commits, and pushes.
 - Review the Vercel preview before manually merging.
+- See `AGENTS.md` for the concise agent operating contract.
 
-## Getting started
+## Getting Started
 
 1. Install dependencies:
 
@@ -38,7 +37,10 @@ npm install
 Copy-Item .env.example .env.local
 ```
 
-3. Fill in the Supabase values in `.env.local`.
+3. Fill in the Supabase values in `.env.local`:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
 4. Start the development server:
 
@@ -48,45 +50,34 @@ npm run dev
 
 5. Open `http://localhost:3000`.
 
-## Available scripts
+## Available Scripts
 
 ```powershell
 npm run dev
-npm run dev:clean
 npm run build
 npm run start
 npm run lint
 ```
 
-## Environment variables
-
-Required for Supabase-backed features:
-
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-
-Optional for future server-side admin tasks only:
-
-- `SUPABASE_SERVICE_ROLE_KEY`
-
-## Current state
+## Current State
 
 - `/` is a public landing page.
-- `/login` exists, but it is still a placeholder route.
-- `/app` exists, but it is still a placeholder route and is not protected yet.
-- Supabase environment and session helpers exist, but the real auth flow is not complete.
-- There is no plant CRUD, image upload, AI identification, watering workflow, or calendar sync yet.
+- `/login` provides Supabase email sign-in and sign-up.
+- `/app` is protected for signed-in users.
+- Supabase environment handling, session helpers, middleware refresh, and sign-out exist.
+- User-owned plant CRUD exists with persisted `plants` records, RLS ownership policies, and soft archive behavior.
+- There is no dedicated plant detail/profile view yet.
+- There is no image upload, AI identification, watering workflow, reminder system, or calendar sync yet.
 
 ## Docs
 
-- `docs/roadmap.md` outlines the current sequence of work and future phases.
-- `docs/current-task.md` records the next implementation slice and definition of done.
-- `docs/agent-handoff.md` captures current repo truth and next-step guidance.
-- `docs/architecture.md` explains the current technical direction and product boundaries.
+Hot-path docs:
 
-## Notes
+- `AGENTS.md` is the agent operating contract.
+- `docs/product.md` captures durable product truth and guardrails.
+- `docs/architecture.md` describes the implemented technical shape and integration boundaries.
+- `docs/roadmap.md` tracks product sequencing and slice status.
+- `docs/current-task.md` identifies the active slice and next action.
+- Active `docs/campaigns/*.md` files group related PR-sized slices.
 
-- Plant identification is part of the product direction, but it is not implemented yet.
-- The MVP stays focused on the personal plant collection and watering loop before richer plant knowledge or automation.
-- AI features should remain assistive and should not overclaim diagnosis or certainty.
-- Calendar sync is planned later, with Google Calendar first and Outlook later.
+Archived docs may exist under `docs/archive/` for historical context only.
