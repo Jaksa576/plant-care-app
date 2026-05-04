@@ -233,7 +233,7 @@ export function PlantForm({
             </p>
             <ul className="mt-4 space-y-3 text-sm leading-7 text-[color:var(--muted)]">
               <li>This is a manually entered plant record.</li>
-              <li>No AI identification has happened in this flow.</li>
+              <li>AI suggestions are saved only after you review and accept them.</li>
               <li>No reminders have been scheduled yet.</li>
               <li>Watering guidance stays editable and can be changed later.</li>
             </ul>

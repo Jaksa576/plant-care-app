@@ -3,13 +3,16 @@ import { redirect } from "next/navigation";
 
 import {
   archivePlantAction,
+  identifyPlantPhotoAction,
   markWateredAction,
   removePlantPhotoAction,
+  savePlantIdentificationSuggestionAction,
   uploadPlantPhotoAction,
 } from "@/app/app/plants/actions";
 import { AppShell } from "@/components/app-shell";
 import { ArchivePlantForm } from "@/components/archive-plant-form";
 import { MarkWateredForm } from "@/components/mark-watered-form";
+import { PlantIdentificationPanel } from "@/components/plant-identification-form";
 import { PlantPhotoForm } from "@/components/plant-photo-form";
 import { PlantPhotoFrame } from "@/components/plant-photo";
 import { SignOutButton } from "@/components/sign-out-button";
@@ -230,6 +233,13 @@ function PlantProfile({
         plant={plant}
         schedule={schedule}
         showError={wateringStateError}
+      />
+
+      <PlantIdentificationPanel
+        hasPhoto={Boolean(plant.primary_photo_path)}
+        editHref={`/app/plants/${plant.id}/edit`}
+        identifyAction={identifyPlantPhotoAction.bind(null, plant.id)}
+        saveSuggestionAction={savePlantIdentificationSuggestionAction.bind(null, plant.id)}
       />
 
       <WateringHistorySection events={wateringEvents} showError={wateringStateError} />

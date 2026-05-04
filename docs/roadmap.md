@@ -29,14 +29,14 @@ This document tracks product sequencing and slice status. Stable product directi
 - Watering dashboard basics with overdue, due today, upcoming, and recently watered sections.
 - Plant-level watering history timeline.
 - Primary plant photo upload with private Supabase Storage, profile display, dashboard thumbnails, replace/remove actions, and calm no-photo fallbacks.
+- AI-assisted plant identification with Pl@ntNet, transient names-only suggestions, user review/edit/reject flow, and accepted updates to normal plant fields.
 
 ### Active
 
-- Slice 4.2: AI-assisted plant identification readiness review.
+- Slice 5.1: Internal reminder model.
 
 ### Planned
 
-- AI-assisted plant identification.
 - Internal reminder model.
 - Google Calendar sync.
 - Reminder flexibility.
@@ -50,7 +50,6 @@ This document tracks product sequencing and slice status. Stable product directi
 
 ### Not Yet Implemented
 
-- AI identification.
 - Reminder system.
 - Calendar sync.
 
@@ -152,9 +151,9 @@ Current active campaign:
 
 ### Slice 4.2: AI-Assisted Plant Identification
 
-**Status:** active.
+**Status:** implemented.
 
-**Scope:** Submit a plant photo for identification, show likely names plus confidence or uncertainty, store accepted suggestions, and allow manual override/edit.
+**Scope completed:** Submit an owned primary plant photo to Pl@ntNet from a deliberate profile action, show up to three uncertainty-labeled names-only suggestions, allow review/edit/reject/manual override, and save only accepted common/scientific names into normal editable plant fields.
 
 **Guardrail:** AI supports setup but does not become authoritative plant truth.
 
@@ -166,7 +165,7 @@ Current active campaign:
 
 ### Slice 5.1: Internal Reminder Model
 
-**Status:** planned.
+**Status:** active.
 
 **Scope:** App-owned reminder state tied to watering and groundwork for external provider sync.
 
@@ -210,10 +209,9 @@ Automation can reduce friction after the app has reliable user behavior and care
 
 ## Recommended Implementation Order
 
-1. Slice 4.2: AI-assisted plant identification, only if provider decisions are documented or explicitly approved.
-2. Slice 5.1: internal reminder model.
-3. Slice 5.2: Google Calendar sync.
-4. Slice 5.3: reminder flexibility.
-5. Later: health support, richer knowledge, smarter automation, and Outlook sync.
+1. Slice 5.1: internal reminder model.
+2. Slice 5.2: Google Calendar sync.
+3. Slice 5.3: reminder flexibility.
+4. Later: health support, richer knowledge, smarter automation, and Outlook sync.
 
 This order keeps the manual plant and watering loop useful before photos, AI, reminders, and calendar integrations.

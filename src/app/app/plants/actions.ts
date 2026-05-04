@@ -5,6 +5,12 @@ import { redirect } from "next/navigation";
 
 import { getAuthState } from "@/lib/auth";
 import type { MarkWateredState } from "@/components/mark-watered-form";
+import { getPlantNetConfig } from "@/lib/env";
+import { identifyPlantWithPlantNet } from "@/lib/plant-identification/plantnet";
+import type {
+  PlantIdentificationCandidate,
+  PlantIdentificationStatus,
+} from "@/lib/plant-identification/types";
 import {
   archivePlantForUser,
   createPlantForUser,
@@ -23,6 +29,17 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createWateringEventForPlant } from "@/lib/watering/data";
 
 export type PlantPhotoState = {
+  status: "idle" | "success" | "error";
+  message: string | null;
+};
+
+export type PlantIdentificationState = {
+  status: PlantIdentificationStatus;
+  message: string | null;
+  candidates: PlantIdentificationCandidate[];
+};
+
+export type SavePlantIdentificationState = {
   status: "idle" | "success" | "error";
   message: string | null;
 };
@@ -275,5 +292,146 @@ export async function removePlantPhotoAction(
   return {
     status: "success",
     message: "Photo removed. The calm fallback is back for this plant.",
+  };
+}
+
+export async function identifyPlantPhotoAction(
+  plantId: string,
+  previousState: PlantIdentificationState,
+  formData?: FormData,
+): Promise<PlantIdentificationState> {
+  void previousState;
+  void formData;
+  const { supabase, user } = await getSignedInPlantContext();
+  const plantResult = await getPlantForUser(supabase, user.id, plantId);
+  const plant = plantResult.data;
+
+  if (plantResult.error || !plant || plant.archived_at) {
+    return {
+      status: "error",
+      message: "This plant is not available for identification right now.",
+      candidates: [],
+    };
+  }
+
+  if (!plant.primary_photo_path) {
+    return {
+      status: "error",
+      message: "Add a photo before asking for identification help.",
+      candidates: [],
+    };
+  }
+
+  const plantNetConfig = getPlantNetConfig();
+
+  if (!plantNetConfig) {
+    return {
+      status: "error",
+      message:
+        "Plant identification is not configured. Add PLANTNET_API_KEY on the server to enable this helper.",
+      candidates: [],
+    };
+  }
+
+  const photoResult = await supabase.storage
+    .from(PLANT_PHOTO_BUCKET)
+    .download(plant.primary_photo_path);
+
+  if (photoResult.error || !photoResult.data) {
+    return {
+      status: "error",
+      message: "Identification is unavailable right now. Your plant details are still editable.",
+      candidates: [],
+    };
+  }
+
+  const identifyResult = await identifyPlantWithPlantNet(plantNetConfig, photoResult.data);
+
+  if (identifyResult.error || !identifyResult.data) {
+    return {
+      status: "error",
+      message:
+        identifyResult.error ??
+        "Identification is unavailable right now. Your plant details are still editable.",
+      candidates: [],
+    };
+  }
+
+  if (identifyResult.data.length === 0) {
+    return {
+      status: "no-candidates",
+      message: "We are not sure about this one. You can keep editing manually.",
+      candidates: [],
+    };
+  }
+
+  return {
+    status: "success",
+    message: "These are suggestions, not certainties. You can edit anything before saving.",
+    candidates: identifyResult.data,
+  };
+}
+
+export async function savePlantIdentificationSuggestionAction(
+  plantId: string,
+  previousState: SavePlantIdentificationState,
+  formData: FormData,
+): Promise<SavePlantIdentificationState> {
+  void previousState;
+  const commonNameValue = formData.get("commonName");
+  const scientificNameValue = formData.get("scientificName");
+  const commonName = typeof commonNameValue === "string" ? commonNameValue.trim() : "";
+  const scientificName =
+    typeof scientificNameValue === "string" ? scientificNameValue.trim() : "";
+
+  if (!commonName && !scientificName) {
+    return {
+      status: "error",
+      message: "Keep at least one suggested name before saving.",
+    };
+  }
+
+  const { supabase, user } = await getSignedInPlantContext();
+  const plantResult = await getPlantForUser(supabase, user.id, plantId);
+  const plant = plantResult.data;
+
+  if (plantResult.error || !plant || plant.archived_at) {
+    return {
+      status: "error",
+      message: "Could not save this suggestion. Please refresh and try again.",
+    };
+  }
+
+  if (!commonName && !plant.nickname) {
+    return {
+      status: "error",
+      message: "Keep a nickname or common name so this plant has a clear label.",
+    };
+  }
+
+  const updateResult = await updatePlantForUser(supabase, user.id, plant.id, {
+    nickname: plant.nickname,
+    common_name: commonName || null,
+    scientific_name: scientificName || null,
+    location: plant.location,
+    notes: plant.notes,
+    watering_interval_days: plant.watering_interval_days,
+    watering_guidance: plant.watering_guidance,
+  });
+
+  if (updateResult.error || !updateResult.data) {
+    return {
+      status: "error",
+      message: updateResult.error ?? "Could not save this suggestion right now.",
+    };
+  }
+
+  revalidatePath("/app");
+  revalidatePath(`/app/plants/${plant.id}`);
+  revalidatePath(`/app/plants/${plant.id}/edit`);
+
+  return {
+    status: "success",
+    message: "Suggested names saved. You can keep editing this plant any time.",
   };
 }

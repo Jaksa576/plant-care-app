@@ -26,7 +26,8 @@ This document describes implemented technical shape and architectural boundaries
 - Plant profiles show watering history from watering events.
 - Plant profiles support one optional primary photo per owned plant.
 - Dashboard cards show a small plant thumbnail or calm fallback.
-- There is no AI identification, reminder system, or calendar sync yet.
+- Plant profiles include an optional Pl@ntNet-backed identification helper when a primary photo exists.
+- There is no reminder system or calendar sync yet.
 
 ## Auth And Session Pattern
 
@@ -44,6 +45,7 @@ This document describes implemented technical shape and architectural boundaries
 - Watering event reads and inserts filter by the authenticated user's ID on the server and are backed by RLS policies.
 - Plant photo upload, replace, remove, and display first verify the signed-in user's plant ownership on the server.
 - Plant photo storage paths include the authenticated user ID and plant ID, and Storage RLS policies check that path against an owned plant.
+- AI identification first verifies the signed-in user's ownership of the plant and primary photo before reading Storage or calling the provider.
 - RLS must stay enabled on user-owned tables.
 - App queries and database policies should agree on ownership boundaries.
 - Cross-user access checks are required whenever routes, queries, mutations, or schema touch user-owned data.
@@ -112,7 +114,22 @@ Photo object paths use `{user_id}/{plant_id}/primary-{uuid}.{extension}`. Storag
 
 The bucket is private. Server-rendered app surfaces create short-lived signed URLs for display on plant profiles and dashboard cards. Missing or unavailable photos fall back to calm local UI; photos are optional and user-owned.
 
-AI-assisted identification should use owned photos to reduce setup friction while preserving user review, uncertainty, edit, reject, and manual override paths. No AI provider boundary or configuration is implemented yet.
+AI-assisted identification uses Pl@ntNet for optional plant name suggestions. Required server-only environment:
+
+- `PLANTNET_API_KEY`
+- optional `PLANTNET_PROJECT`, defaulting to `all`
+
+The provider boundary lives in `src/lib/plant-identification/plantnet.ts`. Server actions verify plant ownership, download the owned private photo bytes from Supabase Storage, and send those bytes to `POST /v2/identify/{project}` as multipart form data with `images` and `organs=auto`. The app does not expose the API key to browser code and does not send Pl@ntNet public or signed Supabase URLs.
+
+Pl@ntNet responses are normalized into transient candidates with:
+
+- provider
+- scientific name
+- optional common name
+- confidence score
+- uncertainty label: `likely`, `possible`, or `not_sure`
+
+The UI displays up to three names-only suggestions with the note `Plant suggestions powered by Pl@ntNet.` Raw provider responses are not persisted by default. Unreviewed suggestions are not plant truth. A user must review and save a candidate before accepted common/scientific names update the existing editable `plants` fields. Care basics, watering intervals, diagnosis, disease, pest, toxicity, and treatment suggestions are excluded from Slice 4.2.
 
 ## Integration Boundaries
 

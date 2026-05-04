@@ -40,7 +40,8 @@ This campaign covers the remaining planned v1 roadmap after the watering foundat
 Current implementation status:
 
 - Slice 4.1: plant photo upload is implemented.
-- Slice 4.2: AI-assisted plant identification is the active readiness gate.
+- Slice 4.2: AI-assisted plant identification with Pl@ntNet is implemented.
+- Slice 5.1: Internal reminder model is the active next slice.
 - Reminder and calendar slices remain planned.
 
 This is not a broad visual redesign, AI product expansion, diagnosis feature, generic task platform, notification platform, or bidirectional calendar integration.
@@ -176,6 +177,20 @@ Codex should stop rather than invent answers for these if the repo docs do not a
 - Whether reminders should have a user-selected time in Slice 5.1 or remain date-based until Slice 5.2.
 - Whether Google Calendar sync should create single upcoming events or recurring events.
 - Whether disconnecting Google should delete future synced events or only stop future sync.
+
+### Approved Slice 4.2 provider decision
+
+Slice 4.2 uses Pl@ntNet as the approved provider.
+
+- Provider: Pl@ntNet API.
+- Environment: server-only `PLANTNET_API_KEY`.
+- Optional environment: `PLANTNET_PROJECT`, default `all`.
+- Endpoint: `POST /v2/identify/{project}` with `lang=en` and `nb-results=3`.
+- Request: server-side multipart upload of owned private photo bytes with `images` and `organs=auto`.
+- Suggestions: common/scientific names only.
+- Care basics, watering intervals, diagnosis, pest, disease, toxicity, and treatment are excluded.
+- Persistence: raw provider responses are not persisted by default.
+- Attribution: review UI includes `Plant suggestions powered by Pl@ntNet.`
 
 ## Suggested information architecture
 
@@ -812,9 +827,11 @@ Stop and report if:
 
 ## Slice 4.2 — AI-assisted plant identification
 
+**Status:** complete.
+
 ### Recommendation
 
-Add an optional, conservative identification workflow from an owned plant photo. Do not start this slice until the AI provider, credentials, request shape, and data-handling expectations are documented or explicitly approved.
+Add an optional, conservative identification workflow from an owned plant photo. Pl@ntNet is the approved provider for this slice.
 
 ### User story
 
@@ -862,11 +879,16 @@ Plant profile
 
 ### AI provider rule
 
-Codex must not invent provider-specific integration details.
+Codex must not invent provider-specific integration details beyond the approved Pl@ntNet boundary.
 
-If the repo docs and environment do not identify the AI provider, API, credentials, request shape, allowed data handling, and expected response shape, Codex must stop and report that Slice 4.2 needs a provider decision.
+Approved provider configuration is:
 
-If provider setup is documented, implement the smallest provider boundary needed for this slice and document it in `docs/architecture.md`.
+- `PLANTNET_API_KEY` server-side only.
+- `PLANTNET_PROJECT`, optional and defaulting to `all`.
+- `POST https://my-api.plantnet.org/v2/identify/{project}?api-key={PLANTNET_API_KEY}&lang=en&nb-results=3`.
+- Multipart request with owned private photo bytes, `images`, and `organs=auto`.
+
+If these values cannot be represented server-side, Codex must stop and report the issue. The provider boundary is documented in `docs/architecture.md`.
 
 ### Data and ownership expectations
 
@@ -978,6 +1000,8 @@ Stop and report if:
 ---
 
 ## Slice 5.1 — Internal reminder model
+
+**Status:** active.
 
 ### Recommendation
 
