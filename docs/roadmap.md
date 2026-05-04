@@ -52,7 +52,6 @@ This document tracks product sequencing and slice status. Stable product directi
 
 - Image upload.
 - AI identification.
-- Watering workflow.
 - Reminder system.
 - Calendar sync.
 
