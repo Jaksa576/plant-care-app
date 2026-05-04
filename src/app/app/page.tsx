@@ -4,6 +4,7 @@ import { StatusPill } from "@/components/status-pill";
 import { DashboardSection } from "@/components/watering-dashboard";
 import { getAuthState } from "@/lib/auth";
 import { listPlantsForUser } from "@/lib/plants/data";
+import { createPlantPhotoUrlMap } from "@/lib/plants/photos";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   getDashboardAttentionCount,
@@ -42,6 +43,7 @@ export default async function AppPage({ searchParams }: AppPageProps) {
     listWateringEventsForUser(supabase, authState.user.id),
   ]);
   const plants = plantsResult.data ?? [];
+  const photoUrls = await createPlantPhotoUrlMap(supabase, plants);
   const dashboardPlants = getDashboardPlants(plants, wateringEventsResult.data ?? []);
   const dashboardGroups = getWateringDashboardGroups(dashboardPlants);
   const attentionCount = getDashboardAttentionCount(dashboardGroups);
@@ -79,7 +81,7 @@ export default async function AppPage({ searchParams }: AppPageProps) {
               </h2>
               <p className="mt-4 text-sm leading-7 text-[color:var(--muted)] sm:text-base">
                 Watering state is based on your latest watering record and each plant&apos;s editable
-                interval. Photos, reminders, and calendar sync are still deferred.
+                interval. Photos are optional, and reminders and calendar sync are still deferred.
               </p>
             </div>
 
@@ -117,8 +119,8 @@ export default async function AppPage({ searchParams }: AppPageProps) {
             <StatusPill>Empty collection</StatusPill>
             <h2 className="mt-5 text-3xl font-semibold">No plants yet, and that&apos;s okay.</h2>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-[color:var(--muted)] sm:text-base">
-              Add your first plant to start tracking watering. No AI identification has happened
-              here, no reminders have been scheduled, and watering guidance stays editable.
+              Add your first plant to start tracking watering. Photos can come later, no AI
+              identification has happened here, and watering guidance stays editable.
             </p>
             <div className="mt-6">
               <Link
@@ -144,38 +146,43 @@ export default async function AppPage({ searchParams }: AppPageProps) {
               </section>
             ) : null}
 
-            <DashboardSection
-              title="Overdue"
-              description="Plants with a next watering date before today."
-              emptyMessage="Nothing overdue right now."
-              plants={dashboardGroups.overdue}
-              showAction
-            />
+              <DashboardSection
+                title="Overdue"
+                description="Plants with a next watering date before today."
+                emptyMessage="Nothing overdue right now."
+                plants={dashboardGroups.overdue}
+                photoUrls={photoUrls}
+                showAction
+              />
             <DashboardSection
               title="Due today"
-              description="Plants due today, plus plants with an interval that have not been watered yet."
-              emptyMessage="No plants due today."
-              plants={dashboardGroups.dueToday}
-              showAction
-            />
+                description="Plants due today, plus plants with an interval that have not been watered yet."
+                emptyMessage="No plants due today."
+                plants={dashboardGroups.dueToday}
+                photoUrls={photoUrls}
+                showAction
+              />
             <DashboardSection
               title="Upcoming"
-              description="Plants with a next watering date in the next 7 days."
-              emptyMessage="Add watering intervals to see upcoming care."
-              plants={dashboardGroups.upcoming}
-            />
+                description="Plants with a next watering date in the next 7 days."
+                emptyMessage="Add watering intervals to see upcoming care."
+                plants={dashboardGroups.upcoming}
+                photoUrls={photoUrls}
+              />
             <DashboardSection
               title="Recently watered"
-              description="Plants watered in the last 7 days."
-              emptyMessage="Watering you record will appear here."
-              plants={dashboardGroups.recentlyWatered}
-            />
+                description="Plants watered in the last 7 days."
+                emptyMessage="Watering you record will appear here."
+                plants={dashboardGroups.recentlyWatered}
+                photoUrls={photoUrls}
+              />
             {dashboardGroups.needsInterval.length > 0 ? (
               <DashboardSection
                 title="Needs interval"
                 description="Plants without a watering interval yet."
                 emptyMessage="Every active plant has a watering interval."
                 plants={dashboardGroups.needsInterval}
+                photoUrls={photoUrls}
               />
             ) : null}
           </div>

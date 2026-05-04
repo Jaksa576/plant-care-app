@@ -37,7 +37,7 @@ export default async function NewPlantPage() {
           action={createPlantAction}
           submitLabel="Save plant"
           title="Start with the basics"
-          description="This first plant record is intentionally simple: manual details only, no AI identification, no photos, and no reminders yet."
+          description="This first plant record is intentionally simple: manual details first, with an optional photo after save and no AI identification or reminders yet."
         />
       </div>
     </AppShell>

@@ -1,14 +1,22 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { archivePlantAction, markWateredAction } from "@/app/app/plants/actions";
+import {
+  archivePlantAction,
+  markWateredAction,
+  removePlantPhotoAction,
+  uploadPlantPhotoAction,
+} from "@/app/app/plants/actions";
 import { AppShell } from "@/components/app-shell";
 import { ArchivePlantForm } from "@/components/archive-plant-form";
 import { MarkWateredForm } from "@/components/mark-watered-form";
+import { PlantPhotoForm } from "@/components/plant-photo-form";
+import { PlantPhotoFrame } from "@/components/plant-photo";
 import { SignOutButton } from "@/components/sign-out-button";
 import { StatusPill } from "@/components/status-pill";
 import { getAuthState } from "@/lib/auth";
 import { getPlantForUser } from "@/lib/plants/data";
+import { createPlantPhotoUrlMap } from "@/lib/plants/photos";
 import {
   getPlantPrimaryLabel,
   getPlantSecondaryLabel,
@@ -157,11 +165,13 @@ function PlantProfile({
   schedule,
   wateringStateError,
   wateringEvents,
+  photoUrl,
 }: {
   plant: PlantRecord;
   schedule: WateringScheduleState;
   wateringStateError: boolean;
   wateringEvents: WateringEventRecord[];
+  photoUrl?: string;
 }) {
   const primaryLabel = getPlantPrimaryLabel(plant);
   const secondaryLabel = getPlantSecondaryLabel(plant);
@@ -170,31 +180,49 @@ function PlantProfile({
   return (
     <div className="flex flex-col gap-6">
       <section className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface)] p-6 shadow-[var(--shadow)] backdrop-blur sm:p-8">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-          <div className="max-w-2xl">
-            <StatusPill>Plant profile</StatusPill>
-            <h2 className="mt-5 text-3xl font-semibold text-[color:var(--foreground)] sm:text-4xl">
-              {primaryLabel}
-            </h2>
-            {secondaryLabel ? (
-              <p className="mt-3 text-base leading-7 text-[color:var(--muted)]">{secondaryLabel}</p>
-            ) : null}
-            {plant.scientific_name ? (
-              <p className="mt-2 text-sm italic leading-6 text-[color:var(--muted)]">
-                {plant.scientific_name}
-              </p>
-            ) : null}
-            <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
-              {plant.location ?? "No room or location set yet."}
-            </p>
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)] lg:items-start">
+          <div className="flex flex-col gap-5">
+            <PlantPhotoFrame
+              photoUrl={photoUrl}
+              alt={photoUrl ? `${primaryLabel} primary plant photo` : ""}
+            />
+            <PlantPhotoForm
+              uploadAction={uploadPlantPhotoAction.bind(null, plant.id)}
+              removeAction={removePlantPhotoAction.bind(null, plant.id)}
+              hasPhoto={Boolean(plant.primary_photo_path)}
+            />
           </div>
 
-          <Link
-            href={`/app/plants/${plant.id}/edit`}
-            className="inline-flex w-fit items-center justify-center rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-95"
-          >
-            Edit details
-          </Link>
+          <div>
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between lg:flex-col">
+              <div className="max-w-2xl">
+                <StatusPill>Plant profile</StatusPill>
+                <h2 className="mt-5 text-3xl font-semibold text-[color:var(--foreground)] sm:text-4xl">
+                  {primaryLabel}
+                </h2>
+                {secondaryLabel ? (
+                  <p className="mt-3 text-base leading-7 text-[color:var(--muted)]">
+                    {secondaryLabel}
+                  </p>
+                ) : null}
+                {plant.scientific_name ? (
+                  <p className="mt-2 text-sm italic leading-6 text-[color:var(--muted)]">
+                    {plant.scientific_name}
+                  </p>
+                ) : null}
+                <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
+                  {plant.location ?? "No room or location set yet."}
+                </p>
+              </div>
+
+              <Link
+                href={`/app/plants/${plant.id}/edit`}
+                className="inline-flex w-fit items-center justify-center rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-95"
+              >
+                Edit details
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -303,12 +331,13 @@ export default async function PlantProfilePage({ params, searchParams }: PlantPr
   const schedule = plant
     ? getWateringScheduleState(plant, wateringEvents[0] ?? null)
     : null;
+  const photoUrls = plant ? await createPlantPhotoUrlMap(supabase, [plant]) : {};
 
   return (
     <AppShell
       userEmail={authState.user.email ?? "Signed-in user"}
       title={plantTitle}
-      subtitle="Review this plant record before watering state, photos, AI, or reminders attach to it."
+      subtitle="Review this plant record, its optional photo, and the watering state that belongs to this account."
       actions={<SignOutButton />}
     >
       <div className="flex flex-col gap-6">
@@ -366,6 +395,7 @@ export default async function PlantProfilePage({ params, searchParams }: PlantPr
               schedule={schedule}
               wateringStateError={Boolean(wateringResult?.error)}
               wateringEvents={wateringEvents}
+              photoUrl={photoUrls[plant.id]}
             />
             <ArchivePlantForm
               action={archivePlantAction.bind(

@@ -9,12 +9,23 @@ import {
   archivePlantForUser,
   createPlantForUser,
   getPlantForUser,
+  updatePlantPrimaryPhotoForUser,
   updatePlantForUser,
 } from "@/lib/plants/data";
 import { createPlantFormErrorState, parsePlantFormData } from "@/lib/plants/forms";
+import {
+  getPlantPhotoPath,
+  getPlantPhotoValidationError,
+  PLANT_PHOTO_BUCKET,
+} from "@/lib/plants/photos";
 import { emptyPlantFormState, type PlantFormState } from "@/lib/plants/types";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createWateringEventForPlant } from "@/lib/watering/data";
+
+export type PlantPhotoState = {
+  status: "idle" | "success" | "error";
+  message: string | null;
+};
 
 async function getSignedInPlantContext() {
   const authState = await getAuthState();
@@ -139,5 +150,130 @@ export async function markWateredAction(
     message: plantResult.data.watering_interval_days
       ? "Watering recorded. Next watering updated from today."
       : "Watering recorded. Add an interval later to see a next date.",
+  };
+}
+
+export async function uploadPlantPhotoAction(
+  plantId: string,
+  previousState: PlantPhotoState,
+  formData: FormData,
+): Promise<PlantPhotoState> {
+  void previousState;
+  const file = formData.get("photo");
+
+  if (!(file instanceof File)) {
+    return {
+      status: "error",
+      message: "Choose a plant photo before uploading.",
+    };
+  }
+
+  const validationError = getPlantPhotoValidationError(file);
+
+  if (validationError) {
+    return {
+      status: "error",
+      message: validationError,
+    };
+  }
+
+  const { supabase, user } = await getSignedInPlantContext();
+  const plantResult = await getPlantForUser(supabase, user.id, plantId);
+  const plant = plantResult.data;
+
+  if (plantResult.error || !plant || plant.archived_at) {
+    return {
+      status: "error",
+      message: "Could not update this plant photo. Please refresh and try again.",
+    };
+  }
+
+  const photoPath = getPlantPhotoPath(user.id, plant.id, file.type);
+  const uploadResult = await supabase.storage.from(PLANT_PHOTO_BUCKET).upload(photoPath, file, {
+    cacheControl: "3600",
+    contentType: file.type,
+  });
+
+  if (uploadResult.error) {
+    return {
+      status: "error",
+      message: "Photo upload failed. Please try a smaller image or try again later.",
+    };
+  }
+
+  const updateResult = await updatePlantPrimaryPhotoForUser(supabase, user.id, plant.id, photoPath);
+
+  if (updateResult.error || !updateResult.data) {
+    await supabase.storage.from(PLANT_PHOTO_BUCKET).remove([photoPath]);
+
+    return {
+      status: "error",
+      message: updateResult.error ?? "Photo uploaded, but the plant record was not updated.",
+    };
+  }
+
+  if (plant.primary_photo_path) {
+    await supabase.storage.from(PLANT_PHOTO_BUCKET).remove([plant.primary_photo_path]);
+  }
+
+  revalidatePath("/app");
+  revalidatePath(`/app/plants/${plant.id}`);
+
+  return {
+    status: "success",
+    message: "Photo saved. This plant will now show its primary photo.",
+  };
+}
+
+export async function removePlantPhotoAction(
+  plantId: string,
+  previousState: PlantPhotoState,
+): Promise<PlantPhotoState> {
+  void previousState;
+  const { supabase, user } = await getSignedInPlantContext();
+  const plantResult = await getPlantForUser(supabase, user.id, plantId);
+  const plant = plantResult.data;
+
+  if (plantResult.error || !plant || plant.archived_at) {
+    return {
+      status: "error",
+      message: "Could not remove this plant photo. Please refresh and try again.",
+    };
+  }
+
+  if (!plant.primary_photo_path) {
+    return {
+      status: "success",
+      message: "This plant does not have a photo yet.",
+    };
+  }
+
+  const updateResult = await updatePlantPrimaryPhotoForUser(supabase, user.id, plant.id, null);
+
+  if (updateResult.error || !updateResult.data) {
+    return {
+      status: "error",
+      message: updateResult.error ?? "Could not clear this plant photo right now.",
+    };
+  }
+
+  const removeResult = await supabase.storage
+    .from(PLANT_PHOTO_BUCKET)
+    .remove([plant.primary_photo_path]);
+
+  if (removeResult.error) {
+    return {
+      status: "error",
+      message:
+        "The plant no longer points to this photo, but storage cleanup may need another try.",
+    };
+  }
+
+  revalidatePath("/app");
+  revalidatePath(`/app/plants/${plant.id}`);
+
+  return {
+    status: "success",
+    message: "Photo removed. The calm fallback is back for this plant.",
   };
 }

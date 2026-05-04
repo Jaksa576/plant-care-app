@@ -8,6 +8,8 @@ export type PlantRecord = {
   notes: string | null;
   watering_interval_days: number | null;
   watering_guidance: string | null;
+  primary_photo_path: string | null;
+  primary_photo_uploaded_at: string | null;
   archived_at: string | null;
   created_at: string;
   updated_at: string;

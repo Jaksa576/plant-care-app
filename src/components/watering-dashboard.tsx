@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { markWateredAction } from "@/app/app/plants/actions";
 import { MarkWateredForm } from "@/components/mark-watered-form";
+import { PlantPhotoFrame } from "@/components/plant-photo";
 import { StatusPill } from "@/components/status-pill";
 import { getPlantPrimaryLabel, getPlantSecondaryLabel } from "@/lib/plants/presenters";
 import type { DashboardPlant } from "@/lib/watering/dashboard";
@@ -11,38 +12,49 @@ type DashboardSectionProps = {
   description: string;
   emptyMessage: string;
   plants: DashboardPlant[];
+  photoUrls: Record<string, string>;
   showAction?: boolean;
 };
 
 type DashboardPlantCardProps = {
   item: DashboardPlant;
+  photoUrl?: string;
   showAction: boolean;
 };
 
-function DashboardPlantCard({ item, showAction }: DashboardPlantCardProps) {
+function DashboardPlantCard({ item, photoUrl, showAction }: DashboardPlantCardProps) {
   const primaryLabel = getPlantPrimaryLabel(item.plant);
   const secondaryLabel = getPlantSecondaryLabel(item.plant);
 
   return (
     <article className="rounded-[1.5rem] border border-[color:var(--border)] bg-white/85 p-4 shadow-[var(--shadow)]">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0">
-          <Link href={`/app/plants/${item.plant.id}`} className="group block">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--muted)]">
-              Plant
-            </p>
-            <h3 className="mt-2 text-xl font-semibold text-[color:var(--foreground)] transition group-hover:text-[color:var(--accent)]">
-              {primaryLabel}
-            </h3>
+        <div className="flex min-w-0 gap-4">
+          <Link href={`/app/plants/${item.plant.id}`} aria-label={`Open ${primaryLabel}`}>
+            <PlantPhotoFrame
+              photoUrl={photoUrl}
+              alt={photoUrl ? `${primaryLabel} primary plant photo` : ""}
+              variant="thumbnail"
+            />
           </Link>
-          {secondaryLabel ? (
-            <p className="mt-1 text-sm leading-6 text-[color:var(--muted)]">{secondaryLabel}</p>
-          ) : null}
-          {item.plant.location ? (
-            <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">
-              {item.plant.location}
-            </p>
-          ) : null}
+          <div className="min-w-0">
+            <Link href={`/app/plants/${item.plant.id}`} className="group block">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--muted)]">
+                Plant
+              </p>
+              <h3 className="mt-2 text-xl font-semibold text-[color:var(--foreground)] transition group-hover:text-[color:var(--accent)]">
+                {primaryLabel}
+              </h3>
+            </Link>
+            {secondaryLabel ? (
+              <p className="mt-1 text-sm leading-6 text-[color:var(--muted)]">{secondaryLabel}</p>
+            ) : null}
+            {item.plant.location ? (
+              <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">
+                {item.plant.location}
+              </p>
+            ) : null}
+          </div>
         </div>
         <StatusPill tone={item.schedule.status === "overdue" ? "warning" : "default"}>
           {item.schedule.nextWateringLabel}
@@ -88,6 +100,7 @@ export function DashboardSection({
   description,
   emptyMessage,
   plants,
+  photoUrls,
   showAction = false,
 }: DashboardSectionProps) {
   return (
@@ -100,7 +113,12 @@ export function DashboardSection({
       {plants.length > 0 ? (
         <div className="mt-5 grid gap-4">
           {plants.map((item) => (
-            <DashboardPlantCard key={item.plant.id} item={item} showAction={showAction} />
+            <DashboardPlantCard
+              key={item.plant.id}
+              item={item}
+              photoUrl={photoUrls[item.plant.id]}
+              showAction={showAction}
+            />
           ))}
         </div>
       ) : (

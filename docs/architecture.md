@@ -24,7 +24,9 @@ This document describes implemented technical shape and architectural boundaries
 - Plant-profile watering state and mark-watered behavior are implemented.
 - The signed-in dashboard groups active plants by watering status: overdue, due today, upcoming, and recently watered.
 - Plant profiles show watering history from watering events.
-- There is no image upload, AI identification, reminder system, or calendar sync yet.
+- Plant profiles support one optional primary photo per owned plant.
+- Dashboard cards show a small plant thumbnail or calm fallback.
+- There is no AI identification, reminder system, or calendar sync yet.
 
 ## Auth And Session Pattern
 
@@ -40,6 +42,8 @@ This document describes implemented technical shape and architectural boundaries
 - Client input must not be trusted for ownership.
 - Plant profile fetches and plant mutations filter by the authenticated user's ID on the server.
 - Watering event reads and inserts filter by the authenticated user's ID on the server and are backed by RLS policies.
+- Plant photo upload, replace, remove, and display first verify the signed-in user's plant ownership on the server.
+- Plant photo storage paths include the authenticated user ID and plant ID, and Storage RLS policies check that path against an owned plant.
 - RLS must stay enabled on user-owned tables.
 - App queries and database policies should agree on ownership boundaries.
 - Cross-user access checks are required whenever routes, queries, mutations, or schema touch user-owned data.
@@ -64,13 +68,15 @@ The implemented `plants` model stores:
 - optional `notes`
 - optional `watering_interval_days`
 - optional `watering_guidance`
+- optional `primary_photo_path`
+- optional `primary_photo_uploaded_at`
 - optional `archived_at`
 - `created_at`
 - `updated_at`
 
 Application validation plus a database check require at least one user-friendly label through `nickname` or `common_name`.
 
-Watering interval and watering guidance are user-entered guidance only. They do not yet drive next-watering calculations and must not be treated as botanical truth.
+Watering interval and watering guidance are user-entered guidance only. The interval drives app date calculations, but it must not be treated as botanical truth.
 
 Archived plants are soft-hidden from the default collection by filtering `archived_at is null`. Restore UX is not implemented.
 
@@ -86,7 +92,7 @@ Watering events are implemented in `watering_events`:
 
 The mark-watered action inserts a watering event for an active plant owned by the signed-in user. Latest watering state is derived from the newest event for the plant. Next watering display is derived from the latest watering event plus the plant's user-entered watering interval. Missing intervals still allow watering to be recorded, but no next date is claimed.
 
-Watering date display uses simple local-day semantics in app helpers: due today is the current local calendar day, overdue is before today, and upcoming is after today. Watering history display is future work.
+Watering date display uses simple local-day semantics in app helpers: due today is the current local calendar day, overdue is before today, and upcoming is after today.
 
 The dashboard reuses the same date helpers as the plant profile. Upcoming and recently watered sections use a conservative 7-day window. Plant-level watering history reads the same event model newest first, so last-watered, dashboard state, and history all derive from one source.
 
@@ -100,7 +106,13 @@ Calendar linkage is future work. When introduced, it should map app-owned remind
 
 ### Photos And AI
 
-Plant photos are future Supabase Storage work. AI-assisted identification should use photos to reduce setup friction while preserving user review, uncertainty, edit, reject, and manual override paths.
+Plant photos use a private Supabase Storage bucket named `plant-photos`. V1 supports one primary photo per plant by storing a durable object path on `plants.primary_photo_path`; `primary_photo_uploaded_at` records when the current reference was saved.
+
+Photo object paths use `{user_id}/{plant_id}/primary-{uuid}.{extension}`. Storage policies allow select, insert, update, and delete only when the first path segment matches `auth.uid()` and the second path segment maps to a plant owned by that user. Inserts and updates require the plant to be active. Server actions still verify plant ownership before upload, replace, or remove.
+
+The bucket is private. Server-rendered app surfaces create short-lived signed URLs for display on plant profiles and dashboard cards. Missing or unavailable photos fall back to calm local UI; photos are optional and user-owned.
+
+AI-assisted identification should use owned photos to reduce setup friction while preserving user review, uncertainty, edit, reject, and manual override paths. No AI provider boundary or configuration is implemented yet.
 
 ## Integration Boundaries
 

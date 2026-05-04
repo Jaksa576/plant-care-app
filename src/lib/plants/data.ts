@@ -149,3 +149,34 @@ export async function archivePlantForUser(
     error: null,
   };
 }
+
+export async function updatePlantPrimaryPhotoForUser(
+  supabase: PlantClient,
+  userId: string,
+  plantId: string,
+  photoPath: string | null,
+): Promise<PlantQueryResult<PlantRecord>> {
+  const { data, error } = await supabase
+    .from("plants")
+    .update({
+      primary_photo_path: photoPath,
+      primary_photo_uploaded_at: photoPath ? new Date().toISOString() : null,
+    })
+    .eq("id", plantId)
+    .eq("user_id", userId)
+    .is("archived_at", null)
+    .select("*")
+    .maybeSingle();
+
+  if (error || !data) {
+    return {
+      data: null,
+      error: getPlantErrorMessage("We couldn't update this plant photo right now.", error),
+    };
+  }
+
+  return {
+    data: data as PlantRecord,
+    error: null,
+  };
+}

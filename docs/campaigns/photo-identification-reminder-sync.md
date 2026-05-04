@@ -2,7 +2,7 @@
 
 ## Campaign recommendation
 
-Use this campaign as the follow-on campaign after `docs/campaigns/plant-profile-watering-foundation.md` is complete through Slice 3.3.
+Use this campaign as the follow-on campaign after `docs/campaigns/archived/plant-profile-watering-foundation.md` is complete through Slice 3.3.
 
 This campaign should not begin as implementation work until the manual plant and watering loop is stable. Photos, AI assistance, reminders, and calendar sync all depend on durable plant ownership, plant profile surfaces, watering state, and watering history.
 
@@ -25,7 +25,7 @@ Codex must inspect these before starting each slice:
 - `docs/architecture.md`
 - `docs/roadmap.md`
 - `docs/current-task.md`
-- `docs/campaigns/plant-profile-watering-foundation.md`
+- `docs/campaigns/archived/plant-profile-watering-foundation.md`
 - `docs/campaigns/photo-identification-reminder-sync.md`
 
 If these docs disagree on active slice, implemented state, data model, storage model, provider configuration, reminder semantics, calendar sync direction, or product guardrails, Codex must stop and report the conflict before changing code.
@@ -36,6 +36,12 @@ This campaign covers the remaining planned v1 roadmap after the watering foundat
 
 - Phase 4: photo upload and optional AI-assisted identification.
 - Phase 5: app-owned watering reminders, Google Calendar sync, and reminder flexibility.
+
+Current implementation status:
+
+- Slice 4.1: plant photo upload is implemented.
+- Slice 4.2: AI-assisted plant identification is the active readiness gate.
+- Reminder and calendar slices remain planned.
 
 This is not a broad visual redesign, AI product expansion, diagnosis feature, generic task platform, notification platform, or bidirectional calendar integration.
 
@@ -646,6 +652,8 @@ Avoid:
 
 ## Slice 4.1 — Plant photo upload
 
+**Status:** complete.
+
 ### Recommendation
 
 Implement one secure primary photo per plant. Display it in the profile hero and plant cards where useful. Keep upload optional and secondary to watering.
@@ -660,7 +668,7 @@ Make the app feel more personal and visual without turning it into a media manag
 
 ### Design target
 
-The user can add, view, replace, and possibly remove a primary plant photo without disrupting the care loop.
+The user can add, view, replace, and remove a primary plant photo without disrupting the care loop.
 
 Suggested UI:
 
@@ -683,7 +691,7 @@ Plant profile
 - On plant cards, show a thumbnail only if it improves recognition and does not crowd watering state.
 - Upload should show progress or clear loading state.
 - Failed upload should show a plain-language error and preserve the current plant state.
-- Replace/remove behavior should be included only if it fits cleanly; if not, implement add/display and document replace/remove as follow-up.
+- Replace/remove behavior is included and remains scoped to the owned plant.
 
 ### Empty/loading/error states
 
@@ -1544,7 +1552,7 @@ Use this template when starting a slice from this campaign.
 - docs/architecture.md
 - docs/roadmap.md
 - docs/current-task.md
-- docs/campaigns/plant-profile-watering-foundation.md
+- docs/campaigns/archived/plant-profile-watering-foundation.md
 - docs/campaigns/photo-identification-reminder-sync.md
 
 ## Readiness gate

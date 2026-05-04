@@ -28,14 +28,14 @@ This document tracks product sequencing and slice status. Stable product directi
 - Plant-level watering state and mark-watered behavior backed by durable watering events.
 - Watering dashboard basics with overdue, due today, upcoming, and recently watered sections.
 - Plant-level watering history timeline.
+- Primary plant photo upload with private Supabase Storage, profile display, dashboard thumbnails, replace/remove actions, and calm no-photo fallbacks.
 
 ### Active
 
-- Bulk review and manual QA for the completed Plant Profile + Watering Foundation stack.
+- Slice 4.2: AI-assisted plant identification readiness review.
 
 ### Planned
 
-- Plant photo upload.
 - AI-assisted plant identification.
 - Internal reminder model.
 - Google Calendar sync.
@@ -50,7 +50,6 @@ This document tracks product sequencing and slice status. Stable product directi
 
 ### Not Yet Implemented
 
-- Image upload.
 - AI identification.
 - Reminder system.
 - Calendar sync.
@@ -59,7 +58,7 @@ This document tracks product sequencing and slice status. Stable product directi
 
 Current active campaign:
 
-- [Plant Profile + Watering Foundation Campaign](campaigns/plant-profile-watering-foundation.md)
+- [Photo Identification + Reminder Sync Campaign](campaigns/photo-identification-reminder-sync.md)
 
 ## Phase 0: Foundation
 
@@ -141,19 +140,19 @@ Current active campaign:
 
 ## Phase 4: Photo Support And AI-Assisted Identification
 
-**Status:** planned.
+**Status:** active.
 
 **Goal:** Make plant setup more visual and convenient after the manual plant/watering loop is useful.
 
 ### Slice 4.1: Plant Photo Upload
 
-**Status:** planned.
+**Status:** implemented.
 
-**Scope:** Upload or capture plant image, store image in Supabase Storage, display image in collection and detail views, and preserve ownership/security expectations.
+**Scope completed:** Upload or capture plant image where supported by the browser/device, store one primary photo in private Supabase Storage, keep a durable plant photo reference, display photos on plant profile and dashboard cards, provide calm no-photo fallbacks, and support replace/remove actions with ownership checks.
 
 ### Slice 4.2: AI-Assisted Plant Identification
 
-**Status:** planned.
+**Status:** active.
 
 **Scope:** Submit a plant photo for identification, show likely names plus confidence or uncertainty, store accepted suggestions, and allow manual override/edit.
 
@@ -211,12 +210,10 @@ Automation can reduce friction after the app has reliable user behavior and care
 
 ## Recommended Implementation Order
 
-1. Bulk review and manual QA for the completed Plant Profile + Watering Foundation stack.
-2. Slice 4.1: plant photo upload, after user approval.
-3. Slice 4.2: AI-assisted plant identification.
-4. Slice 5.1: internal reminder model.
-5. Slice 5.2: Google Calendar sync.
-6. Slice 5.3: reminder flexibility.
-7. Later: health support, richer knowledge, smarter automation, and Outlook sync.
+1. Slice 4.2: AI-assisted plant identification, only if provider decisions are documented or explicitly approved.
+2. Slice 5.1: internal reminder model.
+3. Slice 5.2: Google Calendar sync.
+4. Slice 5.3: reminder flexibility.
+5. Later: health support, richer knowledge, smarter automation, and Outlook sync.
 
 This order keeps the manual plant and watering loop useful before photos, AI, reminders, and calendar integrations.

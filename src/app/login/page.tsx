@@ -37,7 +37,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </h2>
           <p className="mt-4 text-sm leading-7 text-[color:var(--muted)] sm:text-base">
             Sign in to reach your protected plant collection, where manual records now live
-            before photos, reminders, and watering workflow automation.
+            before AI identification, reminders, and watering workflow automation.
           </p>
 
           <div className="mt-8 rounded-[1.75rem] border border-[color:var(--border)] bg-white/80 p-5">
