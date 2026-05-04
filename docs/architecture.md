@@ -17,9 +17,10 @@ This document describes implemented technical shape and architectural boundaries
 - `/` is a public landing page.
 - `/login` provides Supabase email sign-in and sign-up.
 - `/app` is the protected signed-in app area.
+- `/app/plants/[plantId]` is a protected plant detail/profile route for a single user-owned plant.
+- `/app/plants/[plantId]/edit` is the protected plant edit route.
 - The signed-in shell includes sign-out and the current plant collection experience.
-- Manual plant create, edit, list, and archive flows are implemented.
-- There is not yet a dedicated plant detail/profile view.
+- Manual plant create, profile, edit, list, and archive flows are implemented.
 - There is no image upload, AI identification, watering workflow, reminder system, or calendar sync yet.
 
 ## Auth And Session Pattern
@@ -34,6 +35,7 @@ This document describes implemented technical shape and architectural boundaries
 
 - User-owned data must derive `user_id` from the authenticated Supabase user on the server.
 - Client input must not be trusted for ownership.
+- Plant profile fetches and plant mutations filter by the authenticated user's ID on the server.
 - RLS must stay enabled on user-owned tables.
 - App queries and database policies should agree on ownership boundaries.
 - Cross-user access checks are required whenever routes, queries, mutations, or schema touch user-owned data.

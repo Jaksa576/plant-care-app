@@ -24,14 +24,14 @@ This document tracks product sequencing and slice status. Stable product directi
 - Middleware-based Supabase session refresh.
 - User-owned plant collection with manual add, edit, and archive flows.
 - Persisted `plants` table with RLS ownership policies and soft archive support.
+- Dedicated protected plant detail/profile view for user-owned plant records.
 
 ### Active
 
-- Slice 2.2: plant detail/profile view refinement.
+- Slice 3.1: watering state and mark-watered action.
 
 ### Planned
 
-- Watering state and mark-watered action.
 - Watering dashboard basics.
 - Watering care history timeline.
 - Plant photo upload.
@@ -49,7 +49,6 @@ This document tracks product sequencing and slice status. Stable product directi
 
 ### Not Yet Implemented
 
-- Dedicated plant detail/profile view.
 - Image upload.
 - AI identification.
 - Watering workflow.
@@ -86,7 +85,7 @@ Current active campaign:
 
 ## Phase 2: Core Plant Records And Plant Profiles
 
-**Status:** active.
+**Status:** implemented.
 
 **Goal:** Let a signed-in user create, manage, and review plant records without AI dependency.
 
@@ -102,9 +101,9 @@ Current active campaign:
 
 ### Slice 2.2: Plant Detail/Profile View
 
-**Status:** active.
+**Status:** implemented.
 
-**Scope:** Dedicated plant detail/profile page, clear display of existing plant fields, coherent edit/archive paths, and mobile-friendly presentation.
+**Scope completed:** Dedicated protected plant detail/profile page, collection-to-profile navigation, clear display of existing plant fields, coherent edit/archive paths, missing-field presentation, and mobile-friendly presentation.
 
 **Non-goals:** Photo upload, AI identification, watering tasks, last watered state, next watering calculations, reminders, dashboard due logic, and calendar sync.
 
@@ -112,13 +111,13 @@ Current active campaign:
 
 ## Phase 3: Watering Workflow And Dashboard
 
-**Status:** planned.
+**Status:** active.
 
 **Goal:** Make the app genuinely useful for keeping plants alive.
 
 ### Slice 3.1: Watering State And Actions
 
-**Status:** planned.
+**Status:** active.
 
 **Scope:** Last watered state, next watering state or equivalent derived value, mark-watered action, recalculation after watering, and graceful handling for early watering.
 
@@ -212,15 +211,14 @@ Automation can reduce friction after the app has reliable user behavior and care
 
 ## Recommended Implementation Order
 
-1. Slice 2.2: plant detail/profile view.
-2. Slice 3.1: watering state and mark-watered action.
-3. Slice 3.2: watering dashboard basics.
-4. Slice 3.3: watering care history timeline.
-5. Slice 4.1: plant photo upload.
-6. Slice 4.2: AI-assisted plant identification.
-7. Slice 5.1: internal reminder model.
-8. Slice 5.2: Google Calendar sync.
-9. Slice 5.3: reminder flexibility.
-10. Later: health support, richer knowledge, smarter automation, and Outlook sync.
+1. Slice 3.1: watering state and mark-watered action.
+2. Slice 3.2: watering dashboard basics.
+3. Slice 3.3: watering care history timeline.
+4. Slice 4.1: plant photo upload.
+5. Slice 4.2: AI-assisted plant identification.
+6. Slice 5.1: internal reminder model.
+7. Slice 5.2: Google Calendar sync.
+8. Slice 5.3: reminder flexibility.
+9. Later: health support, richer knowledge, smarter automation, and Outlook sync.
 
 This order keeps the manual plant and watering loop useful before photos, AI, reminders, and calendar integrations.

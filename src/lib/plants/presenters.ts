@@ -11,3 +11,15 @@ export function getPlantSecondaryLabel(plant: Pick<PlantRecord, "nickname" | "co
 
   return null;
 }
+
+export function getWateringIntervalLabel(
+  plant: Pick<PlantRecord, "watering_interval_days">,
+) {
+  if (!plant.watering_interval_days) {
+    return null;
+  }
+
+  return `About every ${plant.watering_interval_days} day${
+    plant.watering_interval_days === 1 ? "" : "s"
+  }`;
+}

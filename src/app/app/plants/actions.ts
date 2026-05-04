@@ -58,7 +58,7 @@ export async function createPlantAction(
   }
 
   revalidatePath("/app");
-  redirect(`/app/plants/${result.data.id}/edit?created=1`);
+  redirect(`/app/plants/${result.data.id}?created=1`);
 }
 
 export async function updatePlantAction(
@@ -84,17 +84,22 @@ export async function updatePlantAction(
   }
 
   revalidatePath("/app");
-  redirect(`/app/plants/${plantId}/edit?updated=1`);
+  revalidatePath(`/app/plants/${plantId}`);
+  redirect(`/app/plants/${plantId}?updated=1`);
 }
 
-export async function archivePlantAction(plantId: string) {
+export async function archivePlantAction(
+  plantId: string,
+  errorRedirectPath?: string,
+) {
   const { supabase, user } = await getSignedInPlantContext();
   const result = await archivePlantForUser(supabase, user.id, plantId);
 
   if (result.error) {
-    redirect(`/app/plants/${plantId}/edit?archiveError=1`);
+    redirect(errorRedirectPath ?? `/app/plants/${plantId}/edit?archiveError=1`);
   }
 
   revalidatePath("/app");
+  revalidatePath(`/app/plants/${plantId}`);
   redirect("/app?archived=1");
 }

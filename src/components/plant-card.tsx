@@ -81,7 +81,13 @@ export function PlantCard({ plant }: PlantCardProps) {
         </div>
       ) : null}
 
-      <div className="mt-5">
+      <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+        <Link
+          href={`/app/plants/${plant.id}`}
+          className="inline-flex items-center justify-center rounded-full bg-[color:var(--accent)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-95"
+        >
+          Open profile
+        </Link>
         <Link
           href={`/app/plants/${plant.id}/edit`}
           className="inline-flex items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold text-[color:var(--foreground)] transition hover:bg-[color:var(--accent-soft)]"
