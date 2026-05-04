@@ -13,6 +13,14 @@ export type PlantRecord = {
   updated_at: string;
 };
 
+export type WateringEventRecord = {
+  id: string;
+  plant_id: string;
+  user_id: string;
+  watered_at: string;
+  created_at: string;
+};
+
 export type PlantInput = {
   nickname: string | null;
   common_name: string | null;

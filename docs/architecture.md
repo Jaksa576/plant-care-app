@@ -21,7 +21,8 @@ This document describes implemented technical shape and architectural boundaries
 - `/app/plants/[plantId]/edit` is the protected plant edit route.
 - The signed-in shell includes sign-out and the current plant collection experience.
 - Manual plant create, profile, edit, list, and archive flows are implemented.
-- There is no image upload, AI identification, watering workflow, reminder system, or calendar sync yet.
+- Plant-profile watering state and mark-watered behavior are implemented.
+- There is no image upload, AI identification, watering dashboard, reminder system, or calendar sync yet.
 
 ## Auth And Session Pattern
 
@@ -36,6 +37,7 @@ This document describes implemented technical shape and architectural boundaries
 - User-owned data must derive `user_id` from the authenticated Supabase user on the server.
 - Client input must not be trusted for ownership.
 - Plant profile fetches and plant mutations filter by the authenticated user's ID on the server.
+- Watering event reads and inserts filter by the authenticated user's ID on the server and are backed by RLS policies.
 - RLS must stay enabled on user-owned tables.
 - App queries and database policies should agree on ownership boundaries.
 - Cross-user access checks are required whenever routes, queries, mutations, or schema touch user-owned data.
@@ -72,7 +74,17 @@ Archived plants are soft-hidden from the default collection by filtering `archiv
 
 ### Care Events
 
-Care events are future work. The first event type should be watering. The model should be able to expand later without forcing non-watering event types into v1.
+Watering events are implemented in `watering_events`:
+
+- `id`
+- `plant_id`
+- `user_id`
+- `watered_at`
+- `created_at`
+
+The mark-watered action inserts a watering event for an active plant owned by the signed-in user. Latest watering state is derived from the newest event for the plant. Next watering display is derived from the latest watering event plus the plant's user-entered watering interval. Missing intervals still allow watering to be recorded, but no next date is claimed.
+
+Watering date display uses simple local-day semantics in app helpers: due today is the current local calendar day, overdue is before today, and upcoming is after today. Watering history display is future work.
 
 ### Reminders
 

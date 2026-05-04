@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { archivePlantAction } from "@/app/app/plants/actions";
+import { archivePlantAction, markWateredAction } from "@/app/app/plants/actions";
 import { AppShell } from "@/components/app-shell";
 import { ArchivePlantForm } from "@/components/archive-plant-form";
+import { MarkWateredForm } from "@/components/mark-watered-form";
 import { SignOutButton } from "@/components/sign-out-button";
 import { StatusPill } from "@/components/status-pill";
 import { getAuthState } from "@/lib/auth";
@@ -15,6 +16,8 @@ import {
 } from "@/lib/plants/presenters";
 import type { PlantRecord } from "@/lib/plants/types";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getLatestWateringEventForPlant } from "@/lib/watering/data";
+import { getWateringScheduleState, type WateringScheduleState } from "@/lib/watering/schedule";
 
 type PlantProfilePageProps = {
   params: Promise<{
@@ -49,7 +52,66 @@ function MissingField({ children }: { children: React.ReactNode }) {
   return <span className="text-[color:var(--muted)]">{children}</span>;
 }
 
-function PlantProfile({ plant }: { plant: PlantRecord }) {
+function WateringStatusCard({
+  plant,
+  schedule,
+  showError,
+}: {
+  plant: PlantRecord;
+  schedule: WateringScheduleState;
+  showError: boolean;
+}) {
+  const statusTone = schedule.status === "overdue" ? "warning" : "success";
+
+  return (
+    <section className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-6 shadow-[var(--shadow)] sm:p-8">
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <StatusPill tone={statusTone}>Watering</StatusPill>
+          <h3 className="mt-5 text-2xl font-semibold">{schedule.nextWateringLabel}</h3>
+          <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
+            {schedule.helperText}
+          </p>
+        </div>
+        <Link
+          href={`/app/plants/${plant.id}/edit`}
+          className="inline-flex w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold text-[color:var(--foreground)] transition hover:bg-[color:var(--accent-soft)]"
+        >
+          Edit interval
+        </Link>
+      </div>
+
+      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        <ProfileField label="Last watered" value={schedule.lastWateredLabel} />
+        <ProfileField
+          label="Next watering"
+          value={schedule.nextWateringLabel}
+          helper={schedule.nextWateringDate ? "Calculated from the latest watering record." : undefined}
+        />
+      </div>
+
+      {showError ? (
+        <div className="mt-5 rounded-[1.25rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950">
+          Could not load watering state. The action is hidden until this plant can be checked again.
+        </div>
+      ) : (
+        <div className="mt-6">
+          <MarkWateredForm action={markWateredAction.bind(null, plant.id)} />
+        </div>
+      )}
+    </section>
+  );
+}
+
+function PlantProfile({
+  plant,
+  schedule,
+  wateringStateError,
+}: {
+  plant: PlantRecord;
+  schedule: WateringScheduleState;
+  wateringStateError: boolean;
+}) {
   const primaryLabel = getPlantPrimaryLabel(plant);
   const secondaryLabel = getPlantSecondaryLabel(plant);
   const intervalLabel = getWateringIntervalLabel(plant);
@@ -84,6 +146,12 @@ function PlantProfile({ plant }: { plant: PlantRecord }) {
           </Link>
         </div>
       </section>
+
+      <WateringStatusCard
+        plant={plant}
+        schedule={schedule}
+        showError={wateringStateError}
+      />
 
       <section className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-6 shadow-[var(--shadow)] sm:p-8">
         <div className="flex flex-col gap-2">
@@ -175,6 +243,12 @@ export default async function PlantProfilePage({ params, searchParams }: PlantPr
   const result = await getPlantForUser(supabase, authState.user.id, plantId);
   const plant = result.data;
   const plantTitle = plant ? getPlantPrimaryLabel(plant) : "Plant not available";
+  const wateringResult = plant
+    ? await getLatestWateringEventForPlant(supabase, authState.user.id, plant.id)
+    : null;
+  const schedule = plant
+    ? getWateringScheduleState(plant, wateringResult?.data ?? null)
+    : null;
 
   return (
     <AppShell
@@ -231,9 +305,13 @@ export default async function PlantProfilePage({ params, searchParams }: PlantPr
           </section>
         ) : null}
 
-        {plant ? (
+        {plant && schedule ? (
           <>
-            <PlantProfile plant={plant} />
+            <PlantProfile
+              plant={plant}
+              schedule={schedule}
+              wateringStateError={Boolean(wateringResult?.error)}
+            />
             <ArchivePlantForm
               action={archivePlantAction.bind(
                 null,

@@ -4,14 +4,17 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { getAuthState } from "@/lib/auth";
+import type { MarkWateredState } from "@/components/mark-watered-form";
 import {
   archivePlantForUser,
   createPlantForUser,
+  getPlantForUser,
   updatePlantForUser,
 } from "@/lib/plants/data";
 import { createPlantFormErrorState, parsePlantFormData } from "@/lib/plants/forms";
 import { emptyPlantFormState, type PlantFormState } from "@/lib/plants/types";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createWateringEventForPlant } from "@/lib/watering/data";
 
 async function getSignedInPlantContext() {
   const authState = await getAuthState();
@@ -102,4 +105,39 @@ export async function archivePlantAction(
   revalidatePath("/app");
   revalidatePath(`/app/plants/${plantId}`);
   redirect("/app?archived=1");
+}
+
+export async function markWateredAction(
+  plantId: string,
+  previousState: MarkWateredState,
+): Promise<MarkWateredState> {
+  void previousState;
+  const { supabase, user } = await getSignedInPlantContext();
+  const plantResult = await getPlantForUser(supabase, user.id, plantId);
+
+  if (plantResult.error || !plantResult.data || plantResult.data.archived_at) {
+    return {
+      status: "error",
+      message: "Could not record watering. Please try again.",
+    };
+  }
+
+  const result = await createWateringEventForPlant(supabase, user.id, plantId);
+
+  if (result.error || !result.data) {
+    return {
+      status: "error",
+      message: result.error ?? "Could not record watering. Please try again.",
+    };
+  }
+
+  revalidatePath("/app");
+  revalidatePath(`/app/plants/${plantId}`);
+
+  return {
+    status: "success",
+    message: plantResult.data.watering_interval_days
+      ? "Watering recorded. Next watering updated from today."
+      : "Watering recorded. Add an interval later to see a next date.",
+  };
 }

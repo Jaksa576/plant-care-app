@@ -34,12 +34,13 @@ If the docs disagree on active slice, roadmap status, route shape, data model, o
 
 ## Current campaign context
 
-Current state after Slice 2.2:
+Current state after Slice 3.1:
 
 - Slice 2.1 is implemented.
 - Slice 2.2 is implemented.
-- Slice 3.1 is active.
-- Slices 3.2 and 3.3 are planned follow-ons.
+- Slice 3.1 is implemented.
+- Slice 3.2 is active.
+- Slice 3.3 is a planned follow-on.
 - Manual plant records exist.
 - The app should now turn those records into a durable plant-level experience.
 - Watering remains the core product loop.
@@ -588,7 +589,7 @@ Stop and report if:
 
 ## Slice 3.1 — Watering state and mark-watered action
 
-**Status:** active.
+**Status:** complete.
 
 ### Recommendation
 
@@ -785,6 +786,8 @@ Stop and report if:
 ---
 
 ## Slice 3.2 — Watering dashboard basics
+
+**Status:** active.
 
 ### Recommendation
 
