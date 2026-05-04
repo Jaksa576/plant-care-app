@@ -41,6 +41,29 @@ export async function getLatestWateringEventForPlant(
   };
 }
 
+export async function listWateringEventsForUser(
+  supabase: WateringClient,
+  userId: string,
+): Promise<PlantQueryResult<WateringEventRecord[]>> {
+  const { data, error } = await supabase
+    .from("watering_events")
+    .select("*")
+    .eq("user_id", userId)
+    .order("watered_at", { ascending: false });
+
+  if (error) {
+    return {
+      data: null,
+      error: getWateringErrorMessage("We couldn't load watering state right now.", error),
+    };
+  }
+
+  return {
+    data: (data ?? []) as WateringEventRecord[],
+    error: null,
+  };
+}
+
 export async function createWateringEventForPlant(
   supabase: WateringClient,
   userId: string,

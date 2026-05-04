@@ -26,14 +26,14 @@ This document tracks product sequencing and slice status. Stable product directi
 - Persisted `plants` table with RLS ownership policies and soft archive support.
 - Dedicated protected plant detail/profile view for user-owned plant records.
 - Plant-level watering state and mark-watered behavior backed by durable watering events.
+- Watering dashboard basics with overdue, due today, upcoming, and recently watered sections.
 
 ### Active
 
-- Slice 3.2: watering dashboard basics.
+- Slice 3.3: watering care history timeline.
 
 ### Planned
 
-- Watering care history timeline.
 - Plant photo upload.
 - AI-assisted plant identification.
 - Internal reminder model.
@@ -125,15 +125,15 @@ Current active campaign:
 
 ### Slice 3.2: Watering Dashboard Basics
 
-**Status:** active.
+**Status:** implemented.
 
-**Scope:** Dashboard sections for overdue, due today, upcoming, and recently watered plants; empty states; mobile-first scanning; and low-friction access to mark-watered behavior.
+**Scope completed:** Dashboard sections for overdue, due today, upcoming, and recently watered plants; empty states; mobile-first cards; profile links; and mark-watered access for actionable sections.
 
 **Non-goals:** Calendar sync, notification delivery, AI-generated scheduling, and generalized task management.
 
 ### Slice 3.3: Watering Care History Timeline
 
-**Status:** planned.
+**Status:** active.
 
 **Scope:** Watering event history, plant-level history display, simple timeline model, and future-compatible naming without overbuilding non-watering care.
 
@@ -211,13 +211,12 @@ Automation can reduce friction after the app has reliable user behavior and care
 
 ## Recommended Implementation Order
 
-1. Slice 3.2: watering dashboard basics.
-2. Slice 3.3: watering care history timeline.
-3. Slice 4.1: plant photo upload.
-4. Slice 4.2: AI-assisted plant identification.
-5. Slice 5.1: internal reminder model.
-6. Slice 5.2: Google Calendar sync.
-7. Slice 5.3: reminder flexibility.
-8. Later: health support, richer knowledge, smarter automation, and Outlook sync.
+1. Slice 3.3: watering care history timeline.
+2. Slice 4.1: plant photo upload.
+3. Slice 4.2: AI-assisted plant identification.
+4. Slice 5.1: internal reminder model.
+5. Slice 5.2: Google Calendar sync.
+6. Slice 5.3: reminder flexibility.
+7. Later: health support, richer knowledge, smarter automation, and Outlook sync.
 
 This order keeps the manual plant and watering loop useful before photos, AI, reminders, and calendar integrations.

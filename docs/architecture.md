@@ -22,7 +22,8 @@ This document describes implemented technical shape and architectural boundaries
 - The signed-in shell includes sign-out and the current plant collection experience.
 - Manual plant create, profile, edit, list, and archive flows are implemented.
 - Plant-profile watering state and mark-watered behavior are implemented.
-- There is no image upload, AI identification, watering dashboard, reminder system, or calendar sync yet.
+- The signed-in dashboard groups active plants by watering status: overdue, due today, upcoming, and recently watered.
+- There is no image upload, AI identification, watering history timeline, reminder system, or calendar sync yet.
 
 ## Auth And Session Pattern
 
@@ -85,6 +86,8 @@ Watering events are implemented in `watering_events`:
 The mark-watered action inserts a watering event for an active plant owned by the signed-in user. Latest watering state is derived from the newest event for the plant. Next watering display is derived from the latest watering event plus the plant's user-entered watering interval. Missing intervals still allow watering to be recorded, but no next date is claimed.
 
 Watering date display uses simple local-day semantics in app helpers: due today is the current local calendar day, overdue is before today, and upcoming is after today. Watering history display is future work.
+
+The dashboard reuses the same date helpers as the plant profile. Upcoming and recently watered sections use a conservative 7-day window.
 
 ### Reminders
 

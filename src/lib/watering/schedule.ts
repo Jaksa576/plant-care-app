@@ -21,7 +21,7 @@ function addDays(date: Date, days: number) {
   return next;
 }
 
-function getDayDifference(fromDate: Date, toDate: Date) {
+export function getDayDifference(fromDate: Date, toDate: Date) {
   const fromDay = getLocalDayStart(fromDate).getTime();
   const toDay = getLocalDayStart(toDate).getTime();
 
