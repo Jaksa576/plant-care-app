@@ -35,6 +35,14 @@ function formatCalendarDate(date: Date) {
   }).format(date);
 }
 
+export function formatWateringHistoryDate(wateredAt: string) {
+  return new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(wateredAt));
+}
+
 export function formatLastWateredLabel(wateredAt: string | null, today = new Date()) {
   if (!wateredAt) {
     return "Not watered yet";

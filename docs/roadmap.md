@@ -27,10 +27,11 @@ This document tracks product sequencing and slice status. Stable product directi
 - Dedicated protected plant detail/profile view for user-owned plant records.
 - Plant-level watering state and mark-watered behavior backed by durable watering events.
 - Watering dashboard basics with overdue, due today, upcoming, and recently watered sections.
+- Plant-level watering history timeline.
 
 ### Active
 
-- Slice 3.3: watering care history timeline.
+- Bulk review and manual QA for the completed Plant Profile + Watering Foundation stack.
 
 ### Planned
 
@@ -111,7 +112,7 @@ Current active campaign:
 
 ## Phase 3: Watering Workflow And Dashboard
 
-**Status:** active.
+**Status:** implemented.
 
 **Goal:** Make the app genuinely useful for keeping plants alive.
 
@@ -133,9 +134,9 @@ Current active campaign:
 
 ### Slice 3.3: Watering Care History Timeline
 
-**Status:** active.
+**Status:** implemented.
 
-**Scope:** Watering event history, plant-level history display, simple timeline model, and future-compatible naming without overbuilding non-watering care.
+**Scope completed:** Plant-level watering history display from durable watering events, newest-first ordering, empty history state, and consistency with mark-watered/dashboard state.
 
 **Non-goals:** Treatment history, repotting history, diagnosis records, analytics, streaks, and broad activity feeds.
 
@@ -211,8 +212,8 @@ Automation can reduce friction after the app has reliable user behavior and care
 
 ## Recommended Implementation Order
 
-1. Slice 3.3: watering care history timeline.
-2. Slice 4.1: plant photo upload.
+1. Bulk review and manual QA for the completed Plant Profile + Watering Foundation stack.
+2. Slice 4.1: plant photo upload, after user approval.
 3. Slice 4.2: AI-assisted plant identification.
 4. Slice 5.1: internal reminder model.
 5. Slice 5.2: Google Calendar sync.

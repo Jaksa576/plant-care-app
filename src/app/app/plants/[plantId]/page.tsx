@@ -14,10 +14,14 @@ import {
   getPlantSecondaryLabel,
   getWateringIntervalLabel,
 } from "@/lib/plants/presenters";
-import type { PlantRecord } from "@/lib/plants/types";
+import type { PlantRecord, WateringEventRecord } from "@/lib/plants/types";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getLatestWateringEventForPlant } from "@/lib/watering/data";
-import { getWateringScheduleState, type WateringScheduleState } from "@/lib/watering/schedule";
+import { listWateringEventsForPlant } from "@/lib/watering/data";
+import {
+  formatWateringHistoryDate,
+  getWateringScheduleState,
+  type WateringScheduleState,
+} from "@/lib/watering/schedule";
 
 type PlantProfilePageProps = {
   params: Promise<{
@@ -103,14 +107,61 @@ function WateringStatusCard({
   );
 }
 
+function WateringHistorySection({
+  events,
+  showError,
+}: {
+  events: WateringEventRecord[];
+  showError: boolean;
+}) {
+  return (
+    <section className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-6 shadow-[var(--shadow)] sm:p-8">
+      <div className="flex flex-col gap-2">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--muted)]">
+          Recent watering
+        </p>
+        <h3 className="text-2xl font-semibold">Watering history</h3>
+      </div>
+
+      {showError ? (
+        <p className="mt-5 rounded-[1.25rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950">
+          We couldn&apos;t load watering history right now. Please try again after refreshing.
+        </p>
+      ) : null}
+
+      {!showError && events.length === 0 ? (
+        <p className="mt-5 rounded-[1.25rem] border border-[color:var(--border)] bg-white/75 px-4 py-3 text-sm leading-6 text-[color:var(--muted)]">
+          No watering recorded yet. Mark this plant as watered to start its history.
+        </p>
+      ) : null}
+
+      {!showError && events.length > 0 ? (
+        <ol className="mt-5 flex flex-col gap-3">
+          {events.map((event) => (
+            <li
+              key={event.id}
+              className="rounded-[1.25rem] border border-[color:var(--border)] bg-white/80 px-4 py-3"
+            >
+              <p className="text-base font-semibold">{formatWateringHistoryDate(event.watered_at)}</p>
+              <p className="mt-1 text-sm leading-6 text-[color:var(--muted)]">Watered</p>
+            </li>
+          ))}
+        </ol>
+      ) : null}
+    </section>
+  );
+}
+
 function PlantProfile({
   plant,
   schedule,
   wateringStateError,
+  wateringEvents,
 }: {
   plant: PlantRecord;
   schedule: WateringScheduleState;
   wateringStateError: boolean;
+  wateringEvents: WateringEventRecord[];
 }) {
   const primaryLabel = getPlantPrimaryLabel(plant);
   const secondaryLabel = getPlantSecondaryLabel(plant);
@@ -152,6 +203,8 @@ function PlantProfile({
         schedule={schedule}
         showError={wateringStateError}
       />
+
+      <WateringHistorySection events={wateringEvents} showError={wateringStateError} />
 
       <section className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-6 shadow-[var(--shadow)] sm:p-8">
         <div className="flex flex-col gap-2">
@@ -244,10 +297,11 @@ export default async function PlantProfilePage({ params, searchParams }: PlantPr
   const plant = result.data;
   const plantTitle = plant ? getPlantPrimaryLabel(plant) : "Plant not available";
   const wateringResult = plant
-    ? await getLatestWateringEventForPlant(supabase, authState.user.id, plant.id)
+    ? await listWateringEventsForPlant(supabase, authState.user.id, plant.id)
     : null;
+  const wateringEvents = wateringResult?.data ?? [];
   const schedule = plant
-    ? getWateringScheduleState(plant, wateringResult?.data ?? null)
+    ? getWateringScheduleState(plant, wateringEvents[0] ?? null)
     : null;
 
   return (
@@ -311,6 +365,7 @@ export default async function PlantProfilePage({ params, searchParams }: PlantPr
               plant={plant}
               schedule={schedule}
               wateringStateError={Boolean(wateringResult?.error)}
+              wateringEvents={wateringEvents}
             />
             <ArchivePlantForm
               action={archivePlantAction.bind(

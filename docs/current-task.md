@@ -10,53 +10,46 @@
 - A dedicated, protected plant detail/profile view is implemented for user-owned plant records.
 - Plant-level watering state and mark-watered behavior are implemented with durable watering events.
 - A watering dashboard with overdue, due today, upcoming, and recently watered sections is implemented.
-- There is no image upload, AI identification, watering history timeline, reminder system, or calendar sync yet.
+- Plant-level watering history is implemented from the durable watering event model.
+- There is no image upload, AI identification, reminder system, or calendar sync yet.
 
 ## Active Slice
 
-Slice 3.3: watering care history timeline.
+The Plant Profile + Watering Foundation Campaign is complete through Slice 3.3.
 
-This is the next active slice in the [Plant Profile + Watering Foundation Campaign](campaigns/plant-profile-watering-foundation.md).
+The next planned product slice is Slice 4.1: plant photo upload, pending bulk manual QA and user approval to begin the follow-on campaign.
 
 ## Why This Is Next
 
-Slice 3.2 turned plant watering state into a scannable dashboard. Slice 3.3 should add plant-level watering history so users can trust and review the records created by mark-watered actions.
+The completed campaign now supports manual plant records, plant profiles, mark-watered behavior, watering dashboard sections, and plant-level watering history. Manual QA should review the stacked branches before starting photo upload or AI work.
 
 ## Scope
 
-- Add a plant-level watering history section to the profile.
-- Show watering events ordered newest first.
-- Include a calm empty history state.
-- Keep last-watered/dashboard state consistent with the existing watering event model.
-- Preserve server-derived ownership checks and RLS-backed data boundaries.
+- Review and merge the stacked Plant Profile + Watering Foundation branches.
+- Manually verify profile, watering, dashboard, history, mobile, protected-route, and cross-user ownership behavior.
+- Decide whether to start Slice 4.1: plant photo upload.
 
 ## Non-Goals
 
-- No photo upload or Supabase Storage work.
-- No AI identification or AI care suggestions.
-- No reminders, notifications, Google Calendar sync, or Outlook sync.
-- No health diagnosis, encyclopedia content, or generalized task behavior.
+- Do not start photo upload, Supabase Storage, AI identification, reminders, notifications, Google Calendar sync, or Outlook sync until approved.
+- Do not broaden into health diagnosis, encyclopedia content, or generalized task behavior.
 
 ## Acceptance Criteria
 
-- A signed-in user can review recent watering events for a plant.
-- Events are ordered newest first.
-- Empty history state is clear and calm.
-- Mark-watered creates history consistently.
-- Last-watered and dashboard state remain consistent with history.
-- Another signed-in user cannot view or mutate another user's watering history.
-- No photos, AI, reminders, calendar sync, schema drift beyond the scoped need, or unrelated UI changes are introduced.
+- Stacked branches are reviewed in order.
+- Manual QA covers the campaign-level matrix in the campaign doc.
+- Docs identify Slice 4.1 or the follow-on campaign only after user approval.
 
 ## Validation Expectations
 
-For Slice 3.3, run:
+For the completed campaign stack, verify each implementation branch ran:
 
 - `npm run typecheck` if a typecheck script exists.
 - `npm test` if a test script exists.
 - `npm run build`.
 
-Also manually verify empty history, one-event history, multi-event history, mark-watered history updates, refresh persistence, mobile layout, dashboard/profile consistency, protected route behavior, and cross-user ownership/RLS in a Supabase-backed environment.
+Manual QA should verify empty history, one-event history, multi-event history, mark-watered history updates, refresh persistence, mobile layout, dashboard/profile consistency, protected route behavior, and cross-user ownership/RLS in a Supabase-backed environment.
 
 ## Next Recommended Action
 
-Implement Slice 3.3 in a dedicated branch and worktree. Reuse the existing watering event model and avoid broad activity-feed behavior.
+Review the stacked branches through Vercel previews and manual QA. After approval, start Slice 4.1: plant photo upload in a new branch/worktree.

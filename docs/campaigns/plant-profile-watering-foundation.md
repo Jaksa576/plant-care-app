@@ -1,7 +1,7 @@
 # Plant Profile + Watering Foundation Campaign
 
 **Campaign file:** `docs/campaigns/plant-profile-watering-foundation.md`  
-**Campaign status:** Active  
+**Campaign status:** Complete  
 **Roadmap span:** Slice 2.2 through Slice 3.3  
 **Target branch:** `main`  
 **Implementation model:** one PR-sized slice at a time  
@@ -34,13 +34,14 @@ If the docs disagree on active slice, roadmap status, route shape, data model, o
 
 ## Current campaign context
 
-Current state after Slice 3.2:
+Current state after Slice 3.3:
 
 - Slice 2.1 is implemented.
 - Slice 2.2 is implemented.
 - Slice 3.1 is implemented.
 - Slice 3.2 is implemented.
-- Slice 3.3 is active.
+- Slice 3.3 is implemented.
+- The campaign is complete pending manual QA, review, and merge.
 - Manual plant records exist.
 - The app should now turn those records into a durable plant-level experience.
 - Watering remains the core product loop.
@@ -984,7 +985,7 @@ Stop and report if:
 
 ## Slice 3.3 — Watering care history timeline
 
-**Status:** active.
+**Status:** complete.
 
 ### Recommendation
 
