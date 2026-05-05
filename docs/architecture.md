@@ -27,7 +27,8 @@ This document describes implemented technical shape and architectural boundaries
 - Plant profiles support one optional primary photo per owned plant.
 - Dashboard cards show a small plant thumbnail or calm fallback.
 - Plant profiles include an optional Pl@ntNet-backed identification helper when a primary photo exists.
-- There is no reminder system or calendar sync yet.
+- Plant profiles include an app-owned watering reminder panel.
+- There is no calendar sync yet.
 
 ## Auth And Session Pattern
 
@@ -46,6 +47,7 @@ This document describes implemented technical shape and architectural boundaries
 - Plant photo upload, replace, remove, and display first verify the signed-in user's plant ownership on the server.
 - Plant photo storage paths include the authenticated user ID and plant ID, and Storage RLS policies check that path against an owned plant.
 - AI identification first verifies the signed-in user's ownership of the plant and primary photo before reading Storage or calling the provider.
+- Watering reminder reads and mutations filter by the authenticated user's ID on the server and are backed by RLS policies tied to owned plants.
 - RLS must stay enabled on user-owned tables.
 - App queries and database policies should agree on ownership boundaries.
 - Cross-user access checks are required whenever routes, queries, mutations, or schema touch user-owned data.
@@ -100,11 +102,25 @@ The dashboard reuses the same date helpers as the plant profile. Upcoming and re
 
 ### Reminders
 
-Reminder records or equivalent derived schedule state are future work. Reminder behavior should support watering before expanding into advanced scheduling.
+Watering reminders are implemented in `watering_reminders`:
+
+- `id`
+- `user_id`
+- `plant_id`
+- `reminder_type`, constrained to `watering`
+- `enabled`
+- optional `next_reminder_date`
+- optional `reminder_time`
+- `created_at`
+- `updated_at`
+
+Reminders are app-owned and work without Google Calendar. The v1 Slice 5.1 behavior is date-first: the profile panel shows the next reminder date in plain language and avoids notification delivery claims. Users can turn a watering reminder on with a chosen date and turn it off without changing plant details or watering history.
+
+When a signed-in user marks a plant watered, the action still creates a watering event first. If an enabled watering reminder exists and the plant has a watering interval, the app updates `next_reminder_date` from the new watering event plus the interval. Missing intervals still allow reminders through a user-selected date, but no automatic date is claimed.
 
 ### Calendar Linkage
 
-Calendar linkage is future work. When introduced, it should map app-owned reminders to provider-specific event IDs without making calendar sync a prerequisite for reminders. Google Calendar comes before Outlook.
+Calendar linkage is future work. When introduced, it should map app-owned reminders to provider-specific event IDs without making calendar sync a prerequisite for reminders. Google Calendar comes before Outlook, and app reminders remain the source of truth.
 
 ### Photos And AI
 

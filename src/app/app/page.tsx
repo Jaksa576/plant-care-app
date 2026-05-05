@@ -81,7 +81,7 @@ export default async function AppPage({ searchParams }: AppPageProps) {
               </h2>
               <p className="mt-4 text-sm leading-7 text-[color:var(--muted)] sm:text-base">
                 Watering state is based on your latest watering record and each plant&apos;s editable
-                interval. Photos are optional, and reminders and calendar sync are still deferred.
+                interval. Photos, identification, and reminders are optional. Calendar sync is still deferred.
               </p>
             </div>
 

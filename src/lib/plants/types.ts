@@ -23,6 +23,18 @@ export type WateringEventRecord = {
   created_at: string;
 };
 
+export type WateringReminderRecord = {
+  id: string;
+  user_id: string;
+  plant_id: string;
+  reminder_type: "watering";
+  enabled: boolean;
+  next_reminder_date: string | null;
+  reminder_time: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type PlantInput = {
   nickname: string | null;
   common_name: string | null;

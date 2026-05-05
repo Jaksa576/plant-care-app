@@ -30,14 +30,14 @@ This document tracks product sequencing and slice status. Stable product directi
 - Plant-level watering history timeline.
 - Primary plant photo upload with private Supabase Storage, profile display, dashboard thumbnails, replace/remove actions, and calm no-photo fallbacks.
 - AI-assisted plant identification with Pl@ntNet, transient names-only suggestions, user review/edit/reject flow, and accepted updates to normal plant fields.
+- App-owned watering reminders with watering-only reminder records, enabled/disabled state, date-first next reminder, profile panel, owner-scoped RLS, and mark-watered date updates when an interval exists.
 
 ### Active
 
-- Slice 5.1: Internal reminder model.
+- Slice 5.2: Google Calendar sync readiness review.
 
 ### Planned
 
-- Internal reminder model.
 - Google Calendar sync.
 - Reminder flexibility.
 
@@ -50,7 +50,6 @@ This document tracks product sequencing and slice status. Stable product directi
 
 ### Not Yet Implemented
 
-- Reminder system.
 - Calendar sync.
 
 ## Campaigns
@@ -165,13 +164,13 @@ Current active campaign:
 
 ### Slice 5.1: Internal Reminder Model
 
-**Status:** active.
+**Status:** implemented.
 
-**Scope:** App-owned reminder state tied to watering and groundwork for external provider sync.
+**Scope completed:** App-owned watering reminder state tied to signed-in user and owned plant, watering-only type constraint, enabled/disabled state, date-first next reminder, plant profile panel, owner-scoped RLS policies, and mark-watered updates when an interval exists.
 
 ### Slice 5.2: Google Calendar Sync
 
-**Status:** planned.
+**Status:** active.
 
 **Scope:** Connect Google account, create/update watering reminder events, store provider linkage, and keep sync app-owned for v1.
 

@@ -25,6 +25,14 @@ import {
   PLANT_PHOTO_BUCKET,
 } from "@/lib/plants/photos";
 import { emptyPlantFormState, type PlantFormState } from "@/lib/plants/types";
+import {
+  getDerivedNextReminderDate,
+  getTodayDateInputValue,
+} from "@/lib/reminders/schedule";
+import {
+  updateWateringReminderAfterWatered,
+  upsertWateringReminderForPlant,
+} from "@/lib/reminders/data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createWateringEventForPlant } from "@/lib/watering/data";
 
@@ -40,6 +48,11 @@ export type PlantIdentificationState = {
 };
 
 export type SavePlantIdentificationState = {
+  status: "idle" | "success" | "error";
+  message: string | null;
+};
+
+export type WateringReminderState = {
   status: "idle" | "success" | "error";
   message: string | null;
 };
@@ -157,6 +170,12 @@ export async function markWateredAction(
       status: "error",
       message: result.error ?? "Could not record watering. Please try again.",
     };
+  }
+
+  const nextReminderDate = getDerivedNextReminderDate(plantResult.data, result.data);
+
+  if (nextReminderDate) {
+    await updateWateringReminderAfterWatered(supabase, user.id, plantId, nextReminderDate);
   }
 
   revalidatePath("/app");
@@ -433,5 +452,95 @@ export async function savePlantIdentificationSuggestionAction(
   return {
     status: "success",
     message: "Suggested names saved. You can keep editing this plant any time.",
+  };
+}
+
+export async function saveWateringReminderAction(
+  plantId: string,
+  previousState: WateringReminderState,
+  formData: FormData,
+): Promise<WateringReminderState> {
+  void previousState;
+  const { supabase, user } = await getSignedInPlantContext();
+  const plantResult = await getPlantForUser(supabase, user.id, plantId);
+  const plant = plantResult.data;
+
+  if (plantResult.error || !plant || plant.archived_at) {
+    return {
+      status: "error",
+      message: "Could not save this reminder. Please refresh and try again.",
+    };
+  }
+
+  const dateValue = formData.get("nextReminderDate");
+  const nextReminderDate = typeof dateValue === "string" ? dateValue.trim() : "";
+
+  if (!nextReminderDate) {
+    return {
+      status: "error",
+      message: "Choose a next reminder date before turning this on.",
+    };
+  }
+
+  if (nextReminderDate < getTodayDateInputValue()) {
+    return {
+      status: "error",
+      message: "Choose today or a future date for the next reminder.",
+    };
+  }
+
+  const result = await upsertWateringReminderForPlant(supabase, user.id, plant.id, {
+    enabled: true,
+    next_reminder_date: nextReminderDate,
+  });
+
+  if (result.error || !result.data) {
+    return {
+      status: "error",
+      message: result.error ?? "Could not save this reminder right now.",
+    };
+  }
+
+  revalidatePath(`/app/plants/${plant.id}`);
+
+  return {
+    status: "success",
+    message: "Watering reminder saved in Plant Care.",
+  };
+}
+
+export async function disableWateringReminderAction(
+  plantId: string,
+  previousState: WateringReminderState,
+): Promise<WateringReminderState> {
+  void previousState;
+  const { supabase, user } = await getSignedInPlantContext();
+  const plantResult = await getPlantForUser(supabase, user.id, plantId);
+  const plant = plantResult.data;
+
+  if (plantResult.error || !plant || plant.archived_at) {
+    return {
+      status: "error",
+      message: "Could not pause this reminder. Please refresh and try again.",
+    };
+  }
+
+  const result = await upsertWateringReminderForPlant(supabase, user.id, plant.id, {
+    enabled: false,
+    next_reminder_date: null,
+  });
+
+  if (result.error || !result.data) {
+    return {
+      status: "error",
+      message: result.error ?? "Could not pause this reminder right now.",
+    };
+  }
+
+  revalidatePath(`/app/plants/${plant.id}`);
+
+  return {
+    status: "success",
+    message: "Watering reminder paused. Your plant details and watering history are unchanged.",
   };
 }

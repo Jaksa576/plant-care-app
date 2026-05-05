@@ -13,37 +13,35 @@
 - Plant-level watering history is implemented from the durable watering event model.
 - Primary plant photo upload is implemented with private Supabase Storage, one optional photo per owned plant, profile display, dashboard thumbnails, replace/remove actions, and calm no-photo fallbacks.
 - AI-assisted plant identification is implemented with a deliberate Pl@ntNet-backed helper from an owned primary photo. Suggestions are transient, names-only, reviewable, editable, rejectable, and saved only after user acceptance into normal plant fields.
-- There is no reminder system or calendar sync yet.
+- App-owned watering reminders are implemented with a watering-only reminder model, enabled/disabled state, date-first next reminder, plant profile panel, owner-scoped RLS, and mark-watered updates when an interval exists.
+- There is no Google Calendar sync yet.
 
 ## Active Slice
 
 The Photo Identification + Reminder Sync Campaign is active.
 
-Slice 4.2: AI-assisted plant identification is implemented. The next planned product slice is Slice 5.1: Internal reminder model.
+Slice 5.1: Internal reminder model is implemented. The next planned product slice is Slice 5.2: Google Calendar sync.
 
 ## Why This Is Next
 
-The app now supports visual plant records and conservative name suggestions without making AI authoritative. App-owned watering reminders are next because reminders must exist inside Plant Care before any Google Calendar sync.
+Watering reminders now exist in Plant Care without depending on an external provider. Google Calendar sync is next only if OAuth credentials, redirect URL strategy, scopes, token storage, and token encryption can be represented safely server-side.
 
 ## Scope
 
-- Add app-owned reminder state scoped to the signed-in user and owned plant.
-- Keep reminder type constrained to watering for v1.
-- Add enabled/disabled state and a next reminder date or datetime.
-- Show a plain-language reminder panel on plant profile.
-- Ensure reminder behavior works without Google Calendar.
+- Inspect whether Google Calendar OAuth and token handling can be implemented securely.
+- If safe configuration exists, add one-way sync from app-owned watering reminders to Google Calendar.
+- Keep Plant Care reminders authoritative if sync fails.
 
 ## Non-Goals
 
-- Do not implement Google Calendar sync, Outlook sync, notification delivery, generic tasks, diagnosis, encyclopedia content, AI scheduling, or calendar-defined reminder truth.
-- Do not claim push/email/SMS notifications exist unless an actual channel is implemented.
+- Do not implement Outlook, bidirectional sync, calendar-owned reminder truth, generic calendar tasks, notification delivery, AI scheduling, health diagnosis, or broad calendar settings.
 
 ## Acceptance Criteria
 
-- Reminder state is scoped to signed-in user and owned plant.
-- Reminder behavior is app-owned and works without Google Calendar.
-- Reminder language stays watering-specific and plain.
-- Manual plant setup and watering remain useful without reminders.
+- Slice 5.2 starts only after the Google readiness gate passes.
+- Provider secrets and refresh tokens are not exposed to browser code.
+- App reminders remain the source of truth.
+- Sync failure preserves app reminder state.
 
 ## Validation Expectations
 
@@ -54,8 +52,8 @@ For implementation slices, run:
 - `npm run build`.
 - `npm run lint` if present.
 
-Stop if reminder semantics are ambiguous or validation fails.
+Stop if Google OAuth/token handling cannot be implemented safely or validation fails.
 
 ## Next Recommended Action
 
-Start Slice 5.1: Internal reminder model on a new branch/worktree after reviewing the updated docs.
+Start Slice 5.2 readiness review on a new branch/worktree stacked on Slice 5.1.

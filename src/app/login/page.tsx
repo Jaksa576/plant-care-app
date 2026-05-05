@@ -37,7 +37,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </h2>
           <p className="mt-4 text-sm leading-7 text-[color:var(--muted)] sm:text-base">
             Sign in to reach your protected plant collection, where manual records now live
-            before AI identification, reminders, and watering workflow automation.
+            before Google Calendar sync and any future care automation.
           </p>
 
           <div className="mt-8 rounded-[1.75rem] border border-[color:var(--border)] bg-white/80 p-5">
@@ -47,7 +47,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             <ul className="mt-4 space-y-3 text-sm leading-6 text-[color:var(--muted)]">
               <li>Your account owns every plant record in the protected app.</li>
               <li>Manual plant setup is available right after sign-in.</li>
-              <li>Watering workflows, reminders, and AI stay out of this slice.</li>
+              <li>Watering workflows stay app-owned and editable after sign-in.</li>
             </ul>
           </div>
 

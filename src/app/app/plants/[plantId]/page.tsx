@@ -3,10 +3,12 @@ import { redirect } from "next/navigation";
 
 import {
   archivePlantAction,
+  disableWateringReminderAction,
   identifyPlantPhotoAction,
   markWateredAction,
   removePlantPhotoAction,
   savePlantIdentificationSuggestionAction,
+  saveWateringReminderAction,
   uploadPlantPhotoAction,
 } from "@/app/app/plants/actions";
 import { AppShell } from "@/components/app-shell";
@@ -17,6 +19,7 @@ import { PlantPhotoForm } from "@/components/plant-photo-form";
 import { PlantPhotoFrame } from "@/components/plant-photo";
 import { SignOutButton } from "@/components/sign-out-button";
 import { StatusPill } from "@/components/status-pill";
+import { WateringReminderPanel } from "@/components/watering-reminder-form";
 import { getAuthState } from "@/lib/auth";
 import { getPlantForUser } from "@/lib/plants/data";
 import { createPlantPhotoUrlMap } from "@/lib/plants/photos";
@@ -25,7 +28,9 @@ import {
   getPlantSecondaryLabel,
   getWateringIntervalLabel,
 } from "@/lib/plants/presenters";
-import type { PlantRecord, WateringEventRecord } from "@/lib/plants/types";
+import type { PlantRecord, WateringEventRecord, WateringReminderRecord } from "@/lib/plants/types";
+import { getWateringReminderForPlant } from "@/lib/reminders/data";
+import { getReminderSummary } from "@/lib/reminders/schedule";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { listWateringEventsForPlant } from "@/lib/watering/data";
 import {
@@ -169,16 +174,21 @@ function PlantProfile({
   wateringStateError,
   wateringEvents,
   photoUrl,
+  reminder,
+  reminderError,
 }: {
   plant: PlantRecord;
   schedule: WateringScheduleState;
   wateringStateError: boolean;
   wateringEvents: WateringEventRecord[];
   photoUrl?: string;
+  reminder: WateringReminderRecord | null;
+  reminderError: boolean;
 }) {
   const primaryLabel = getPlantPrimaryLabel(plant);
   const secondaryLabel = getPlantSecondaryLabel(plant);
   const intervalLabel = getWateringIntervalLabel(plant);
+  const reminderSummary = getReminderSummary(reminder, plant, wateringEvents[0] ?? null);
 
   return (
     <div className="flex flex-col gap-6">
@@ -240,6 +250,19 @@ function PlantProfile({
         editHref={`/app/plants/${plant.id}/edit`}
         identifyAction={identifyPlantPhotoAction.bind(null, plant.id)}
         saveSuggestionAction={savePlantIdentificationSuggestionAction.bind(null, plant.id)}
+      />
+
+      <WateringReminderPanel
+        enabled={Boolean(reminder?.enabled)}
+        summaryLabel={reminderSummary.label}
+        helperText={
+          reminderError
+            ? "We couldn't load this reminder right now. Your watering history is still available."
+            : reminderSummary.helperText
+        }
+        dateInputValue={reminderSummary.dateInputValue}
+        saveAction={saveWateringReminderAction.bind(null, plant.id)}
+        disableAction={disableWateringReminderAction.bind(null, plant.id)}
       />
 
       <WateringHistorySection events={wateringEvents} showError={wateringStateError} />
@@ -337,6 +360,9 @@ export default async function PlantProfilePage({ params, searchParams }: PlantPr
   const wateringResult = plant
     ? await listWateringEventsForPlant(supabase, authState.user.id, plant.id)
     : null;
+  const reminderResult = plant
+    ? await getWateringReminderForPlant(supabase, authState.user.id, plant.id)
+    : null;
   const wateringEvents = wateringResult?.data ?? [];
   const schedule = plant
     ? getWateringScheduleState(plant, wateringEvents[0] ?? null)
@@ -406,6 +432,8 @@ export default async function PlantProfilePage({ params, searchParams }: PlantPr
               wateringStateError={Boolean(wateringResult?.error)}
               wateringEvents={wateringEvents}
               photoUrl={photoUrls[plant.id]}
+              reminder={reminderResult?.data ?? null}
+              reminderError={Boolean(reminderResult?.error)}
             />
             <ArchivePlantForm
               action={archivePlantAction.bind(

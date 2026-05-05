@@ -41,8 +41,9 @@ Current implementation status:
 
 - Slice 4.1: plant photo upload is implemented.
 - Slice 4.2: AI-assisted plant identification with Pl@ntNet is implemented.
-- Slice 5.1: Internal reminder model is the active next slice.
-- Reminder and calendar slices remain planned.
+- Slice 5.1: Internal reminder model is implemented.
+- Slice 5.2: Google Calendar sync readiness review is the active next slice.
+- Reminder flexibility remains planned.
 
 This is not a broad visual redesign, AI product expansion, diagnosis feature, generic task platform, notification platform, or bidirectional calendar integration.
 
@@ -1001,11 +1002,19 @@ Stop and report if:
 
 ## Slice 5.1 — Internal reminder model
 
-**Status:** active.
+**Status:** complete.
 
 ### Recommendation
 
 Create app-owned watering reminders before any external sync. Keep the model watering-specific, simple, and provider-neutral.
+
+Slice 5.1 implementation notes:
+
+- `watering_reminders` stores one watering reminder per owned plant.
+- Reminder type is constrained to `watering`.
+- Reminders are app-owned, date-first, and work without Google Calendar.
+- The plant profile shows the reminder panel and avoids notification delivery claims.
+- Marking watered updates enabled reminder dates from the new watering event plus the plant interval when an interval exists.
 
 ### User story
 
@@ -1146,6 +1155,8 @@ Stop and report if:
 ---
 
 ## Slice 5.2 — Google Calendar sync
+
+**Status:** active.
 
 ### Recommendation
 
