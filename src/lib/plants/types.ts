@@ -35,6 +35,35 @@ export type WateringReminderRecord = {
   updated_at: string;
 };
 
+export type GoogleCalendarConnectionRecord = {
+  id: string;
+  user_id: string;
+  provider: "google";
+  encrypted_refresh_token: string;
+  token_iv: string;
+  token_auth_tag: string;
+  calendar_id: string;
+  connected_at: string;
+  last_sync_status: "idle" | "success" | "error" | "cleanup_warning";
+  last_sync_error: string | null;
+  last_synced_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type GoogleCalendarEventLinkRecord = {
+  id: string;
+  user_id: string;
+  reminder_id: string;
+  google_event_id: string;
+  calendar_id: string;
+  last_sync_status: "idle" | "success" | "error" | "cleanup_warning";
+  last_sync_error: string | null;
+  last_synced_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type PlantInput = {
   nickname: string | null;
   common_name: string | null;

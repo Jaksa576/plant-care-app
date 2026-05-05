@@ -31,14 +31,14 @@ This document tracks product sequencing and slice status. Stable product directi
 - Primary plant photo upload with private Supabase Storage, profile display, dashboard thumbnails, replace/remove actions, and calm no-photo fallbacks.
 - AI-assisted plant identification with Pl@ntNet, transient names-only suggestions, user review/edit/reject flow, and accepted updates to normal plant fields.
 - App-owned watering reminders with watering-only reminder records, enabled/disabled state, date-first next reminder, profile panel, owner-scoped RLS, and mark-watered date updates when an interval exists.
+- Google Calendar sync with server-side OAuth, encrypted refresh-token storage, primary-calendar event creation/update, app-owned reminder linkage, disconnect cleanup, and one-way app-to-calendar behavior.
 
 ### Active
 
-- Slice 5.2: Google Calendar sync readiness review.
+- Slice 5.3: Reminder flexibility.
 
 ### Planned
 
-- Google Calendar sync.
 - Reminder flexibility.
 
 ### Deferred
@@ -47,10 +47,6 @@ This document tracks product sequencing and slice status. Stable product directi
 - Plant health support and issue suggestions.
 - Richer plant knowledge beyond watering-first v1.
 - Adaptive watering adjustments and seasonal automation.
-
-### Not Yet Implemented
-
-- Calendar sync.
 
 ## Campaigns
 
@@ -170,13 +166,13 @@ Current active campaign:
 
 ### Slice 5.2: Google Calendar Sync
 
-**Status:** active.
+**Status:** implemented.
 
-**Scope:** Connect Google account, create/update watering reminder events, store provider linkage, and keep sync app-owned for v1.
+**Scope completed:** Google Calendar connect/callback routes, server-only OAuth token exchange, encrypted refresh-token storage, primary calendar event create/update, reminder-to-event linkage, compact sync status panel, disconnect cleanup, and sync failure behavior that preserves app reminders.
 
 ### Slice 5.3: Reminder Flexibility
 
-**Status:** planned.
+**Status:** active.
 
 **Scope:** Fixed schedule reminders, last-watered based reminders, snooze, and watered-early support.
 
@@ -208,9 +204,7 @@ Automation can reduce friction after the app has reliable user behavior and care
 
 ## Recommended Implementation Order
 
-1. Slice 5.1: internal reminder model.
-2. Slice 5.2: Google Calendar sync.
-3. Slice 5.3: reminder flexibility.
-4. Later: health support, richer knowledge, smarter automation, and Outlook sync.
+1. Slice 5.3: reminder flexibility.
+2. Later: health support, richer knowledge, smarter automation, and Outlook sync.
 
 This order keeps the manual plant and watering loop useful before photos, AI, reminders, and calendar integrations.

@@ -4,6 +4,10 @@ const env = {
   supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
   plantNetApiKey: process.env.PLANTNET_API_KEY,
   plantNetProject: process.env.PLANTNET_PROJECT,
+  googleClientId: process.env.GOOGLE_CLIENT_ID,
+  googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  googleCalendarRedirectUri: process.env.GOOGLE_CALENDAR_REDIRECT_URI,
+  googleTokenEncryptionKey: process.env.GOOGLE_TOKEN_ENCRYPTION_KEY,
 };
 
 export function hasSupabaseEnv() {
@@ -37,5 +41,25 @@ export function getPlantNetConfig() {
   return {
     apiKey,
     project: env.plantNetProject?.trim() || "all",
+  };
+}
+
+export function getGoogleCalendarConfig() {
+  const clientId = env.googleClientId?.trim();
+  const clientSecret = env.googleClientSecret?.trim();
+  const redirectUri = env.googleCalendarRedirectUri?.trim();
+  const tokenEncryptionKey = env.googleTokenEncryptionKey?.trim();
+
+  if (!clientId || !clientSecret || !redirectUri || !tokenEncryptionKey) {
+    return null;
+  }
+
+  return {
+    clientId,
+    clientSecret,
+    redirectUri,
+    tokenEncryptionKey,
+    scope: "https://www.googleapis.com/auth/calendar.events",
+    calendarId: "primary",
   };
 }

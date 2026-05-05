@@ -6,6 +6,10 @@ import { redirect } from "next/navigation";
 import { getAuthState } from "@/lib/auth";
 import type { MarkWateredState } from "@/components/mark-watered-form";
 import { getPlantNetConfig } from "@/lib/env";
+import {
+  removeWateringReminderFromGoogleCalendar,
+  syncWateringReminderToGoogleCalendar,
+} from "@/lib/google-calendar/sync";
 import { identifyPlantWithPlantNet } from "@/lib/plant-identification/plantnet";
 import type {
   PlantIdentificationCandidate,
@@ -175,7 +179,21 @@ export async function markWateredAction(
   const nextReminderDate = getDerivedNextReminderDate(plantResult.data, result.data);
 
   if (nextReminderDate) {
-    await updateWateringReminderAfterWatered(supabase, user.id, plantId, nextReminderDate);
+    const reminderUpdateResult = await updateWateringReminderAfterWatered(
+      supabase,
+      user.id,
+      plantId,
+      nextReminderDate,
+    );
+
+    if (reminderUpdateResult.data) {
+      await syncWateringReminderToGoogleCalendar(
+        supabase,
+        user.id,
+        plantResult.data,
+        reminderUpdateResult.data,
+      );
+    }
   }
 
   revalidatePath("/app");
@@ -501,6 +519,8 @@ export async function saveWateringReminderAction(
     };
   }
 
+  await syncWateringReminderToGoogleCalendar(supabase, user.id, plant, result.data);
+
   revalidatePath(`/app/plants/${plant.id}`);
 
   return {
@@ -536,6 +556,8 @@ export async function disableWateringReminderAction(
       message: result.error ?? "Could not pause this reminder right now.",
     };
   }
+
+  await removeWateringReminderFromGoogleCalendar(supabase, user.id, result.data.id);
 
   revalidatePath(`/app/plants/${plant.id}`);
 

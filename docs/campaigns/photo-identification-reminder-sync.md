@@ -42,8 +42,8 @@ Current implementation status:
 - Slice 4.1: plant photo upload is implemented.
 - Slice 4.2: AI-assisted plant identification with Pl@ntNet is implemented.
 - Slice 5.1: Internal reminder model is implemented.
-- Slice 5.2: Google Calendar sync readiness review is the active next slice.
-- Reminder flexibility remains planned.
+- Slice 5.2: Google Calendar sync is implemented.
+- Slice 5.3: Reminder flexibility is the active next slice.
 
 This is not a broad visual redesign, AI product expansion, diagnosis feature, generic task platform, notification platform, or bidirectional calendar integration.
 
@@ -1156,7 +1156,24 @@ Stop and report if:
 
 ## Slice 5.2 — Google Calendar sync
 
-**Status:** active.
+**Status:** complete.
+
+### Implementation notes
+
+Slice 5.2 implements Google Calendar as a one-way reflection of app-owned watering reminders.
+
+- OAuth routes are `/app/integrations/google-calendar/connect` and `/app/integrations/google-calendar/callback`.
+- Scope is `https://www.googleapis.com/auth/calendar.events`.
+- Server-only environment is `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_CALENDAR_REDIRECT_URI`, and `GOOGLE_TOKEN_ENCRYPTION_KEY`.
+- V1 uses the primary Google Calendar and stores `calendar_id` as `primary`.
+- Refresh tokens are encrypted before storage in Supabase and are never exposed to browser code.
+- Provider connections are scoped by `user_id`.
+- Reminder event links are scoped by `user_id` and `reminder_id`.
+- The app creates or updates one upcoming all-day Google Calendar event per active watering reminder.
+- App reminders remain the source of truth if sync fails.
+- Disconnect preserves app reminders, stops future sync, and attempts cleanup of known app-managed Google events.
+
+Slice 5.3 is now active.
 
 ### Recommendation
 

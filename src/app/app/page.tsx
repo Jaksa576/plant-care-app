@@ -18,11 +18,15 @@ import { redirect } from "next/navigation";
 type AppPageProps = {
   searchParams: Promise<{
     archived?: string;
+    googleCalendar?: string;
   }>;
 };
 
 export default async function AppPage({ searchParams }: AppPageProps) {
-  const [authState, { archived }] = await Promise.all([getAuthState(), searchParams]);
+  const [authState, { archived, googleCalendar }] = await Promise.all([
+    getAuthState(),
+    searchParams,
+  ]);
 
   if (!authState.supabaseConfigured) {
     redirect("/login?missingEnv=1");
@@ -81,7 +85,7 @@ export default async function AppPage({ searchParams }: AppPageProps) {
               </h2>
               <p className="mt-4 text-sm leading-7 text-[color:var(--muted)] sm:text-base">
                 Watering state is based on your latest watering record and each plant&apos;s editable
-                interval. Photos, identification, and reminders are optional. Calendar sync is still deferred.
+                interval. Photos, identification, reminders, and Google Calendar sync are optional.
               </p>
             </div>
 
@@ -102,6 +106,29 @@ export default async function AppPage({ searchParams }: AppPageProps) {
               {plantsResult.error}
             </p>
           </section>
+        ) : null}
+
+        {googleCalendar ? (
+          <div
+            className={`rounded-[1.75rem] border px-5 py-4 ${
+              googleCalendar === "connected"
+                ? "border-emerald-200 bg-emerald-50"
+                : "border-amber-200 bg-amber-50"
+            }`}
+          >
+            <StatusPill tone={googleCalendar === "connected" ? "success" : "warning"}>
+              Google Calendar
+            </StatusPill>
+            <p
+              className={`mt-3 text-sm leading-7 ${
+                googleCalendar === "connected" ? "text-emerald-950/80" : "text-amber-950/80"
+              }`}
+            >
+              {googleCalendar === "connected"
+                ? "Google Calendar connected. Open a plant reminder to update its calendar event."
+                : "Google Calendar could not be connected. Plant Care reminders are unchanged."}
+            </p>
+          </div>
         ) : null}
 
         {!plantsResult.error && wateringEventsResult.error ? (

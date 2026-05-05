@@ -28,7 +28,8 @@ This document describes implemented technical shape and architectural boundaries
 - Dashboard cards show a small plant thumbnail or calm fallback.
 - Plant profiles include an optional Pl@ntNet-backed identification helper when a primary photo exists.
 - Plant profiles include an app-owned watering reminder panel.
-- There is no calendar sync yet.
+- Plant profiles include a compact Google Calendar sync panel when reminders are present.
+- Google Calendar sync is implemented as a one-way reflection of app-owned reminders.
 
 ## Auth And Session Pattern
 
@@ -48,6 +49,7 @@ This document describes implemented technical shape and architectural boundaries
 - Plant photo storage paths include the authenticated user ID and plant ID, and Storage RLS policies check that path against an owned plant.
 - AI identification first verifies the signed-in user's ownership of the plant and primary photo before reading Storage or calling the provider.
 - Watering reminder reads and mutations filter by the authenticated user's ID on the server and are backed by RLS policies tied to owned plants.
+- Google Calendar connection and event-link reads/mutations filter by the authenticated user's ID on the server and are backed by RLS policies.
 - RLS must stay enabled on user-owned tables.
 - App queries and database policies should agree on ownership boundaries.
 - Cross-user access checks are required whenever routes, queries, mutations, or schema touch user-owned data.
@@ -120,7 +122,35 @@ When a signed-in user marks a plant watered, the action still creates a watering
 
 ### Calendar Linkage
 
-Calendar linkage is future work. When introduced, it should map app-owned reminders to provider-specific event IDs without making calendar sync a prerequisite for reminders. Google Calendar comes before Outlook, and app reminders remain the source of truth.
+Google Calendar sync is implemented for active watering reminders as a one-way reflection from Plant Care to Google Calendar. App reminders remain the source of truth. Google Calendar events do not define reminder state, watering state, or care guidance.
+
+Google OAuth routes:
+
+- `/app/integrations/google-calendar/connect`
+- `/app/integrations/google-calendar/callback`
+
+Server-only Google configuration:
+
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+- `GOOGLE_CALENDAR_REDIRECT_URI`
+- `GOOGLE_TOKEN_ENCRYPTION_KEY`
+
+The OAuth scope is `https://www.googleapis.com/auth/calendar.events`. V1 uses the user's primary calendar and stores `calendar_id` as `primary`.
+
+Google refresh tokens are encrypted with AES-256-GCM before storage in `google_calendar_connections`. Tokens, client secret, and refresh token values are never exposed to browser code or stored in browser storage. Provider connection records are scoped to `user_id`.
+
+Reminder-to-event linkage lives in `google_calendar_event_links`:
+
+- `user_id`
+- `reminder_id`
+- `google_event_id`
+- `calendar_id`
+- sync status/error/timestamp metadata
+
+The app creates or updates one upcoming all-day Google Calendar event per active watering reminder. The event title uses `Water [plant label]`, and the description says it was created from Plant Care and that Plant Care remains the source of truth. Recurring Google events, bidirectional sync, Outlook sync, and non-watering calendar events are not implemented.
+
+If Google sync fails, the Plant Care reminder remains saved and authoritative. Disconnecting Google preserves app reminders, stops future sync, and attempts to delete known app-managed Google Calendar events. If provider cleanup fails, the app still disconnects and reports a recoverable cleanup warning.
 
 ### Photos And AI
 

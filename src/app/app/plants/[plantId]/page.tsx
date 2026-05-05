@@ -2,6 +2,10 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import {
+  disconnectGoogleCalendarAction,
+  syncGoogleCalendarReminderAction,
+} from "@/app/app/integrations/google-calendar/actions";
+import {
   archivePlantAction,
   disableWateringReminderAction,
   identifyPlantPhotoAction,
@@ -14,6 +18,7 @@ import {
 import { AppShell } from "@/components/app-shell";
 import { ArchivePlantForm } from "@/components/archive-plant-form";
 import { MarkWateredForm } from "@/components/mark-watered-form";
+import { GoogleCalendarSyncPanel } from "@/components/google-calendar-sync-panel";
 import { PlantIdentificationPanel } from "@/components/plant-identification-form";
 import { PlantPhotoForm } from "@/components/plant-photo-form";
 import { PlantPhotoFrame } from "@/components/plant-photo";
@@ -21,6 +26,11 @@ import { SignOutButton } from "@/components/sign-out-button";
 import { StatusPill } from "@/components/status-pill";
 import { WateringReminderPanel } from "@/components/watering-reminder-form";
 import { getAuthState } from "@/lib/auth";
+import { getGoogleCalendarConfig } from "@/lib/env";
+import {
+  getGoogleCalendarConnection,
+  getGoogleCalendarEventLinkForReminder,
+} from "@/lib/google-calendar/data";
 import { getPlantForUser } from "@/lib/plants/data";
 import { createPlantPhotoUrlMap } from "@/lib/plants/photos";
 import {
@@ -28,7 +38,13 @@ import {
   getPlantSecondaryLabel,
   getWateringIntervalLabel,
 } from "@/lib/plants/presenters";
-import type { PlantRecord, WateringEventRecord, WateringReminderRecord } from "@/lib/plants/types";
+import type {
+  GoogleCalendarConnectionRecord,
+  GoogleCalendarEventLinkRecord,
+  PlantRecord,
+  WateringEventRecord,
+  WateringReminderRecord,
+} from "@/lib/plants/types";
 import { getWateringReminderForPlant } from "@/lib/reminders/data";
 import { getReminderSummary } from "@/lib/reminders/schedule";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -176,6 +192,9 @@ function PlantProfile({
   photoUrl,
   reminder,
   reminderError,
+  googleCalendarConfigured,
+  googleCalendarConnection,
+  googleCalendarEventLink,
 }: {
   plant: PlantRecord;
   schedule: WateringScheduleState;
@@ -184,6 +203,9 @@ function PlantProfile({
   photoUrl?: string;
   reminder: WateringReminderRecord | null;
   reminderError: boolean;
+  googleCalendarConfigured: boolean;
+  googleCalendarConnection: GoogleCalendarConnectionRecord | null;
+  googleCalendarEventLink: GoogleCalendarEventLinkRecord | null;
 }) {
   const primaryLabel = getPlantPrimaryLabel(plant);
   const secondaryLabel = getPlantSecondaryLabel(plant);
@@ -263,6 +285,15 @@ function PlantProfile({
         dateInputValue={reminderSummary.dateInputValue}
         saveAction={saveWateringReminderAction.bind(null, plant.id)}
         disableAction={disableWateringReminderAction.bind(null, plant.id)}
+      />
+
+      <GoogleCalendarSyncPanel
+        configured={googleCalendarConfigured}
+        connection={googleCalendarConnection}
+        eventLink={googleCalendarEventLink}
+        reminderEnabled={Boolean(reminder?.enabled && reminder.next_reminder_date)}
+        syncAction={syncGoogleCalendarReminderAction.bind(null, plant.id)}
+        disconnectAction={disconnectGoogleCalendarAction}
       />
 
       <WateringHistorySection events={wateringEvents} showError={wateringStateError} />
@@ -363,6 +394,16 @@ export default async function PlantProfilePage({ params, searchParams }: PlantPr
   const reminderResult = plant
     ? await getWateringReminderForPlant(supabase, authState.user.id, plant.id)
     : null;
+  const googleCalendarConnectionResult = plant
+    ? await getGoogleCalendarConnection(supabase, authState.user.id)
+    : null;
+  const googleCalendarEventLinkResult = reminderResult?.data
+    ? await getGoogleCalendarEventLinkForReminder(
+        supabase,
+        authState.user.id,
+        reminderResult.data.id,
+      )
+    : null;
   const wateringEvents = wateringResult?.data ?? [];
   const schedule = plant
     ? getWateringScheduleState(plant, wateringEvents[0] ?? null)
@@ -434,6 +475,9 @@ export default async function PlantProfilePage({ params, searchParams }: PlantPr
               photoUrl={photoUrls[plant.id]}
               reminder={reminderResult?.data ?? null}
               reminderError={Boolean(reminderResult?.error)}
+              googleCalendarConfigured={Boolean(getGoogleCalendarConfig())}
+              googleCalendarConnection={googleCalendarConnectionResult?.data ?? null}
+              googleCalendarEventLink={googleCalendarEventLinkResult?.data ?? null}
             />
             <ArchivePlantForm
               action={archivePlantAction.bind(
