@@ -30,10 +30,12 @@ import {
 } from "@/lib/plants/photos";
 import { emptyPlantFormState, type PlantFormState } from "@/lib/plants/types";
 import {
+  addReminderDaysToDateValue,
   getDerivedNextReminderDate,
   getTodayDateInputValue,
 } from "@/lib/reminders/schedule";
 import {
+  getWateringReminderForPlant,
   updateWateringReminderAfterWatered,
   upsertWateringReminderForPlant,
 } from "@/lib/reminders/data";
@@ -491,7 +493,10 @@ export async function saveWateringReminderAction(
   }
 
   const dateValue = formData.get("nextReminderDate");
+  const modeValue = formData.get("reminderMode");
   const nextReminderDate = typeof dateValue === "string" ? dateValue.trim() : "";
+  const reminderMode =
+    modeValue === "fixed_schedule" ? "fixed_schedule" : "after_watering";
 
   if (!nextReminderDate) {
     return {
@@ -507,8 +512,16 @@ export async function saveWateringReminderAction(
     };
   }
 
+  if (!plant.watering_interval_days) {
+    return {
+      status: "error",
+      message: "Add a watering interval before choosing reminder timing.",
+    };
+  }
+
   const result = await upsertWateringReminderForPlant(supabase, user.id, plant.id, {
     enabled: true,
+    reminder_mode: reminderMode,
     next_reminder_date: nextReminderDate,
   });
 
@@ -545,8 +558,10 @@ export async function disableWateringReminderAction(
     };
   }
 
+  const reminderResult = await getWateringReminderForPlant(supabase, user.id, plant.id);
   const result = await upsertWateringReminderForPlant(supabase, user.id, plant.id, {
     enabled: false,
+    reminder_mode: reminderResult.data?.reminder_mode ?? "after_watering",
     next_reminder_date: null,
   });
 
@@ -564,5 +579,61 @@ export async function disableWateringReminderAction(
   return {
     status: "success",
     message: "Watering reminder paused. Your plant details and watering history are unchanged.",
+  };
+}
+
+export async function snoozeWateringReminderAction(
+  plantId: string,
+  previousState: WateringReminderState,
+  formData: FormData,
+): Promise<WateringReminderState> {
+  void previousState;
+  const { supabase, user } = await getSignedInPlantContext();
+  const plantResult = await getPlantForUser(supabase, user.id, plantId);
+  const plant = plantResult.data;
+
+  if (plantResult.error || !plant || plant.archived_at) {
+    return {
+      status: "error",
+      message: "Could not snooze this reminder. Please refresh and try again.",
+    };
+  }
+
+  const reminderResult = await getWateringReminderForPlant(supabase, user.id, plant.id);
+  const reminder = reminderResult.data;
+  const snoozeValue = formData.get("snoozeDays");
+  const snoozeDays = snoozeValue === "3" ? 3 : 1;
+
+  if (!reminder?.enabled || !reminder.next_reminder_date) {
+    return {
+      status: "error",
+      message: "Turn on this reminder before snoozing it.",
+    };
+  }
+
+  const nextReminderDate = addReminderDaysToDateValue(
+    reminder.next_reminder_date,
+    snoozeDays,
+  );
+  const result = await upsertWateringReminderForPlant(supabase, user.id, plant.id, {
+    enabled: true,
+    reminder_mode: reminder.reminder_mode,
+    next_reminder_date: nextReminderDate,
+  });
+
+  if (result.error || !result.data) {
+    return {
+      status: "error",
+      message: result.error ?? "Could not snooze this reminder right now.",
+    };
+  }
+
+  await syncWateringReminderToGoogleCalendar(supabase, user.id, plant, result.data);
+
+  revalidatePath(`/app/plants/${plant.id}`);
+
+  return {
+    status: "success",
+    message: `Snoozed until ${nextReminderDate}.`,
   };
 }

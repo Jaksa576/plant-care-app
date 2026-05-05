@@ -28,6 +28,7 @@ export type WateringReminderRecord = {
   user_id: string;
   plant_id: string;
   reminder_type: "watering";
+  reminder_mode: "after_watering" | "fixed_schedule";
   enabled: boolean;
   next_reminder_date: string | null;
   reminder_time: string | null;

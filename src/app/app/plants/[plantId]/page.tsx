@@ -13,6 +13,7 @@ import {
   removePlantPhotoAction,
   savePlantIdentificationSuggestionAction,
   saveWateringReminderAction,
+  snoozeWateringReminderAction,
   uploadPlantPhotoAction,
 } from "@/app/app/plants/actions";
 import { AppShell } from "@/components/app-shell";
@@ -282,9 +283,13 @@ function PlantProfile({
             ? "We couldn't load this reminder right now. Your watering history is still available."
             : reminderSummary.helperText
         }
+        previewText={reminderSummary.previewText}
         dateInputValue={reminderSummary.dateInputValue}
+        mode={reminderSummary.mode}
+        canUseReminderTiming={Boolean(plant.watering_interval_days)}
         saveAction={saveWateringReminderAction.bind(null, plant.id)}
         disableAction={disableWateringReminderAction.bind(null, plant.id)}
+        snoozeAction={snoozeWateringReminderAction.bind(null, plant.id)}
       />
 
       <GoogleCalendarSyncPanel

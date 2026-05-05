@@ -7,6 +7,7 @@ type ReminderClient = SupabaseClient;
 
 export type WateringReminderInput = {
   enabled: boolean;
+  reminder_mode?: WateringReminderRecord["reminder_mode"];
   next_reminder_date: string | null;
   reminder_time?: string | null;
 };
@@ -59,6 +60,7 @@ export async function upsertWateringReminderForPlant(
         user_id: userId,
         plant_id: plantId,
         reminder_type: "watering",
+        reminder_mode: input.reminder_mode ?? "after_watering",
         enabled: input.enabled,
         next_reminder_date: input.next_reminder_date,
         reminder_time: input.reminder_time ?? null,
@@ -95,6 +97,7 @@ export async function updateWateringReminderAfterWatered(
     .eq("user_id", userId)
     .eq("plant_id", plantId)
     .eq("reminder_type", "watering")
+    .eq("reminder_mode", "after_watering")
     .eq("enabled", true)
     .select("*")
     .maybeSingle();

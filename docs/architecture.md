@@ -110,15 +110,23 @@ Watering reminders are implemented in `watering_reminders`:
 - `user_id`
 - `plant_id`
 - `reminder_type`, constrained to `watering`
+- `reminder_mode`, constrained to `after_watering` or `fixed_schedule`
 - `enabled`
 - optional `next_reminder_date`
 - optional `reminder_time`
 - `created_at`
 - `updated_at`
 
-Reminders are app-owned and work without Google Calendar. The v1 Slice 5.1 behavior is date-first: the profile panel shows the next reminder date in plain language and avoids notification delivery claims. Users can turn a watering reminder on with a chosen date and turn it off without changing plant details or watering history.
+Reminders are app-owned and work without Google Calendar. The profile panel shows the next reminder date in plain language and avoids notification delivery claims. Users can turn a watering reminder on with a chosen date and turn it off without changing plant details or watering history.
 
-When a signed-in user marks a plant watered, the action still creates a watering event first. If an enabled watering reminder exists and the plant has a watering interval, the app updates `next_reminder_date` from the new watering event plus the interval. Missing intervals still allow reminders through a user-selected date, but no automatic date is claimed.
+Reminder modes are watering-specific:
+
+- `after_watering`: next reminder is based on the latest watering date plus the plant's user-entered watering interval.
+- `fixed_schedule`: next reminder follows the saved date; watering early records care but does not reset the reminder date.
+
+When a signed-in user marks a plant watered, the action still creates a watering event first. If an enabled `after_watering` reminder exists and the plant has a watering interval, the app updates `next_reminder_date` from the new watering event plus the interval. Fixed schedule reminders are not reset by early watering.
+
+Snooze actions move the current `next_reminder_date` later by a small number of days without changing plant care basics or watering interval. Reminder mode changes, snoozes, and mark-watered reminder updates ask Google Calendar sync to mirror the app reminder when a Google connection exists.
 
 ### Calendar Linkage
 

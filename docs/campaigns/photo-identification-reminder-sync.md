@@ -43,7 +43,9 @@ Current implementation status:
 - Slice 4.2: AI-assisted plant identification with Pl@ntNet is implemented.
 - Slice 5.1: Internal reminder model is implemented.
 - Slice 5.2: Google Calendar sync is implemented.
-- Slice 5.3: Reminder flexibility is the active next slice.
+- Slice 5.3: Reminder flexibility is implemented.
+
+The campaign is complete pending stacked branch review, preview QA, and ordered merges.
 
 This is not a broad visual redesign, AI product expansion, diagnosis feature, generic task platform, notification platform, or bidirectional calendar integration.
 
@@ -1360,6 +1362,20 @@ Stop and report if:
 ---
 
 ## Slice 5.3 — Reminder flexibility
+
+**Status:** complete.
+
+### Implementation notes
+
+Slice 5.3 adds focused watering reminder flexibility without introducing a generic scheduler.
+
+- Reminder mode is stored on `watering_reminders.reminder_mode`.
+- `After I water` recalculates the next reminder from the latest watering date plus the plant's watering interval.
+- `Fixed schedule` keeps the saved next reminder date when the user waters early.
+- Snooze moves the current next reminder by 1 or 3 days without changing plant care basics.
+- Reminder mode changes, snooze, and after-watering mark-watered updates ask Google Calendar sync to mirror the app reminder when connected.
+- Users need a watering interval before choosing reminder timing.
+- No push, email, SMS, Outlook, bidirectional sync, AI scheduling, or generic task behavior is implemented.
 
 ### Recommendation
 

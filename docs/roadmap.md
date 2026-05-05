@@ -32,14 +32,15 @@ This document tracks product sequencing and slice status. Stable product directi
 - AI-assisted plant identification with Pl@ntNet, transient names-only suggestions, user review/edit/reject flow, and accepted updates to normal plant fields.
 - App-owned watering reminders with watering-only reminder records, enabled/disabled state, date-first next reminder, profile panel, owner-scoped RLS, and mark-watered date updates when an interval exists.
 - Google Calendar sync with server-side OAuth, encrypted refresh-token storage, primary-calendar event creation/update, app-owned reminder linkage, disconnect cleanup, and one-way app-to-calendar behavior.
+- Reminder flexibility with after-watering mode, fixed schedule mode, snooze controls, plain-language next reminder previews, and calendar sync updates from app reminder changes.
 
 ### Active
 
-- Slice 5.3: Reminder flexibility.
+- Campaign QA and review for the stacked Photo Identification + Reminder Sync branches.
 
 ### Planned
 
-- Reminder flexibility.
+- No additional v1 feature slice is active.
 
 ### Deferred
 
@@ -134,7 +135,7 @@ Current active campaign:
 
 ## Phase 4: Photo Support And AI-Assisted Identification
 
-**Status:** active.
+**Status:** implemented.
 
 **Goal:** Make plant setup more visual and convenient after the manual plant/watering loop is useful.
 
@@ -154,7 +155,7 @@ Current active campaign:
 
 ## Phase 5: Reminders And Google Calendar Sync
 
-**Status:** planned.
+**Status:** implemented.
 
 **Goal:** Help users remember watering outside the app without letting calendar sync define the core model.
 
@@ -172,9 +173,9 @@ Current active campaign:
 
 ### Slice 5.3: Reminder Flexibility
 
-**Status:** active.
+**Status:** implemented.
 
-**Scope:** Fixed schedule reminders, last-watered based reminders, snooze, and watered-early support.
+**Scope completed:** Plain-language after-watering and fixed schedule modes, snooze by 1 or 3 days, watered-early behavior that resets after-watering reminders but leaves fixed schedule reminders unchanged, next reminder preview copy, and Google Calendar sync updates from app reminder changes.
 
 ### Outlook Sync
 
@@ -204,7 +205,8 @@ Automation can reduce friction after the app has reliable user behavior and care
 
 ## Recommended Implementation Order
 
-1. Slice 5.3: reminder flexibility.
-2. Later: health support, richer knowledge, smarter automation, and Outlook sync.
+1. QA and review the stacked Photo Identification + Reminder Sync branches.
+2. Merge the stacked branches in order after approval.
+3. Later: health support, richer knowledge, smarter automation, and Outlook sync.
 
 This order keeps the manual plant and watering loop useful before photos, AI, reminders, and calendar integrations.
