@@ -32,7 +32,7 @@ This document tracks product sequencing and slice status. Stable product directi
 - AI-assisted plant identification with Pl@ntNet, transient names-only suggestions, user review/edit/reject flow, and accepted updates to normal plant fields.
 - App-owned watering reminders with watering-only reminder records, enabled/disabled state, date-first next reminder, profile panel, owner-scoped RLS, and mark-watered date updates when an interval exists.
 - Google Calendar sync with server-side OAuth, encrypted refresh-token storage, primary-calendar event creation/update, app-owned reminder linkage, disconnect cleanup, and one-way app-to-calendar behavior.
-- Reminder flexibility with after-watering mode, fixed schedule mode, snooze controls, plain-language next reminder previews, and calendar sync updates from app reminder changes.
+- Reminder flexibility with after-watering mode, fixed schedule mode, snooze controls, reminder-aware dashboard urgency, plain-language next reminder previews, and calendar sync updates from app reminder changes.
 
 ### Active
 
@@ -175,7 +175,7 @@ Current active campaign:
 
 **Status:** implemented.
 
-**Scope completed:** Plain-language after-watering and fixed schedule modes, snooze by 1 or 3 days, watered-early behavior that resets after-watering reminders but leaves fixed schedule reminders unchanged, next reminder preview copy, and Google Calendar sync updates from app reminder changes.
+**Scope completed:** Plain-language after-watering and fixed schedule modes, snooze by 1 or 3 days, watered-early behavior that resets after-watering reminders but leaves fixed schedule reminders unchanged, dashboard grouping that uses enabled reminder dates before interval fallback, next reminder preview copy, and Google Calendar sync updates from app reminder changes.
 
 ### Outlook Sync
 

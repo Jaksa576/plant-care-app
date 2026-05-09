@@ -534,6 +534,7 @@ export async function saveWateringReminderAction(
 
   await syncWateringReminderToGoogleCalendar(supabase, user.id, plant, result.data);
 
+  revalidatePath("/app");
   revalidatePath(`/app/plants/${plant.id}`);
 
   return {
@@ -574,6 +575,7 @@ export async function disableWateringReminderAction(
 
   await removeWateringReminderFromGoogleCalendar(supabase, user.id, result.data.id);
 
+  revalidatePath("/app");
   revalidatePath(`/app/plants/${plant.id}`);
 
   return {
@@ -630,6 +632,7 @@ export async function snoozeWateringReminderAction(
 
   await syncWateringReminderToGoogleCalendar(supabase, user.id, plant, result.data);
 
+  revalidatePath("/app");
   revalidatePath(`/app/plants/${plant.id}`);
 
   return {

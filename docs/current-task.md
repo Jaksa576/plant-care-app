@@ -9,13 +9,13 @@
 - User-owned plant CRUD is implemented with a persisted `plants` table, RLS ownership policies, and soft archive behavior.
 - A dedicated, protected plant detail/profile view is implemented for user-owned plant records.
 - Plant-level watering state and mark-watered behavior are implemented with durable watering events.
-- A watering dashboard with overdue, due today, upcoming, and recently watered sections is implemented.
+- A reminder-aware watering dashboard with overdue, due today, upcoming, and recently watered sections is implemented.
 - Plant-level watering history is implemented from the durable watering event model.
 - Primary plant photo upload is implemented with private Supabase Storage, one optional photo per owned plant, profile display, dashboard thumbnails, replace/remove actions, and calm no-photo fallbacks.
 - AI-assisted plant identification is implemented with a deliberate Pl@ntNet-backed helper from an owned primary photo. Suggestions are transient, names-only, reviewable, editable, rejectable, and saved only after user acceptance into normal plant fields.
 - App-owned watering reminders are implemented with a watering-only reminder model, enabled/disabled state, date-first next reminder, plant profile panel, owner-scoped RLS, and mark-watered updates when an interval exists.
 - Google Calendar sync is implemented as a one-way reflection of app-owned watering reminders when server OAuth configuration is present.
-- Reminder flexibility is implemented with after-watering mode, fixed schedule mode, snooze controls, and predictable watered-early behavior.
+- Reminder flexibility is implemented with after-watering mode, fixed schedule mode, snooze controls, predictable watered-early behavior, and dashboard urgency that reflects enabled reminder dates.
 
 ## Active Slice
 
@@ -32,6 +32,7 @@ The v1 photo, identification, reminder, and Google Calendar stack is now impleme
 - QA the stacked campaign branches in order.
 - Apply Supabase migrations in a preview environment.
 - Verify Google Calendar configuration in a safe preview environment before merging the calendar slice.
+- Verify dashboard grouping with enabled reminders due today, overdue, and upcoming.
 
 ## Non-Goals
 
@@ -40,7 +41,7 @@ The v1 photo, identification, reminder, and Google Calendar stack is now impleme
 ## Acceptance Criteria
 
 - Branches remain unmerged to main until product owner review.
-- Manual QA covers reminders, Google sync, RLS/ownership, and mobile profile controls.
+- Manual QA covers reminders, dashboard grouping, Google sync, RLS/ownership, and mobile profile controls.
 - Deferred roadmap items stay deferred unless reprioritized.
 
 ## Validation Expectations

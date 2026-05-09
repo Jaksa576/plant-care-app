@@ -1,5 +1,6 @@
-import type { PlantRecord, WateringEventRecord } from "@/lib/plants/types";
+import type { PlantRecord, WateringEventRecord, WateringReminderRecord } from "@/lib/plants/types";
 import {
+  formatLastWateredLabel,
   getDayDifference,
   getWateringScheduleState,
   type WateringScheduleState,
@@ -10,6 +11,7 @@ const DASHBOARD_WINDOW_DAYS = 7;
 export type DashboardPlant = {
   plant: PlantRecord;
   latestWateringEvent: WateringEventRecord | null;
+  reminder: WateringReminderRecord | null;
   schedule: WateringScheduleState;
 };
 
@@ -33,20 +35,107 @@ export function getLatestWateringEventByPlantId(events: WateringEventRecord[]) {
   return latestByPlantId;
 }
 
+export function getEnabledReminderByPlantId(reminders: WateringReminderRecord[]) {
+  const reminderByPlantId = new Map<string, WateringReminderRecord>();
+
+  for (const reminder of reminders) {
+    if (reminder.enabled && reminder.next_reminder_date) {
+      reminderByPlantId.set(reminder.plant_id, reminder);
+    }
+  }
+
+  return reminderByPlantId;
+}
+
+function getLocalDateFromDateValue(dateValue: string) {
+  const [year, month, day] = dateValue.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function getReminderScheduleState(
+  reminder: WateringReminderRecord,
+  latestWateringEvent: WateringEventRecord | null,
+  today: Date,
+): WateringScheduleState {
+  const lastWateredAt = latestWateringEvent?.watered_at ?? null;
+  const reminderDateValue = reminder.next_reminder_date;
+
+  if (!reminderDateValue) {
+    return getWateringScheduleState({ watering_interval_days: null }, latestWateringEvent, today);
+  }
+
+  const reminderDate = getLocalDateFromDateValue(reminderDateValue);
+  const daysUntilDue = getDayDifference(today, reminderDate);
+  const helperText =
+    reminder.reminder_mode === "fixed_schedule"
+      ? "Based on this plant's fixed watering reminder."
+      : "Based on this plant's after-watering reminder.";
+
+  if (daysUntilDue < 0) {
+    const overdueDays = Math.abs(daysUntilDue);
+
+    return {
+      lastWateredAt,
+      lastWateredLabel: formatLastWateredLabel(lastWateredAt, today),
+      nextWateringDate: reminderDate,
+      nextWateringLabel: `Overdue by ${overdueDays} day${overdueDays === 1 ? "" : "s"}`,
+      status: "overdue",
+      helperText,
+    };
+  }
+
+  if (daysUntilDue === 0) {
+    return {
+      lastWateredAt,
+      lastWateredLabel: formatLastWateredLabel(lastWateredAt, today),
+      nextWateringDate: reminderDate,
+      nextWateringLabel: "Due today",
+      status: "due-today",
+      helperText,
+    };
+  }
+
+  if (daysUntilDue === 1) {
+    return {
+      lastWateredAt,
+      lastWateredLabel: formatLastWateredLabel(lastWateredAt, today),
+      nextWateringDate: reminderDate,
+      nextWateringLabel: "Due tomorrow",
+      status: "upcoming",
+      helperText,
+    };
+  }
+
+  return {
+    lastWateredAt,
+    lastWateredLabel: formatLastWateredLabel(lastWateredAt, today),
+    nextWateringDate: reminderDate,
+    nextWateringLabel: `Due in ${daysUntilDue} days`,
+    status: "upcoming",
+    helperText,
+  };
+}
+
 export function getDashboardPlants(
   plants: PlantRecord[],
   events: WateringEventRecord[],
+  reminders: WateringReminderRecord[] = [],
   today = new Date(),
 ) {
   const latestByPlantId = getLatestWateringEventByPlantId(events);
+  const reminderByPlantId = getEnabledReminderByPlantId(reminders);
 
   return plants.map((plant) => {
     const latestWateringEvent = latestByPlantId.get(plant.id) ?? null;
+    const reminder = reminderByPlantId.get(plant.id) ?? null;
 
     return {
       plant,
       latestWateringEvent,
-      schedule: getWateringScheduleState(plant, latestWateringEvent, today),
+      reminder,
+      schedule: reminder
+        ? getReminderScheduleState(reminder, latestWateringEvent, today)
+        : getWateringScheduleState(plant, latestWateringEvent, today),
     };
   });
 }

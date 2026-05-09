@@ -47,6 +47,29 @@ export async function getWateringReminderForPlant(
   };
 }
 
+export async function listWateringRemindersForUser(
+  supabase: ReminderClient,
+  userId: string,
+): Promise<PlantQueryResult<WateringReminderRecord[]>> {
+  const { data, error } = await supabase
+    .from("watering_reminders")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("reminder_type", "watering");
+
+  if (error) {
+    return {
+      data: null,
+      error: getReminderErrorMessage("We couldn't load watering reminders right now.", error),
+    };
+  }
+
+  return {
+    data: (data as WateringReminderRecord[]) ?? [],
+    error: null,
+  };
+}
+
 export async function upsertWateringReminderForPlant(
   supabase: ReminderClient,
   userId: string,

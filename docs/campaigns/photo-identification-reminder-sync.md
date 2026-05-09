@@ -1374,6 +1374,7 @@ Slice 5.3 adds focused watering reminder flexibility without introducing a gener
 - `Fixed schedule` keeps the saved next reminder date when the user waters early.
 - Snooze moves the current next reminder by 1 or 3 days without changing plant care basics.
 - Reminder mode changes, snooze, and after-watering mark-watered updates ask Google Calendar sync to mirror the app reminder when connected.
+- The dashboard uses enabled reminder dates for overdue, due today, and upcoming grouping before falling back to interval-based watering calculations.
 - Users need a watering interval before choosing reminder timing.
 - No push, email, SMS, Outlook, bidirectional sync, AI scheduling, or generic task behavior is implemented.
 
@@ -1546,6 +1547,7 @@ Stop and report if:
 | AI failure | Manual care remains available |
 | Reminder model | App-owned reminder works without Google Calendar |
 | Reminder calculation | Next reminder is explainable and consistent |
+| Dashboard reminders | Enabled reminder dates drive overdue, due today, and upcoming grouping |
 | Google sync | Calendar mirrors app reminder state only |
 | Provider failure | App reminders survive failure/disconnect |
 | Reminder flexibility | Snooze and watered-early behavior are predictable |
@@ -1564,6 +1566,7 @@ The campaign is complete when:
 - Users can add and view plant photos.
 - Users can optionally use conservative AI identification from owned photos.
 - Users can manage app-owned watering reminders.
+- The dashboard reflects app-owned watering reminders when enabled reminder dates exist.
 - Google Calendar, if configured, mirrors reminders without becoming source of truth.
 - Reminder flexibility is useful but not generic.
 - RLS, route protection, storage access, provider linkage, and ownership checks remain intact.

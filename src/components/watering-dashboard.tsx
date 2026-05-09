@@ -25,6 +25,15 @@ type DashboardPlantCardProps = {
 function DashboardPlantCard({ item, photoUrl, showAction }: DashboardPlantCardProps) {
   const primaryLabel = getPlantPrimaryLabel(item.plant);
   const secondaryLabel = getPlantSecondaryLabel(item.plant);
+  const guidanceLabel = item.reminder
+    ? item.reminder.reminder_mode === "fixed_schedule"
+      ? "Fixed reminder"
+      : "After-watering reminder"
+    : item.plant.watering_interval_days
+      ? `Every ${item.plant.watering_interval_days} day${
+          item.plant.watering_interval_days === 1 ? "" : "s"
+        }`
+      : "No interval set";
 
   return (
     <article className="rounded-[1.5rem] border border-[color:var(--border)] bg-white/85 p-4 shadow-[var(--shadow)]">
@@ -72,13 +81,7 @@ function DashboardPlantCard({ item, photoUrl, showAction }: DashboardPlantCardPr
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[color:var(--muted)]">
             Guidance
           </p>
-          <p className="mt-2 text-sm leading-6">
-            {item.plant.watering_interval_days
-              ? `Every ${item.plant.watering_interval_days} day${
-                  item.plant.watering_interval_days === 1 ? "" : "s"
-                }`
-              : "No interval set"}
-          </p>
+          <p className="mt-2 text-sm leading-6">{guidanceLabel}</p>
         </div>
       </div>
 
