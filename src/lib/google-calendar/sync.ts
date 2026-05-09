@@ -108,11 +108,10 @@ async function getGoogleAccessTokenForConnection(
   };
 }
 
-function getEventDescription(plant: PlantRecord) {
+function getEventDescription() {
   return [
     "Created from Plant Care.",
     "Plant Care remains the source of truth for this watering reminder.",
-    `Plant ID: ${plant.id}`,
   ].join("\n");
 }
 
@@ -160,7 +159,7 @@ export async function syncWateringReminderToGoogleCalendar(
   const eventInput = {
     eventId: existingLink?.google_event_id,
     title: `Water ${getPlantPrimaryLabel(plant)}`,
-    description: getEventDescription(plant),
+    description: getEventDescription(),
     date: reminder.next_reminder_date,
   };
   const eventResult = existingLink
