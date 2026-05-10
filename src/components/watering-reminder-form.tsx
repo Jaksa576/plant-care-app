@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 import type { WateringReminderState } from "@/app/app/plants/actions";
 import { StatusPill } from "@/components/status-pill";
@@ -29,8 +29,22 @@ type WateringReminderPanelProps = {
   ) => Promise<WateringReminderState>;
 };
 
-function ReminderMessage({ state }: { state: WateringReminderState }) {
+type ReminderActionName = "save" | "disable" | "snooze";
+
+function ReminderMessage({
+  state,
+  actionName,
+  latestAction,
+}: {
+  state: WateringReminderState;
+  actionName: ReminderActionName;
+  latestAction: ReminderActionName | null;
+}) {
   if (!state.message) {
+    return null;
+  }
+
+  if (latestAction && latestAction !== actionName) {
     return null;
   }
 
@@ -71,6 +85,7 @@ export function WateringReminderPanel({
     snoozeAction,
     emptyReminderState,
   );
+  const [latestAction, setLatestAction] = useState<ReminderActionName | null>(null);
 
   return (
     <section className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-6 shadow-[var(--shadow)] sm:p-8">
@@ -88,13 +103,25 @@ export function WateringReminderPanel({
       </div>
 
       <div className="mt-5 grid gap-4">
-        <ReminderMessage state={saveState} />
-        <ReminderMessage state={disableState} />
-        <ReminderMessage state={snoozeState} />
+        <ReminderMessage state={saveState} actionName="save" latestAction={latestAction} />
+        <ReminderMessage
+          state={disableState}
+          actionName="disable"
+          latestAction={latestAction}
+        />
+        <ReminderMessage
+          state={snoozeState}
+          actionName="snooze"
+          latestAction={latestAction}
+        />
       </div>
 
       <div className="mt-5 flex flex-col gap-4">
-        <form action={saveFormAction} className="flex flex-col gap-3">
+        <form
+          action={saveFormAction}
+          className="flex flex-col gap-3"
+          onSubmit={() => setLatestAction("save")}
+        >
           <fieldset className="grid gap-3">
             <legend className="text-sm font-semibold text-[color:var(--foreground)]">
               How should reminders work?
@@ -157,7 +184,7 @@ export function WateringReminderPanel({
 
         {enabled ? (
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <form action={snoozeFormAction}>
+            <form action={snoozeFormAction} onSubmit={() => setLatestAction("snooze")}>
               <input type="hidden" name="snoozeDays" value="1" />
               <button
                 type="submit"
@@ -167,7 +194,7 @@ export function WateringReminderPanel({
                 Snooze 1 day
               </button>
             </form>
-            <form action={snoozeFormAction}>
+            <form action={snoozeFormAction} onSubmit={() => setLatestAction("snooze")}>
               <input type="hidden" name="snoozeDays" value="3" />
               <button
                 type="submit"
@@ -177,7 +204,7 @@ export function WateringReminderPanel({
                 Snooze 3 days
               </button>
             </form>
-            <form action={disableFormAction}>
+            <form action={disableFormAction} onSubmit={() => setLatestAction("disable")}>
               <button
                 type="submit"
                 disabled={disablePending}

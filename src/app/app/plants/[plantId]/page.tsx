@@ -52,7 +52,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { listWateringEventsForPlant } from "@/lib/watering/data";
 import {
   formatWateringHistoryDate,
-  getWateringScheduleState,
+  getReminderAwareWateringScheduleState,
   type WateringScheduleState,
 } from "@/lib/watering/schedule";
 
@@ -92,10 +92,12 @@ function MissingField({ children }: { children: React.ReactNode }) {
 function WateringStatusCard({
   plant,
   schedule,
+  hasActiveReminderDate,
   showError,
 }: {
   plant: PlantRecord;
   schedule: WateringScheduleState;
+  hasActiveReminderDate: boolean;
   showError: boolean;
 }) {
   const statusTone = schedule.status === "overdue" ? "warning" : "success";
@@ -123,7 +125,13 @@ function WateringStatusCard({
         <ProfileField
           label="Next watering"
           value={schedule.nextWateringLabel}
-          helper={schedule.nextWateringDate ? "Calculated from the latest watering record." : undefined}
+          helper={
+            schedule.nextWateringDate
+              ? hasActiveReminderDate
+                ? "Using the active Plant Care reminder date."
+                : "Calculated from the latest watering record and interval."
+              : undefined
+          }
         />
       </div>
 
@@ -212,6 +220,7 @@ function PlantProfile({
   const secondaryLabel = getPlantSecondaryLabel(plant);
   const intervalLabel = getWateringIntervalLabel(plant);
   const reminderSummary = getReminderSummary(reminder, plant, wateringEvents[0] ?? null);
+  const hasActiveReminderDate = Boolean(reminder?.enabled && reminder.next_reminder_date);
 
   return (
     <div className="flex flex-col gap-6">
@@ -265,6 +274,7 @@ function PlantProfile({
       <WateringStatusCard
         plant={plant}
         schedule={schedule}
+        hasActiveReminderDate={hasActiveReminderDate}
         showError={wateringStateError}
       />
 
@@ -411,7 +421,11 @@ export default async function PlantProfilePage({ params, searchParams }: PlantPr
     : null;
   const wateringEvents = wateringResult?.data ?? [];
   const schedule = plant
-    ? getWateringScheduleState(plant, wateringEvents[0] ?? null)
+    ? getReminderAwareWateringScheduleState(
+        plant,
+        wateringEvents[0] ?? null,
+        reminderResult?.data ?? null,
+      )
     : null;
   const photoUrls = plant ? await createPlantPhotoUrlMap(supabase, [plant]) : {};
 

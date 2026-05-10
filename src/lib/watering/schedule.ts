@@ -1,4 +1,4 @@
-import type { PlantRecord, WateringEventRecord } from "@/lib/plants/types";
+import type { PlantRecord, WateringEventRecord, WateringReminderRecord } from "@/lib/plants/types";
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
@@ -142,4 +142,91 @@ export function getWateringScheduleState(
     status: "upcoming",
     helperText: `Based on your ${plant.watering_interval_days}-day interval.`,
   };
+}
+
+function getLocalDateFromDateValue(dateValue: string) {
+  const [year, month, day] = dateValue.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function getReminderScheduleState(
+  reminder: Pick<WateringReminderRecord, "next_reminder_date" | "reminder_mode">,
+  latestWateringEvent: Pick<WateringEventRecord, "watered_at"> | null,
+  today = new Date(),
+): WateringScheduleState | null {
+  if (!reminder.next_reminder_date) {
+    return null;
+  }
+
+  const lastWateredAt = latestWateringEvent?.watered_at ?? null;
+  const reminderDate = getLocalDateFromDateValue(reminder.next_reminder_date);
+  const daysUntilDue = getDayDifference(today, reminderDate);
+  const helperText =
+    reminder.reminder_mode === "fixed_schedule"
+      ? "Based on this plant's fixed watering reminder."
+      : "Based on this plant's after-watering reminder.";
+
+  if (daysUntilDue < 0) {
+    const overdueDays = Math.abs(daysUntilDue);
+
+    return {
+      lastWateredAt,
+      lastWateredLabel: formatLastWateredLabel(lastWateredAt, today),
+      nextWateringDate: reminderDate,
+      nextWateringLabel: `Overdue by ${overdueDays} day${overdueDays === 1 ? "" : "s"}`,
+      status: "overdue",
+      helperText,
+    };
+  }
+
+  if (daysUntilDue === 0) {
+    return {
+      lastWateredAt,
+      lastWateredLabel: formatLastWateredLabel(lastWateredAt, today),
+      nextWateringDate: reminderDate,
+      nextWateringLabel: "Due today",
+      status: "due-today",
+      helperText,
+    };
+  }
+
+  if (daysUntilDue === 1) {
+    return {
+      lastWateredAt,
+      lastWateredLabel: formatLastWateredLabel(lastWateredAt, today),
+      nextWateringDate: reminderDate,
+      nextWateringLabel: "Due tomorrow",
+      status: "upcoming",
+      helperText,
+    };
+  }
+
+  return {
+    lastWateredAt,
+    lastWateredLabel: formatLastWateredLabel(lastWateredAt, today),
+    nextWateringDate: reminderDate,
+    nextWateringLabel: `Due in ${daysUntilDue} days`,
+    status: "upcoming",
+    helperText,
+  };
+}
+
+export function getReminderAwareWateringScheduleState(
+  plant: Pick<PlantRecord, "watering_interval_days">,
+  latestWateringEvent: Pick<WateringEventRecord, "watered_at"> | null,
+  reminder: Pick<
+    WateringReminderRecord,
+    "enabled" | "next_reminder_date" | "reminder_mode"
+  > | null,
+  today = new Date(),
+): WateringScheduleState {
+  if (reminder?.enabled && reminder.next_reminder_date) {
+    const reminderSchedule = getReminderScheduleState(reminder, latestWateringEvent, today);
+
+    if (reminderSchedule) {
+      return reminderSchedule;
+    }
+  }
+
+  return getWateringScheduleState(plant, latestWateringEvent, today);
 }

@@ -22,6 +22,7 @@ This document describes implemented technical shape and architectural boundaries
 - The signed-in shell includes sign-out and the current plant collection experience.
 - Manual plant create, profile, edit, list, and archive flows are implemented.
 - Plant-profile watering state and mark-watered behavior are implemented.
+- Plant-profile next watering status uses enabled app-owned reminder dates first, then falls back to watering interval calculations.
 - The signed-in dashboard groups active plants by watering status: overdue, due today, upcoming, and recently watered.
 - Dashboard urgency uses enabled app-owned reminder dates first, then falls back to watering interval calculations.
 - Plant profiles show watering history from watering events.
@@ -101,7 +102,7 @@ The mark-watered action inserts a watering event for an active plant owned by th
 
 Watering date display uses simple local-day semantics in app helpers: due today is the current local calendar day, overdue is before today, and upcoming is after today.
 
-The dashboard reuses the same date helpers as the plant profile. If a plant has an enabled watering reminder with `next_reminder_date`, that date drives overdue, due today, and upcoming grouping. If no enabled reminder date exists, grouping falls back to the latest watering event plus the plant's editable watering interval. Recently watered always comes from watering events. Upcoming and recently watered sections use a conservative 7-day window. Plant-level watering history reads the same event model newest first, so last-watered, dashboard state, and history all derive from one source.
+The dashboard and plant-profile top watering card reuse the same reminder-aware date helpers. If a plant has an enabled watering reminder with `next_reminder_date`, that date drives profile next-watering status plus dashboard overdue, due today, and upcoming grouping. If no enabled reminder date exists, both surfaces fall back to the latest watering event plus the plant's editable watering interval. Recently watered always comes from watering events. Upcoming and recently watered sections use a conservative 7-day window. Plant-level watering history reads the same event model newest first, so last-watered, dashboard state, and history all derive from one source.
 
 ### Reminders
 
@@ -129,7 +130,7 @@ When a signed-in user marks a plant watered, the action still creates a watering
 
 Snooze actions move the current `next_reminder_date` later by a small number of days without changing plant care basics or watering interval. Reminder mode changes, snoozes, and mark-watered reminder updates ask Google Calendar sync to mirror the app reminder when a Google connection exists.
 
-The dashboard reads watering reminders scoped to the signed-in user. Enabled reminders with a next date are treated as the active dashboard schedule for their plant, so fixed schedule reminders remain visible after watering and after-watering reminders update dashboard urgency after mark-watered recalculates the reminder date.
+The dashboard and plant profile read watering reminders scoped to the signed-in user. Enabled reminders with a next date are treated as the active schedule for their plant, so fixed schedule reminders remain visible after watering and after-watering reminders update visible urgency after mark-watered recalculates the reminder date.
 
 ### Calendar Linkage
 
