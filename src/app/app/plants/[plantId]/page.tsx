@@ -18,9 +18,17 @@ import {
 } from "@/app/app/plants/actions";
 import { AppShell } from "@/components/app-shell";
 import { ArchivePlantForm } from "@/components/archive-plant-form";
-import { MarkWateredForm } from "@/components/mark-watered-form";
+import {
+  CameraIcon,
+  ChevronRightIcon,
+  ClockIcon,
+  DropletIcon,
+  LeafIcon,
+  RoomIcon,
+} from "@/components/icons";
 import { GoogleCalendarSyncPanel } from "@/components/google-calendar-sync-panel";
 import { PlantIdentificationPanel } from "@/components/plant-identification-form";
+import { PlantDetailActions } from "@/components/plant-detail-actions";
 import { PlantPhotoForm } from "@/components/plant-photo-form";
 import { PlantPhotoFrame } from "@/components/plant-photo";
 import { SignOutButton } from "@/components/sign-out-button";
@@ -75,12 +83,15 @@ type ProfileFieldProps = {
 
 function ProfileField({ label, value, helper }: ProfileFieldProps) {
   return (
-    <div className="rounded-[1.25rem] border border-[color:var(--border)] bg-white/80 p-4">
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--muted)]">
-        {label}
-      </p>
-      <div className="mt-2 text-sm leading-6 text-[color:var(--foreground)]">{value}</div>
-      {helper ? <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">{helper}</p> : null}
+    <div className="flex items-start gap-3 border-b border-[color:var(--border-soft)] py-3 last:border-b-0">
+      <span className="mt-0.5 text-[color:var(--accent)]">
+        <LeafIcon className="h-4 w-4" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold text-[color:var(--foreground)]">{label}</p>
+        <div className="mt-1 text-sm leading-6 text-[color:var(--muted)]">{value}</div>
+        {helper ? <p className="mt-1 text-xs leading-5 text-[color:var(--muted)]">{helper}</p> : null}
+      </div>
     </div>
   );
 }
@@ -103,11 +114,11 @@ function WateringStatusCard({
   const statusTone = schedule.status === "overdue" ? "warning" : "success";
 
   return (
-    <section className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-6 shadow-[var(--shadow)] sm:p-8">
+    <section className="rounded-[1.5rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] p-5 sm:p-6">
       <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <StatusPill tone={statusTone}>Watering</StatusPill>
-          <h3 className="mt-5 text-2xl font-semibold">{schedule.nextWateringLabel}</h3>
+          <h3 className="mt-4 text-2xl font-semibold">{schedule.nextWateringLabel}</h3>
           <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
             {schedule.helperText}
           </p>
@@ -139,11 +150,7 @@ function WateringStatusCard({
         <div className="mt-5 rounded-[1.25rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950">
           Could not load watering state. The action is hidden until this plant can be checked again.
         </div>
-      ) : (
-        <div className="mt-6">
-          <MarkWateredForm action={markWateredAction.bind(null, plant.id)} />
-        </div>
-      )}
+      ) : null}
     </section>
   );
 }
@@ -156,12 +163,9 @@ function WateringHistorySection({
   showError: boolean;
 }) {
   return (
-    <section className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-6 shadow-[var(--shadow)] sm:p-8">
+    <section className="rounded-[1.5rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] p-5 sm:p-6">
       <div className="flex flex-col gap-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--muted)]">
-          Recent watering
-        </p>
-        <h3 className="text-2xl font-semibold">Watering history</h3>
+        <h3 className="text-xl font-semibold">Care history</h3>
       </div>
 
       {showError ? (
@@ -177,14 +181,20 @@ function WateringHistorySection({
       ) : null}
 
       {!showError && events.length > 0 ? (
-        <ol className="mt-5 flex flex-col gap-3">
+        <ol className="mt-4 divide-y divide-[color:var(--border-soft)]">
           {events.map((event) => (
             <li
               key={event.id}
-              className="rounded-[1.25rem] border border-[color:var(--border)] bg-white/80 px-4 py-3"
+              className="flex items-center gap-3 py-3"
             >
-              <p className="text-base font-semibold">{formatWateringHistoryDate(event.watered_at)}</p>
-              <p className="mt-1 text-sm leading-6 text-[color:var(--muted)]">Watered</p>
+              <DropletIcon className="h-4 w-4 text-[color:var(--accent)]" />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold">Watered</p>
+                <p className="mt-0.5 text-xs leading-5 text-[color:var(--muted)]">
+                  {formatWateringHistoryDate(event.watered_at)}
+                </p>
+              </div>
+              <ChevronRightIcon className="h-4 w-4 text-[color:var(--muted)]" />
             </li>
           ))}
         </ol>
@@ -224,25 +234,22 @@ function PlantProfile({
 
   return (
     <div className="flex flex-col gap-6">
-      <section className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface)] p-6 shadow-[var(--shadow)] backdrop-blur sm:p-8">
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)] lg:items-start">
-          <div className="flex flex-col gap-5">
+      <section className="overflow-hidden rounded-[1.75rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)]">
+        <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_minmax(21rem,26rem)]">
+          <div className="min-h-72 bg-[color:var(--accent-soft)] lg:min-h-[32rem]">
             <PlantPhotoFrame
               photoUrl={photoUrl}
               alt={photoUrl ? `${primaryLabel} primary plant photo` : ""}
             />
-            <PlantPhotoForm
-              uploadAction={uploadPlantPhotoAction.bind(null, plant.id)}
-              removeAction={removePlantPhotoAction.bind(null, plant.id)}
-              hasPhoto={Boolean(plant.primary_photo_path)}
-            />
           </div>
 
-          <div>
-            <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between lg:flex-col">
+          <div className="p-5 sm:p-6">
+            <div className="flex flex-col gap-5">
               <div className="max-w-2xl">
-                <StatusPill>Plant profile</StatusPill>
-                <h2 className="mt-5 text-3xl font-semibold text-[color:var(--foreground)] sm:text-4xl">
+                <StatusPill tone={schedule.status === "overdue" ? "warning" : "success"}>
+                  {schedule.nextWateringLabel}
+                </StatusPill>
+                <h2 className="mt-4 text-3xl font-semibold text-[color:var(--foreground)] sm:text-4xl">
                   {primaryLabel}
                 </h2>
                 {secondaryLabel ? (
@@ -255,21 +262,53 @@ function PlantProfile({
                     {plant.scientific_name}
                   </p>
                 ) : null}
-                <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
-                  {plant.location ?? "No room or location set yet."}
+                <p className="mt-4 inline-flex items-center gap-2 text-sm leading-7 text-[color:var(--muted)]">
+                  <RoomIcon className="h-4 w-4 text-[color:var(--accent)]" />
+                  {plant.location ?? "Unassigned"}
                 </p>
               </div>
 
-              <Link
-                href={`/app/plants/${plant.id}/edit`}
-                className="inline-flex w-fit items-center justify-center rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-95"
-              >
-                Edit details
-              </Link>
+              <PlantDetailActions
+                waterAction={markWateredAction.bind(null, plant.id)}
+                snoozeAction={snoozeWateringReminderAction.bind(null, plant.id)}
+                canSnooze={hasActiveReminderDate}
+              />
             </div>
           </div>
         </div>
       </section>
+
+      <section className="rounded-[1.5rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] p-5 sm:p-6">
+        <div className="mb-3 flex items-center justify-between gap-4">
+          <h3 className="text-xl font-semibold">Care basics</h3>
+          <Link
+            href={`/app/plants/${plant.id}/edit`}
+            className="text-sm font-semibold text-[color:var(--accent-ink)]"
+          >
+            Edit
+          </Link>
+        </div>
+        <ProfileField
+          label="Last watered"
+          value={schedule.lastWateredLabel}
+          helper={schedule.helperText}
+        />
+        <ProfileField
+          label="Water every"
+          value={intervalLabel ?? <MissingField>No watering interval set yet</MissingField>}
+          helper="This is user-entered guidance only."
+        />
+        <ProfileField
+          label="Room"
+          value={plant.location ?? <MissingField>Unassigned</MissingField>}
+        />
+        <ProfileField
+          label="Notes"
+          value={plant.notes ?? <MissingField>No notes added yet</MissingField>}
+        />
+      </section>
+
+      <WateringHistorySection events={wateringEvents} showError={wateringStateError} />
 
       <WateringStatusCard
         plant={plant}
@@ -278,29 +317,45 @@ function PlantProfile({
         showError={wateringStateError}
       />
 
-      <PlantIdentificationPanel
-        hasPhoto={Boolean(plant.primary_photo_path)}
-        editHref={`/app/plants/${plant.id}/edit`}
-        identifyAction={identifyPlantPhotoAction.bind(null, plant.id)}
-        saveSuggestionAction={savePlantIdentificationSuggestionAction.bind(null, plant.id)}
-      />
+      <section className="grid gap-5 lg:grid-cols-2">
+        <div className="rounded-[1.5rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] p-5 sm:p-6">
+          <div className="mb-4 flex items-center gap-2">
+            <CameraIcon className="h-5 w-5 text-[color:var(--accent)]" />
+            <h3 className="text-xl font-semibold">Photo</h3>
+          </div>
+          <PlantPhotoForm
+            uploadAction={uploadPlantPhotoAction.bind(null, plant.id)}
+            removeAction={removePlantPhotoAction.bind(null, plant.id)}
+            hasPhoto={Boolean(plant.primary_photo_path)}
+          />
+        </div>
 
-      <WateringReminderPanel
-        enabled={Boolean(reminder?.enabled)}
-        summaryLabel={reminderSummary.label}
-        helperText={
-          reminderError
-            ? "We couldn't load this reminder right now. Your watering history is still available."
-            : reminderSummary.helperText
-        }
-        previewText={reminderSummary.previewText}
-        dateInputValue={reminderSummary.dateInputValue}
-        mode={reminderSummary.mode}
-        canUseReminderTiming={Boolean(plant.watering_interval_days)}
-        saveAction={saveWateringReminderAction.bind(null, plant.id)}
-        disableAction={disableWateringReminderAction.bind(null, plant.id)}
-        snoozeAction={snoozeWateringReminderAction.bind(null, plant.id)}
-      />
+        <PlantIdentificationPanel
+          hasPhoto={Boolean(plant.primary_photo_path)}
+          editHref={`/app/plants/${plant.id}/edit`}
+          identifyAction={identifyPlantPhotoAction.bind(null, plant.id)}
+          saveSuggestionAction={savePlantIdentificationSuggestionAction.bind(null, plant.id)}
+        />
+      </section>
+
+      <div id="watering-reminder">
+        <WateringReminderPanel
+          enabled={Boolean(reminder?.enabled)}
+          summaryLabel={reminderSummary.label}
+          helperText={
+            reminderError
+              ? "We couldn't load this reminder right now. Your watering history is still available."
+              : reminderSummary.helperText
+          }
+          previewText={reminderSummary.previewText}
+          dateInputValue={reminderSummary.dateInputValue}
+          mode={reminderSummary.mode}
+          canUseReminderTiming={Boolean(plant.watering_interval_days)}
+          saveAction={saveWateringReminderAction.bind(null, plant.id)}
+          disableAction={disableWateringReminderAction.bind(null, plant.id)}
+          snoozeAction={snoozeWateringReminderAction.bind(null, plant.id)}
+        />
+      </div>
 
       <GoogleCalendarSyncPanel
         configured={googleCalendarConfigured}
@@ -311,9 +366,7 @@ function PlantProfile({
         disconnectAction={disconnectGoogleCalendarAction}
       />
 
-      <WateringHistorySection events={wateringEvents} showError={wateringStateError} />
-
-      <section className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-6 shadow-[var(--shadow)] sm:p-8">
+      <section className="rounded-[1.5rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] p-5 sm:p-6">
         <div className="flex flex-col gap-2">
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--muted)]">
             Care basics
@@ -324,7 +377,7 @@ function PlantProfile({
           </p>
         </div>
 
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        <div className="mt-4">
           <ProfileField
             label="Nickname"
             value={plant.nickname ?? <MissingField>No nickname set</MissingField>}
@@ -361,10 +414,11 @@ function PlantProfile({
         </div>
       </section>
 
-      <section className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-6 shadow-[var(--shadow)] sm:p-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--muted)]">
-          Notes
-        </p>
+      <section className="rounded-[1.5rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] p-5 sm:p-6">
+        <div className="mb-3 flex items-center gap-2">
+          <ClockIcon className="h-5 w-5 text-[color:var(--accent)]" />
+          <h3 className="text-xl font-semibold">Notes</h3>
+        </div>
         {plant.notes ? (
           <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-[color:var(--foreground)] sm:text-base">
             {plant.notes}
@@ -433,7 +487,7 @@ export default async function PlantProfilePage({ params, searchParams }: PlantPr
     <AppShell
       userEmail={authState.user.email ?? "Signed-in user"}
       title={plantTitle}
-      subtitle="Review this plant record, its optional photo, and the watering state that belongs to this account."
+      subtitle="Everything about this plant, with watering first and supporting tools close by."
       actions={<SignOutButton />}
     >
       <div className="flex flex-col gap-6">
@@ -441,7 +495,7 @@ export default async function PlantProfilePage({ params, searchParams }: PlantPr
           href="/app"
           className="inline-flex w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold text-[color:var(--foreground)] transition hover:bg-[color:var(--accent-soft)]"
         >
-          Back to your collection
+          Back to Plants
         </Link>
 
         {created === "1" ? (

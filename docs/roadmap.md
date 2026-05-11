@@ -37,6 +37,7 @@ This document tracks product sequencing and slice status. Stable product directi
 - UI redesign shell foundation with warm design tokens, Nunito Sans font loading, local SVG icon primitives, persistent Add Plant access, and Home / Plants / Settings bottom app bar.
 - UI redesign Home / Today surface with Needs water, By room, Recent care, icon-led Water, and secondary Snooze where app reminder state supports it.
 - UI redesign Plants tab with full active collection browsing, room chapters, Unassigned grouping, Add Plant access, plant detail links, and reminder-aware watering status labels.
+- UI redesign Plant Detail inspector with large photo/fallback, identity/status, Water now, Snooze, Reminder, care basics rows, care history, photo/identification, reminder, Google Calendar, edit, and archive access.
 
 ### Active
 

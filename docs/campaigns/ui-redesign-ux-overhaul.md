@@ -310,7 +310,7 @@ Notes:
 
 ### Slice 4: Plant Detail Redesign
 
-Status: next.
+Status: complete on `ui-redesign/04-plant-detail`.
 
 Goal:
 
@@ -341,9 +341,16 @@ Acceptance criteria:
 - Watering, reminders, history, photo, AI, and calendar surfaces remain findable.
 - UI matches visual reference direction.
 
+Notes:
+
+- The existing user-owned plant detail data flow is preserved.
+- The top section now behaves like an inspector: photo/fallback, identity, room/status, Water now, Snooze, and Reminder.
+- Care basics and care history are promoted before supporting panels.
+- Photo, identification, reminders, Google Calendar sync, edit, and archive flows remain contextual and secondary.
+
 ### Slice 5: Add/Edit Plant Flow Polish
 
-Status: planned.
+Status: next.
 
 Goal:
 

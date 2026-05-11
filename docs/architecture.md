@@ -18,7 +18,7 @@ This document describes implemented technical shape and architectural boundaries
 - `/login` provides Supabase email sign-in and sign-up.
 - `/app` is the protected signed-in app area.
 - `/app/plants` is the protected redesigned Plants tab for browsing the full active collection by room.
-- `/app/plants/[plantId]` is a protected plant detail/profile route for a single user-owned plant.
+- `/app/plants/[plantId]` is the protected redesigned plant detail/profile inspector for a single user-owned plant.
 - `/app/plants/[plantId]/edit` is the protected plant edit route.
 - `/app/settings` is a protected settings route stub for account and app-level utility controls.
 - The signed-in shell includes the Home / Plants / Settings bottom app bar, persistent Add Plant access, and sign-out where appropriate.
@@ -30,6 +30,7 @@ This document describes implemented technical shape and architectural boundaries
 - The signed-in Home route presents the redesigned Today surface with Needs water, By room, and Recent care sections.
 - Dashboard urgency uses enabled app-owned reminder dates first, then falls back to watering interval calculations.
 - Plant profiles show watering history from watering events.
+- Plant profiles present a photo/identity hero, primary Water now action, secondary Snooze/Reminder actions, care basics rows, watering history, photo/identification, app reminder, Google Calendar sync, edit, and archive surfaces.
 - Plant profiles support one optional primary photo per owned plant.
 - Dashboard cards show a small plant thumbnail or calm fallback.
 - Plant profiles include an optional Pl@ntNet-backed identification helper when a primary photo exists.
