@@ -178,7 +178,7 @@ Validation:
 
 ### Slice 1: Design System And Shell Foundation
 
-Status: next.
+Status: complete on `ui-redesign/01-foundation-shell`.
 
 Goal:
 
@@ -217,9 +217,15 @@ Validation:
 - `npm run build`.
 - `npm run lint` if present.
 
+Notes:
+
+- No icon dependency was added; Slice 01 introduced local inline SVG primitives for the required icon set.
+- Existing `next/font/google` usage was preserved and switched to Nunito Sans.
+- `/app/plants` and `/app/settings` are protected minimal surfaces for the new bottom app bar. Full collection and settings polish remain scoped to later slices.
+
 ### Slice 2: Home / Today Redesign
 
-Status: planned.
+Status: next.
 
 Goal:
 

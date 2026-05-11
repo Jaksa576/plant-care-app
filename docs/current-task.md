@@ -24,34 +24,40 @@ UI Redesign UX Overhaul Campaign is active.
 Current branch:
 
 ```txt
-ui-redesign/00-docs-reference
+ui-redesign/01-foundation-shell
 ```
 
-Slice 00 adds the missing brand reference companion doc for the approved UI redesign reference package. No app code, route, dependency, schema, auth, or RLS behavior changes are in scope for this slice.
+Slice 01 adds the shared visual foundation and protected signed-in shell navigation for the UI redesign. It introduces warm design tokens, Nunito Sans font loading, local inline SVG icon primitives, Home / Plants / Settings bottom app bar navigation, and minimal protected Plants and Settings route surfaces.
 
 ## Why This Is Next
 
-The v1 watering, photo, AI-assisted identification, app-owned reminder, and Google Calendar sync stack is implemented on `main`. The approved next campaign is the UI Redesign UX Overhaul, starting with a docs reference package readiness fix because `docs/design/plant-care-brand-reference.md` was referenced by the campaign docs but missing from the repo.
+The v1 watering, photo, AI-assisted identification, app-owned reminder, and Google Calendar sync stack is implemented on `main`. The approved active campaign is the UI Redesign UX Overhaul. Slice 01 follows the completed docs reference package so later Home, Plants, and Plant Detail slices can reuse one visual foundation.
 
 ## Scope
 
-- Add `docs/design/plant-care-brand-reference.md` as a concise text companion to `docs/design/plant-care-approved-brand-reference-sheet.png`.
-- Confirm required UI redesign reference docs and mockups exist.
-- Keep app code unchanged.
-- Prepare for Slice 01: Design System And Shell Foundation.
+- Add or refine reusable visual tokens.
+- Apply the softer Nunito Sans typography direction through the existing font strategy.
+- Add local icon primitives without adding an icon dependency.
+- Add signed-in bottom app bar navigation for Home, Plants, and Settings.
+- Keep Add Plant discoverable.
+- Add protected minimal Plants and Settings route surfaces needed for shell navigation.
+- Preserve Supabase auth/session redirects and user-owned data behavior.
 
 ## Non-Goals
 
 - Do not implement Outlook, bidirectional sync, calendar-owned reminder truth, generic tasks, notification delivery, AI scheduling, health diagnosis, or broad scheduler settings without a new approved slice.
-- Do not change app code, dependencies, routes, schema, auth/session handling, RLS assumptions, AI behavior, reminder behavior, or calendar sync behavior in Slice 00.
+- Do not redesign the full Home, Plants, Plant Detail, Add/Edit, reminder, AI, or calendar surfaces in Slice 01.
+- Do not change dependencies, schema, auth/session handling, RLS assumptions, AI behavior, reminder behavior, or calendar sync behavior.
 
 ## Acceptance Criteria
 
-- `docs/design/plant-care-brand-reference.md` exists.
-- Existing UI redesign visual and implementation references exist.
-- Final mockups exist under `docs/design/mockups/`.
-- Campaign doc references the completed docs readiness slice and points to Slice 01 next.
-- Build validation is skipped because no app code changed.
+- Reusable design tokens and icon primitives exist.
+- Nunito Sans is loaded through the current `next/font/google` strategy.
+- Home / Plants / Settings bottom navigation is present on the signed-in app shell.
+- Add Plant remains visible in the signed-in shell.
+- `/app/plants` and `/app/settings` are protected and preserve signed-in route behavior.
+- Existing plant data reads remain user-scoped.
+- Validation gates pass.
 
 ## Validation Expectations
 
@@ -66,10 +72,10 @@ Stop if review finds ownership, migration, provider, or validation issues.
 
 ## Next Recommended Action
 
-Create the next stacked branch from `ui-redesign/00-docs-reference`:
+Create the next stacked branch from `ui-redesign/01-foundation-shell`:
 
 ```txt
-ui-redesign/01-foundation-shell
+ui-redesign/02-home-today
 ```
 
-Then implement the design system and signed-in shell foundation without changing data ownership, auth/session behavior, schema, AI semantics, reminder semantics, or calendar sync semantics.
+Then implement the Home / Today redesign using the existing reminder-aware dashboard data flow and the approved Home mockup. Keep watering primary, Snooze secondary where supported, and avoid schema, AI, or calendar behavior changes.

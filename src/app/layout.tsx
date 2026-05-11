@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Manrope } from "next/font/google";
+import { Nunito_Sans } from "next/font/google";
 
 import "./globals.css";
 
-const manrope = Manrope({
+const nunitoSans = Nunito_Sans({
   subsets: ["latin"],
   variable: "--font-body",
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -20,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${manrope.variable} antialiased`}>{children}</body>
+      <body className={`${nunitoSans.variable} antialiased`}>{children}</body>
     </html>
   );
 }

@@ -18,6 +18,7 @@ This document tracks product sequencing and slice status. Stable product directi
 - Public landing page at `/`.
 - Supabase email auth at `/login`.
 - Protected `/app` route and signed-in shell.
+- Protected `/app/plants` collection tab route stub and `/app/settings` utility route stub.
 - Sign-out flow.
 - Supabase environment handling.
 - Browser and server Supabase helpers.
@@ -33,6 +34,7 @@ This document tracks product sequencing and slice status. Stable product directi
 - App-owned watering reminders with watering-only reminder records, enabled/disabled state, date-first next reminder, profile panel, owner-scoped RLS, and mark-watered date updates when an interval exists.
 - Google Calendar sync with server-side OAuth, encrypted refresh-token storage, primary-calendar event creation/update, app-owned reminder linkage, disconnect cleanup, and one-way app-to-calendar behavior.
 - Reminder flexibility with after-watering mode, fixed schedule mode, snooze controls, reminder-aware dashboard urgency, plain-language next reminder previews, and calendar sync updates from app reminder changes.
+- UI redesign shell foundation with warm design tokens, Nunito Sans font loading, local SVG icon primitives, persistent Add Plant access, and Home / Plants / Settings bottom app bar.
 
 ### Active
 
@@ -53,7 +55,7 @@ This document tracks product sequencing and slice status. Stable product directi
 
 Active campaign:
 
-- None.
+- [UI Redesign UX Overhaul Campaign](campaigns/ui-redesign-ux-overhaul.md)
 
 Completed campaigns:
 
