@@ -9,7 +9,6 @@ import {
   CheckCircleIcon,
   ChevronRightIcon,
   ClockIcon,
-  LeafIcon,
   PlusIcon,
   RoomIcon,
 } from "@/components/icons";
@@ -80,13 +79,13 @@ function getStatusTone(status: DashboardPlant["schedule"]["status"]) {
   return "text-[color:var(--muted)]";
 }
 
-function groupPlantsByRoom(plants: PlantRecord[]) {
-  const groups = new Map<string, PlantRecord[]>();
+function groupDashboardPlantsByRoom(items: DashboardPlant[]) {
+  const groups = new Map<string, DashboardPlant[]>();
 
-  for (const plant of plants) {
-    const room = plant.location?.trim() || "Unassigned";
+  for (const item of items) {
+    const room = item.plant.location?.trim() || "Unassigned";
     const roomPlants = groups.get(room) ?? [];
-    roomPlants.push(plant);
+    roomPlants.push(item);
     groups.set(room, roomPlants);
   }
 
@@ -212,7 +211,7 @@ export default async function AppPage({ searchParams }: AppPageProps) {
   const dashboardGroups = getWateringDashboardGroups(dashboardPlants);
   const attentionCount = getDashboardAttentionCount(dashboardGroups);
   const needsWaterPlants = [...dashboardGroups.overdue, ...dashboardGroups.dueToday];
-  const roomGroups = groupPlantsByRoom(plants);
+  const roomGroups = groupDashboardPlantsByRoom(dashboardPlants);
   const recentCare = getRecentCareEvents(wateringEventsResult.data ?? [], plants);
 
   return (
@@ -221,6 +220,7 @@ export default async function AppPage({ searchParams }: AppPageProps) {
       title="Today"
       subtitle={`${formatTodayDate()} - water what needs care, then move on with your day.`}
       actions={<SignOutButton />}
+      showAddPlantAction={false}
     >
       <div className="flex flex-col gap-6">
         {archived === "1" ? (
@@ -306,8 +306,13 @@ export default async function AppPage({ searchParams }: AppPageProps) {
 
         {!plantsResult.error && plants.length === 0 ? (
           <section className="rounded-[1.5rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] p-6">
-            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[color:var(--accent-soft)] text-[color:var(--accent)]">
-              <LeafIcon className="h-6 w-6" />
+            <span className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-[color:var(--surface-strong)] ring-1 ring-[color:var(--border-soft)]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/brand/plant-care-approved-icon-square-1024.png"
+                alt=""
+                className="h-full w-full object-cover"
+              />
             </span>
             <h2 className="mt-5 text-2xl font-semibold">No plants yet</h2>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-[color:var(--muted)] sm:text-base">
@@ -365,20 +370,27 @@ export default async function AppPage({ searchParams }: AppPageProps) {
                   View all
                 </Link>
               </div>
-              <div className="divide-y divide-[color:var(--border-soft)] rounded-[1.5rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)]">
+              <div className="grid gap-4">
                 {roomGroups.map(([room, roomPlants]) => (
-                  <Link
+                  <div
                     key={room}
-                    href="/app/plants"
-                    className="flex min-h-[var(--tap-target)] items-center gap-3 px-4 py-3 transition hover:bg-[color:var(--stone)]"
+                    className="rounded-[1.5rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] px-4"
                   >
-                    <RoomIcon className="h-5 w-5 text-[color:var(--accent)]" />
-                    <span className="min-w-0 flex-1 truncate text-sm font-semibold">{room}</span>
-                    <span className="rounded-full bg-[color:var(--stone)] px-2.5 py-0.5 text-xs font-semibold text-[color:var(--muted)]">
-                      {roomPlants.length}
-                    </span>
-                    <ChevronRightIcon className="h-4 w-4 text-[color:var(--muted)]" />
-                  </Link>
+                    <div className="flex min-h-[var(--tap-target)] items-center gap-3 border-b border-[color:var(--border-soft)] py-3">
+                      <RoomIcon className="h-5 w-5 text-[color:var(--accent)]" />
+                      <h3 className="min-w-0 flex-1 truncate text-sm font-semibold">{room}</h3>
+                      <span className="rounded-full bg-[color:var(--stone)] px-2.5 py-0.5 text-xs font-semibold text-[color:var(--muted)]">
+                        {roomPlants.length}
+                      </span>
+                    </div>
+                    {roomPlants.map((item) => (
+                      <TodayPlantRow
+                        key={item.plant.id}
+                        item={item}
+                        photoUrl={photoUrls[item.plant.id]}
+                      />
+                    ))}
+                  </div>
                 ))}
               </div>
             </section>

@@ -24,36 +24,44 @@ UI Redesign UX Overhaul Campaign is active.
 Current branch:
 
 ```txt
-ui-redesign/06-supporting-features
+ui-redesign/07-qa-polish
 ```
 
-Slice 06 polishes supporting feature surfaces so the UI redesign is coherent across reminders, Google Calendar sync, photo upload, AI-assisted identification, loading states, and supporting controls.
+Slice 07 applies a narrow QA polish patch on top of the completed UI Redesign UX Overhaul stack. It fixes visible manual-review issues without changing schema, RLS, auth/session behavior, AI semantics, reminder semantics, or calendar semantics.
 
 ## Why This Is Next
 
-The v1 watering, photo, AI-assisted identification, app-owned reminder, and Google Calendar sync stack is implemented on `main`. The UI Redesign UX Overhaul campaign is complete locally through the stacked `ui-redesign/06-supporting-features` branch. Branches have not been pushed because the app safety reviewer rejected export to the configured GitHub remote without explicit approval.
+The v1 watering, photo, AI-assisted identification, app-owned reminder, and Google Calendar sync stack is implemented on `main`. The UI Redesign UX Overhaul campaign is complete through the stacked `ui-redesign/07-qa-polish` branch, with this branch intended for final preview before merge.
 
 ## Scope
 
-- Polish reminder, Google Calendar, photo, and identification supporting surfaces.
-- Keep AI and calendar secondary to watering.
-- Preserve conservative AI/calendar copy and user-owned truth.
-- Improve loading state styling and control tap/focus treatment.
+- Fix primary button contrast and disabled-state clarity.
+- Remove duplicate Home Add Plant affordance.
+- Show Home By room plants inline under textual room chapters.
+- Improve plant detail photo crop/display.
+- Remove duplicated plant detail care/basic information.
+- Clarify Add/Edit required-name fields and validation errors.
+- Confirm photo upload and Pl@ntNet identification remain discoverable on owned plant detail.
+- Use approved logo/icon asset in visible app surfaces without over-branding.
 - Preserve existing auth, ownership, reminder, AI, calendar, and schema behavior.
 
 ## Non-Goals
 
 - Do not implement Outlook, bidirectional sync, calendar-owned reminder truth, generic tasks, notification delivery, AI scheduling, health diagnosis, or broad scheduler settings without a new approved slice.
-- Do not add a new calendar provider, Health Check, AI diagnosis, broad automation, schema/RLS changes, or calendar-first behavior in Slice 06.
+- Do not add onboarding, room management settings, persistent room schema, room dropdown data model, Health Check, landing page overhaul, Google Calendar relocation, pre-save PlantNet identification, AI diagnosis, calendar-first reminder behavior, schema changes, RLS changes, or new dependencies in Slice 07.
 - Do not change dependencies, schema, auth/session handling, RLS assumptions, AI behavior, reminder behavior, or calendar sync behavior.
 
 ## Acceptance Criteria
 
-- Supporting panels match the shared redesign tokens and icon treatment.
-- AI and calendar remain contextual and secondary.
-- Copy remains conservative and user-owned.
-- Loading state matches the redesigned surface language.
-- Tap targets and focus treatment are improved on supporting controls.
+- Primary buttons are readable.
+- Home top area has one Add Plant entry point.
+- Home By room shows plants inline under room chapters, including Unassigned.
+- Water early and Snooze use existing actions only.
+- Plant detail uploaded photos display cleanly on desktop and mobile.
+- Care basics appear once on plant detail.
+- Required Add/Edit fields are visibly marked and validation errors are understandable.
+- Photo upload and AI-assisted identification remain reachable from owned plant detail.
+- Approved brand asset is used in visible app surfaces without replacing plant content as the focus.
 - Empty/error states remain calm and recoverable.
 - Validation gates pass.
 
@@ -70,4 +78,4 @@ Stop if review finds ownership, migration, provider, or validation issues.
 
 ## Next Recommended Action
 
-Recommended next action: review the stacked branches in order, approve the GitHub push/export if remote preview branches are desired, then use Vercel previews for manual QA before merging.
+Recommended next action: push `ui-redesign/07-qa-polish` for Vercel preview, manually QA the checklist in the branch report, then merge the stacked UI redesign branches in order only after review.

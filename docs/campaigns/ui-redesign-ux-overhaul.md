@@ -1,6 +1,6 @@
 # UI Redesign UX Overhaul Campaign
 
-Status: **complete locally through `ui-redesign/06-supporting-features`**.
+Status: **complete locally through `ui-redesign/07-qa-polish`**.
 
 ## Goal
 
@@ -420,6 +420,38 @@ Notes:
 - Tap targets and focus treatment were improved on supporting controls.
 - Loading states were softened to match the redesign foundation.
 - No new calendar provider, Health Check, AI diagnosis, schema, or RLS changes were introduced.
+
+### Slice 7: QA Polish
+
+Status: complete on `ui-redesign/07-qa-polish`.
+
+Goal:
+
+Apply a narrow manual-review polish patch before merge without expanding product scope.
+
+Scope completed:
+
+- Primary action contrast and disabled-state clarity pass.
+- Removed duplicate Home Add Plant affordance while keeping Add Plant discoverable.
+- Changed Home By room from click-through room rows to inline room chapters with visible plant rows and existing Water/Snooze actions.
+- Adjusted plant detail photo display to avoid awkward desktop cropping while preserving private signed URL behavior.
+- Removed duplicated plant detail care/basic information.
+- Made Add/Edit required-name rules visible and kept validation errors understandable.
+- Confirmed photo upload and Pl@ntNet identification remain accessible from owned plant detail.
+- Used approved brand mark in the signed-in shell and empty/fallback surfaces without over-branding.
+
+Validation:
+
+- `npm run lint` passed.
+- `npm run build` passed.
+- `npm run typecheck` and `npm test` are not present in `package.json`.
+
+Deferred:
+
+- onboarding/room settings
+- landing page redesign
+- Google Calendar relocation to Settings
+- pre-save photo-first AI Add Plant flow
 
 ## Campaign QA checklist
 

@@ -43,7 +43,7 @@ export function PlantDetailActions({
         <button
           type="submit"
           disabled={waterPending}
-          className="flex min-h-16 w-full flex-col items-center justify-center gap-1 rounded-2xl bg-[color:var(--accent)] px-3 py-3 text-sm font-semibold text-white shadow-[0_10px_22px_rgba(46,125,83,0.22)] transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+          className="flex min-h-16 w-full flex-col items-center justify-center gap-1 rounded-2xl bg-[color:var(--accent)] px-3 py-3 text-sm font-semibold text-white shadow-[0_10px_22px_rgba(46,125,83,0.22)] transition hover:opacity-95 disabled:cursor-not-allowed disabled:bg-[color:var(--sage)] disabled:text-white disabled:opacity-70"
         >
           <DropletIcon className="h-5 w-5" />
           {waterPending ? "Saving" : "Water now"}
@@ -55,7 +55,7 @@ export function PlantDetailActions({
         <button
           type="submit"
           disabled={!canSnooze || snoozePending}
-          className="flex min-h-16 w-full flex-col items-center justify-center gap-1 rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface-strong)] px-3 py-3 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)] disabled:cursor-not-allowed disabled:opacity-45"
+          className="flex min-h-16 w-full flex-col items-center justify-center gap-1 rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface-strong)] px-3 py-3 text-sm font-semibold text-[color:var(--foreground)] transition hover:bg-[color:var(--accent-soft)] disabled:cursor-not-allowed disabled:bg-[color:var(--stone)] disabled:text-[color:var(--muted)] disabled:opacity-70"
         >
           <AlarmClockIcon className="h-5 w-5" />
           {snoozePending ? "Snoozing" : "Snooze"}

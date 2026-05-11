@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { BottomAppBar } from "@/components/bottom-app-bar";
-import { PlusIcon, SproutIcon } from "@/components/icons";
+import { PlusIcon } from "@/components/icons";
 
 type AppShellProps = {
   children: React.ReactNode;
@@ -9,6 +9,7 @@ type AppShellProps = {
   title?: string;
   subtitle?: string;
   actions?: React.ReactNode;
+  showAddPlantAction?: boolean;
 };
 
 export function AppShell({
@@ -17,6 +18,7 @@ export function AppShell({
   title = "Your plant collection",
   subtitle = "A calm place for the plants that belong to this signed-in account.",
   actions,
+  showAddPlantAction = true,
 }: AppShellProps) {
   return (
     <div className="app-safe-bottom min-h-screen px-4 py-5 sm:px-6 lg:px-8">
@@ -28,8 +30,13 @@ export function AppShell({
                 href="/app"
                 className="inline-flex items-center gap-2 text-sm font-bold text-[color:var(--accent-ink)]"
               >
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[color:var(--accent-soft)] text-[color:var(--accent)]">
-                  <SproutIcon className="h-4 w-4" />
+                <span className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-[color:var(--surface-strong)] ring-1 ring-[color:var(--border-soft)]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/brand/plant-care-approved-icon-square-1024.png"
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
                 </span>
                 Plant Care
               </Link>
@@ -43,13 +50,15 @@ export function AppShell({
             </div>
 
             <div className="flex flex-wrap items-center gap-3 sm:justify-end">
-              <Link
-                href="/app/plants/new"
-                className="inline-flex min-h-[var(--tap-target)] items-center justify-center gap-2 rounded-full bg-[color:var(--accent)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-95"
-              >
-                <PlusIcon className="h-4 w-4" />
-                Add plant
-              </Link>
+              {showAddPlantAction ? (
+                <Link
+                  href="/app/plants/new"
+                  className="inline-flex min-h-[var(--tap-target)] items-center justify-center gap-2 rounded-full bg-[color:var(--accent)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-95 disabled:opacity-60"
+                >
+                  <PlusIcon className="h-4 w-4" />
+                  Add plant
+                </Link>
+              ) : null}
               {actions}
             </div>
           </div>

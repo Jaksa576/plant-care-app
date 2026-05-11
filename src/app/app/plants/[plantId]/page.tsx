@@ -21,7 +21,6 @@ import { ArchivePlantForm } from "@/components/archive-plant-form";
 import {
   CameraIcon,
   ChevronRightIcon,
-  ClockIcon,
   DropletIcon,
   LeafIcon,
   RoomIcon,
@@ -98,61 +97,6 @@ function ProfileField({ label, value, helper }: ProfileFieldProps) {
 
 function MissingField({ children }: { children: React.ReactNode }) {
   return <span className="text-[color:var(--muted)]">{children}</span>;
-}
-
-function WateringStatusCard({
-  plant,
-  schedule,
-  hasActiveReminderDate,
-  showError,
-}: {
-  plant: PlantRecord;
-  schedule: WateringScheduleState;
-  hasActiveReminderDate: boolean;
-  showError: boolean;
-}) {
-  const statusTone = schedule.status === "overdue" ? "warning" : "success";
-
-  return (
-    <section className="rounded-[1.5rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] p-5 sm:p-6">
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <StatusPill tone={statusTone}>Watering</StatusPill>
-          <h3 className="mt-4 text-2xl font-semibold">{schedule.nextWateringLabel}</h3>
-          <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
-            {schedule.helperText}
-          </p>
-        </div>
-        <Link
-          href={`/app/plants/${plant.id}/edit`}
-          className="inline-flex w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold text-[color:var(--foreground)] transition hover:bg-[color:var(--accent-soft)]"
-        >
-          Edit interval
-        </Link>
-      </div>
-
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        <ProfileField label="Last watered" value={schedule.lastWateredLabel} />
-        <ProfileField
-          label="Next watering"
-          value={schedule.nextWateringLabel}
-          helper={
-            schedule.nextWateringDate
-              ? hasActiveReminderDate
-                ? "Using the active Plant Care reminder date."
-                : "Calculated from the latest watering record and interval."
-              : undefined
-          }
-        />
-      </div>
-
-      {showError ? (
-        <div className="mt-5 rounded-[1.25rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950">
-          Could not load watering state. The action is hidden until this plant can be checked again.
-        </div>
-      ) : null}
-    </section>
-  );
 }
 
 function WateringHistorySection({
@@ -240,6 +184,7 @@ function PlantProfile({
             <PlantPhotoFrame
               photoUrl={photoUrl}
               alt={photoUrl ? `${primaryLabel} primary plant photo` : ""}
+              variant="detail"
             />
           </div>
 
@@ -294,6 +239,17 @@ function PlantProfile({
           helper={schedule.helperText}
         />
         <ProfileField
+          label="Next watering"
+          value={schedule.nextWateringLabel}
+          helper={
+            schedule.nextWateringDate
+              ? hasActiveReminderDate
+                ? "Using the active Plant Care reminder date."
+                : "Calculated from the latest watering record and interval."
+              : undefined
+          }
+        />
+        <ProfileField
           label="Water every"
           value={intervalLabel ?? <MissingField>No watering interval set yet</MissingField>}
           helper="This is user-entered guidance only."
@@ -306,16 +262,23 @@ function PlantProfile({
           label="Notes"
           value={plant.notes ?? <MissingField>No notes added yet</MissingField>}
         />
+        {plant.watering_guidance ? (
+          <ProfileField label="Watering guidance" value={plant.watering_guidance} />
+        ) : null}
+        {plant.scientific_name ? (
+          <ProfileField
+            label="Scientific name"
+            value={<span className="italic">{plant.scientific_name}</span>}
+          />
+        ) : null}
+        {wateringStateError ? (
+          <div className="mt-4 rounded-[1.25rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950">
+            Could not load watering state. Refresh before relying on this status.
+          </div>
+        ) : null}
       </section>
 
       <WateringHistorySection events={wateringEvents} showError={wateringStateError} />
-
-      <WateringStatusCard
-        plant={plant}
-        schedule={schedule}
-        hasActiveReminderDate={hasActiveReminderDate}
-        showError={wateringStateError}
-      />
 
       <section className="grid gap-5 lg:grid-cols-2">
         <div className="rounded-[1.5rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] p-5 sm:p-6">
@@ -365,70 +328,6 @@ function PlantProfile({
         syncAction={syncGoogleCalendarReminderAction.bind(null, plant.id)}
         disconnectAction={disconnectGoogleCalendarAction}
       />
-
-      <section className="rounded-[1.5rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] p-5 sm:p-6">
-        <div className="flex flex-col gap-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--muted)]">
-            Care basics
-          </p>
-          <h3 className="text-2xl font-semibold">Editable guidance</h3>
-          <p className="text-sm leading-7 text-[color:var(--muted)]">
-            These are your notes for this plant. They do not calculate watering due dates yet.
-          </p>
-        </div>
-
-        <div className="mt-4">
-          <ProfileField
-            label="Nickname"
-            value={plant.nickname ?? <MissingField>No nickname set</MissingField>}
-          />
-          <ProfileField
-            label="Common name"
-            value={plant.common_name ?? <MissingField>No common name set</MissingField>}
-          />
-          <ProfileField
-            label="Room or location"
-            value={plant.location ?? <MissingField>No location set yet</MissingField>}
-          />
-          <ProfileField
-            label="Scientific name"
-            value={
-              plant.scientific_name ? (
-                <span className="italic">{plant.scientific_name}</span>
-              ) : (
-                <MissingField>No scientific name set</MissingField>
-              )
-            }
-          />
-          <ProfileField
-            label="Watering interval"
-            value={intervalLabel ?? <MissingField>No watering interval set yet</MissingField>}
-            helper="This is user-entered guidance only."
-          />
-          <ProfileField
-            label="Watering guidance"
-            value={
-              plant.watering_guidance ?? <MissingField>No watering notes added yet</MissingField>
-            }
-          />
-        </div>
-      </section>
-
-      <section className="rounded-[1.5rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] p-5 sm:p-6">
-        <div className="mb-3 flex items-center gap-2">
-          <ClockIcon className="h-5 w-5 text-[color:var(--accent)]" />
-          <h3 className="text-xl font-semibold">Notes</h3>
-        </div>
-        {plant.notes ? (
-          <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-[color:var(--foreground)] sm:text-base">
-            {plant.notes}
-          </p>
-        ) : (
-          <p className="mt-4 text-sm leading-7 text-[color:var(--muted)] sm:text-base">
-            No extra notes yet. Add anything useful from the edit screen when you need it.
-          </p>
-        )}
-      </section>
     </div>
   );
 }
@@ -492,7 +391,7 @@ export default async function PlantProfilePage({ params, searchParams }: PlantPr
     >
       <div className="flex flex-col gap-6">
         <Link
-          href="/app"
+          href="/app/plants"
           className="inline-flex w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold text-[color:var(--foreground)] transition hover:bg-[color:var(--accent-soft)]"
         >
           Back to Plants

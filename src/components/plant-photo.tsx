@@ -3,32 +3,46 @@ import { StatusPill } from "@/components/status-pill";
 type PlantPhotoFrameProps = {
   photoUrl?: string | null;
   alt: string;
-  variant?: "hero" | "thumbnail";
+  variant?: "hero" | "detail" | "thumbnail";
 };
 
 export function PlantPhotoFrame({ photoUrl, alt, variant = "hero" }: PlantPhotoFrameProps) {
   const isThumbnail = variant === "thumbnail";
+  const isDetail = variant === "detail";
 
   return (
     <div
       className={`relative overflow-hidden border border-[color:var(--border)] bg-[color:var(--accent-soft)] ${
         isThumbnail
           ? "h-16 w-16 shrink-0 rounded-[1rem]"
-          : "aspect-[4/3] w-full rounded-[1.5rem] sm:aspect-[16/9]"
+          : isDetail
+            ? "h-full min-h-72 w-full rounded-none border-0 lg:min-h-[32rem]"
+            : "aspect-[4/3] w-full rounded-[1.5rem] sm:aspect-[16/9]"
       }`}
     >
       {photoUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={photoUrl} alt={alt} className="h-full w-full object-cover" />
+        <img
+          src={photoUrl}
+          alt={alt}
+          className={`h-full w-full ${isDetail ? "object-contain p-3 sm:p-5" : "object-cover"}`}
+        />
       ) : (
         <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,#deebdf,#f5efe2)] px-3 text-center">
           <div>
-            <div
-              aria-hidden="true"
-              className={`mx-auto rounded-full border border-[color:var(--accent)]/20 bg-white/65 ${
-                isThumbnail ? "h-8 w-8" : "h-14 w-14"
-              }`}
-            />
+            {isThumbnail ? (
+              <div
+                aria-hidden="true"
+                className="mx-auto h-8 w-8 rounded-full border border-[color:var(--accent)]/20 bg-white/65"
+              />
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src="/brand/plant-care-approved-icon-square-1024.png"
+                alt=""
+                className="mx-auto h-16 w-16 rounded-2xl object-cover opacity-90"
+              />
+            )}
             {!isThumbnail ? (
               <p className="mt-4 text-sm leading-6 text-[color:var(--muted)]">
                 Add a photo to make this plant easier to recognize.

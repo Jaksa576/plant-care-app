@@ -32,6 +32,7 @@ function FormField({
   error,
   placeholder,
   rows,
+  requiredHint,
 }: {
   label: string;
   name: keyof PlantFormValues;
@@ -40,7 +41,10 @@ function FormField({
   error?: string;
   placeholder?: string;
   rows?: number;
+  requiredHint?: string;
 }) {
+  const errorId = `${name}-error`;
+  const hintId = `${name}-hint`;
   const sharedClassName =
     "min-h-[var(--tap-target)] rounded-[1rem] border bg-[color:var(--surface-strong)] px-4 py-3 text-base outline-none transition focus:border-[color:var(--accent)] focus:ring-2 focus:ring-[color:var(--accent-soft)]";
   const className = `${sharedClassName} ${
@@ -51,7 +55,19 @@ function FormField({
 
   return (
     <label className="flex flex-col gap-2 text-sm font-medium text-[color:var(--foreground)]">
-      {label}
+      <span>
+        {label}
+        {requiredHint ? (
+          <span className="ml-2 text-xs font-semibold text-[color:var(--attention)]">
+            {requiredHint}
+          </span>
+        ) : null}
+      </span>
+      {requiredHint ? (
+        <span id={hintId} className="text-xs leading-5 text-[color:var(--muted)]">
+          Required as part of the plant name.
+        </span>
+      ) : null}
       {rows ? (
         <textarea
           name={name}
@@ -59,6 +75,8 @@ function FormField({
           onChange={(event) => onChange(event.target.value)}
           rows={rows}
           placeholder={placeholder}
+          aria-invalid={Boolean(error)}
+          aria-describedby={error ? errorId : requiredHint ? hintId : undefined}
           className={className}
         />
       ) : (
@@ -67,10 +85,16 @@ function FormField({
           value={value}
           onChange={(event) => onChange(event.target.value)}
           placeholder={placeholder}
+          aria-invalid={Boolean(error)}
+          aria-describedby={error ? errorId : requiredHint ? hintId : undefined}
           className={className}
         />
       )}
-      {error ? <span className="text-sm text-amber-900">{error}</span> : null}
+      {error ? (
+        <span id={errorId} className="text-sm font-semibold text-amber-900">
+          {error}
+        </span>
+      ) : null}
     </label>
   );
 }
@@ -148,13 +172,16 @@ export function PlantForm({
         <div className="rounded-[1.75rem] border border-amber-200 bg-amber-50 px-5 py-4">
           <StatusPill tone="warning">Something needs attention</StatusPill>
           <p className="mt-3 text-sm leading-7 text-amber-900">{state.message}</p>
+          <p className="mt-2 text-sm leading-7 text-amber-900">
+            Required fields are marked in the form below.
+          </p>
         </div>
       ) : null}
 
       <form action={formAction} className="flex flex-col gap-6">
         <div
           className={`grid gap-5 ${
-            step === "review" ? "hidden" : ""
+            step === "review" && state.status !== "error" ? "hidden" : ""
           }`}
         >
           <FormSection icon={<LeafIcon className="h-5 w-5" />} title="Plant identity">
@@ -166,6 +193,7 @@ export function PlantForm({
                 onChange={(value) => updateField("nickname", value)}
                 error={fieldErrors.nickname}
                 placeholder="Kitchen pothos"
+                requiredHint="Required if no common name"
               />
               <FormField
                 label="Common name"
@@ -174,6 +202,7 @@ export function PlantForm({
                 onChange={(value) => updateField("commonName", value)}
                 error={fieldErrors.commonName}
                 placeholder="Pothos"
+                requiredHint="Required if no nickname"
               />
               <FormField
                 label="Scientific name"
@@ -239,7 +268,7 @@ export function PlantForm({
 
         <section
           className={`rounded-[1.5rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] p-5 sm:p-6 ${
-            step === "edit" ? "hidden" : ""
+            step === "edit" || state.status === "error" ? "hidden" : ""
           }`}
         >
           <div className="grid gap-x-6 sm:grid-cols-2">
