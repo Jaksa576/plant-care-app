@@ -1,6 +1,6 @@
 # UI Redesign UX Overhaul Campaign
 
-Status: **planned**.
+Status: **active**.
 
 ## Goal
 
@@ -148,7 +148,7 @@ Do not add Health, AI, Calendar, or Reminders as top-level tabs in this campaign
 
 ### Slice 0: Docs And Reference Package
 
-Status: planned/manual or docs-only.
+Status: complete on `ui-redesign/00-docs-reference`.
 
 Goal:
 
@@ -166,6 +166,7 @@ Acceptance criteria:
 
 - `docs/design/ui-redesign-visual-reference.md` exists.
 - `docs/design/ui-redesign-implementation-reference.md` exists.
+- `docs/design/plant-care-brand-reference.md` exists.
 - final mockups exist under `docs/design/mockups/`.
 - `docs/campaigns/ui-redesign-ux-overhaul.md` exists.
 - Docs are internally consistent.
@@ -177,7 +178,7 @@ Validation:
 
 ### Slice 1: Design System And Shell Foundation
 
-Status: planned.
+Status: next.
 
 Goal:
 

@@ -19,31 +19,39 @@
 
 ## Active Slice
 
-No implementation slice or v1 feature campaign is currently active.
+UI Redesign UX Overhaul Campaign is active.
 
-The Photo Identification + Reminder Sync Campaign is complete and merged to `main`. Its historical campaign doc is archived at [Photo Identification + Reminder Sync Campaign](campaigns/archived/photo-identification-reminder-sync.md).
+Current branch:
+
+```txt
+ui-redesign/00-docs-reference
+```
+
+Slice 00 adds the missing brand reference companion doc for the approved UI redesign reference package. No app code, route, dependency, schema, auth, or RLS behavior changes are in scope for this slice.
 
 ## Why This Is Next
 
-The v1 watering, photo, AI-assisted identification, app-owned reminder, and Google Calendar sync stack is implemented on `main`. The next work should be product-owner production-readiness review and a decision on the next approved campaign.
+The v1 watering, photo, AI-assisted identification, app-owned reminder, and Google Calendar sync stack is implemented on `main`. The approved next campaign is the UI Redesign UX Overhaul, starting with a docs reference package readiness fix because `docs/design/plant-care-brand-reference.md` was referenced by the campaign docs but missing from the repo.
 
 ## Scope
 
-- Verify production or main-preview environment variables for Pl@ntNet and Google Calendar before broad release.
-- Confirm Supabase migrations are applied in the deployment Supabase project.
-- Perform product-owner QA on the merged main experience: photos, AI review flow, reminders, Google sync, profile/dashboard reminder dates, ownership boundaries, and mobile layout.
-- Decide the next product campaign before starting new implementation work.
+- Add `docs/design/plant-care-brand-reference.md` as a concise text companion to `docs/design/plant-care-approved-brand-reference-sheet.png`.
+- Confirm required UI redesign reference docs and mockups exist.
+- Keep app code unchanged.
+- Prepare for Slice 01: Design System And Shell Foundation.
 
 ## Non-Goals
 
 - Do not implement Outlook, bidirectional sync, calendar-owned reminder truth, generic tasks, notification delivery, AI scheduling, health diagnosis, or broad scheduler settings without a new approved slice.
+- Do not change app code, dependencies, routes, schema, auth/session handling, RLS assumptions, AI behavior, reminder behavior, or calendar sync behavior in Slice 00.
 
 ## Acceptance Criteria
 
-- Hot-path docs agree that the Photo Identification + Reminder Sync Campaign is implemented on `main`.
-- Manual QA covers photos, AI suggestions, reminders, profile/dashboard grouping, Google sync, RLS/ownership, and mobile profile controls.
-- Deployment environments have required server-only provider configuration before shipping provider-backed flows.
-- Deferred roadmap items stay deferred unless reprioritized.
+- `docs/design/plant-care-brand-reference.md` exists.
+- Existing UI redesign visual and implementation references exist.
+- Final mockups exist under `docs/design/mockups/`.
+- Campaign doc references the completed docs readiness slice and points to Slice 01 next.
+- Build validation is skipped because no app code changed.
 
 ## Validation Expectations
 
@@ -58,4 +66,10 @@ Stop if review finds ownership, migration, provider, or validation issues.
 
 ## Next Recommended Action
 
-Run a production-readiness review of the merged `main` app, then choose the next campaign or leave the roadmap in maintenance mode until the product owner approves new scope.
+Create the next stacked branch from `ui-redesign/00-docs-reference`:
+
+```txt
+ui-redesign/01-foundation-shell
+```
+
+Then implement the design system and signed-in shell foundation without changing data ownership, auth/session behavior, schema, AI semantics, reminder semantics, or calendar sync semantics.
