@@ -24,39 +24,41 @@ UI Redesign UX Overhaul Campaign is active.
 Current branch:
 
 ```txt
-ui-redesign/01-foundation-shell
+ui-redesign/02-home-today
 ```
 
-Slice 01 adds the shared visual foundation and protected signed-in shell navigation for the UI redesign. It introduces warm design tokens, Nunito Sans font loading, local inline SVG icon primitives, Home / Plants / Settings bottom app bar navigation, and minimal protected Plants and Settings route surfaces.
+Slice 02 redesigns the signed-in Home route as the approved Today care surface. It keeps the existing reminder-aware plant/watering data flow while presenting Needs water, By room, and Recent care with icon-led Water and secondary Snooze actions.
 
 ## Why This Is Next
 
-The v1 watering, photo, AI-assisted identification, app-owned reminder, and Google Calendar sync stack is implemented on `main`. The approved active campaign is the UI Redesign UX Overhaul. Slice 01 follows the completed docs reference package so later Home, Plants, and Plant Detail slices can reuse one visual foundation.
+The v1 watering, photo, AI-assisted identification, app-owned reminder, and Google Calendar sync stack is implemented on `main`. The approved active campaign is the UI Redesign UX Overhaul. Slice 02 follows the completed shell foundation so the Home screen can become the watering-first Today surface before the full Plants collection redesign.
 
 ## Scope
 
-- Add or refine reusable visual tokens.
-- Apply the softer Nunito Sans typography direction through the existing font strategy.
-- Add local icon primitives without adding an icon dependency.
-- Add signed-in bottom app bar navigation for Home, Plants, and Settings.
-- Keep Add Plant discoverable.
-- Add protected minimal Plants and Settings route surfaces needed for shell navigation.
-- Preserve Supabase auth/session redirects and user-owned data behavior.
+- Replace the old dashboard-card Home presentation with Today/date language.
+- Show overdue and due-today plants first under Needs water.
+- Keep Water as the primary icon-led action.
+- Show Snooze as secondary where current reminder state supports it.
+- Show By room grouping, including Unassigned for missing room/location.
+- Show Recent care as a lightweight watering log.
+- Keep Add Plant visible as a quick action.
+- Preserve existing auth, ownership, reminder, AI, calendar, and schema behavior.
 
 ## Non-Goals
 
 - Do not implement Outlook, bidirectional sync, calendar-owned reminder truth, generic tasks, notification delivery, AI scheduling, health diagnosis, or broad scheduler settings without a new approved slice.
-- Do not redesign the full Home, Plants, Plant Detail, Add/Edit, reminder, AI, or calendar surfaces in Slice 01.
+- Do not redesign Plants, Plant Detail, Add/Edit, reminder, AI, or calendar surfaces in Slice 02.
 - Do not change dependencies, schema, auth/session handling, RLS assumptions, AI behavior, reminder behavior, or calendar sync behavior.
 
 ## Acceptance Criteria
 
-- Reusable design tokens and icon primitives exist.
-- Nunito Sans is loaded through the current `next/font/google` strategy.
-- Home / Plants / Settings bottom navigation is present on the signed-in app shell.
-- Add Plant remains visible in the signed-in shell.
-- `/app/plants` and `/app/settings` are protected and preserve signed-in route behavior.
-- Existing plant data reads remain user-scoped.
+- Home uses Today/date copy rather than dashboard language.
+- Needs water includes overdue and due-today plants.
+- Water remains wired to existing mark-watered behavior.
+- Snooze remains wired to existing reminder snooze behavior where supported.
+- By room groups plants by location and treats missing locations as Unassigned.
+- Recent care shows watering events as a log.
+- Empty/error states remain calm and recoverable.
 - Validation gates pass.
 
 ## Validation Expectations
@@ -72,10 +74,10 @@ Stop if review finds ownership, migration, provider, or validation issues.
 
 ## Next Recommended Action
 
-Create the next stacked branch from `ui-redesign/01-foundation-shell`:
+Create the next stacked branch from `ui-redesign/02-home-today`:
 
 ```txt
-ui-redesign/02-home-today
+ui-redesign/03-plants-collection
 ```
 
-Then implement the Home / Today redesign using the existing reminder-aware dashboard data flow and the approved Home mockup. Keep watering primary, Snooze secondary where supported, and avoid schema, AI, or calendar behavior changes.
+Then implement the full Plants collection surface using the approved Plants tab mockup and the shared shell/tokens from earlier slices.

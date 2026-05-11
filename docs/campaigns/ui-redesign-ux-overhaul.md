@@ -225,7 +225,7 @@ Notes:
 
 ### Slice 2: Home / Today Redesign
 
-Status: next.
+Status: complete on `ui-redesign/02-home-today`.
 
 Goal:
 
@@ -264,9 +264,16 @@ Validation:
 - Standard implementation validation.
 - Manual QA with plants in multiple rooms, missing room, overdue, due today, upcoming, and recently watered states.
 
+Notes:
+
+- Existing reminder-aware dashboard grouping is reused.
+- Water uses the existing mark-watered server action.
+- Snooze is shown as secondary and enabled only for plants with enabled reminder state available to the Home grouping.
+- Recent care is sourced from watering events and shown as a lightweight log.
+
 ### Slice 3: Plants Tab / Collection
 
-Status: planned.
+Status: next.
 
 Goal:
 

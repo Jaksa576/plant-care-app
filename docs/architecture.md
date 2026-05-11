@@ -26,6 +26,7 @@ This document describes implemented technical shape and architectural boundaries
 - Plant-profile watering state and mark-watered behavior are implemented.
 - Plant-profile next watering status uses enabled app-owned reminder dates first, then falls back to watering interval calculations.
 - The signed-in dashboard groups active plants by watering status: overdue, due today, upcoming, and recently watered.
+- The signed-in Home route presents the redesigned Today surface with Needs water, By room, and Recent care sections.
 - Dashboard urgency uses enabled app-owned reminder dates first, then falls back to watering interval calculations.
 - Plant profiles show watering history from watering events.
 - Plant profiles support one optional primary photo per owned plant.

@@ -35,6 +35,7 @@ This document tracks product sequencing and slice status. Stable product directi
 - Google Calendar sync with server-side OAuth, encrypted refresh-token storage, primary-calendar event creation/update, app-owned reminder linkage, disconnect cleanup, and one-way app-to-calendar behavior.
 - Reminder flexibility with after-watering mode, fixed schedule mode, snooze controls, reminder-aware dashboard urgency, plain-language next reminder previews, and calendar sync updates from app reminder changes.
 - UI redesign shell foundation with warm design tokens, Nunito Sans font loading, local SVG icon primitives, persistent Add Plant access, and Home / Plants / Settings bottom app bar.
+- UI redesign Home / Today surface with Needs water, By room, Recent care, icon-led Water, and secondary Snooze where app reminder state supports it.
 
 ### Active
 

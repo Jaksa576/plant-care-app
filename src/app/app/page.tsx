@@ -1,17 +1,35 @@
 import { AppShell } from "@/components/app-shell";
+import {
+  markWateredAction,
+  snoozeWateringReminderAction,
+} from "@/app/app/plants/actions";
+import { TodaySnoozeButton, TodayWaterButton } from "@/components/home-today-actions";
+import {
+  CalendarIcon,
+  CheckCircleIcon,
+  ChevronRightIcon,
+  ClockIcon,
+  LeafIcon,
+  PlusIcon,
+  RoomIcon,
+} from "@/components/icons";
+import { PlantPhotoFrame } from "@/components/plant-photo";
 import { SignOutButton } from "@/components/sign-out-button";
 import { StatusPill } from "@/components/status-pill";
-import { DashboardSection } from "@/components/watering-dashboard";
 import { getAuthState } from "@/lib/auth";
 import { listPlantsForUser } from "@/lib/plants/data";
 import { createPlantPhotoUrlMap } from "@/lib/plants/photos";
+import { getPlantPrimaryLabel, getPlantSecondaryLabel } from "@/lib/plants/presenters";
+import type { PlantRecord, WateringEventRecord } from "@/lib/plants/types";
 import { listWateringRemindersForUser } from "@/lib/reminders/data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   getDashboardAttentionCount,
   getDashboardPlants,
   getWateringDashboardGroups,
+  type DashboardPlant,
 } from "@/lib/watering/dashboard";
+import { formatWateringHistoryDate } from "@/lib/watering/schedule";
 import { listWateringEventsForUser } from "@/lib/watering/data";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -22,6 +40,142 @@ type AppPageProps = {
     googleCalendar?: string;
   }>;
 };
+
+function formatTodayDate() {
+  return new Intl.DateTimeFormat("en", {
+    month: "long",
+    day: "numeric",
+  }).format(new Date());
+}
+
+function getGuidanceLabel(item: DashboardPlant) {
+  if (item.reminder) {
+    return item.reminder.reminder_mode === "fixed_schedule"
+      ? "Fixed reminder"
+      : "After-watering reminder";
+  }
+
+  if (item.plant.watering_interval_days) {
+    return `Every ${item.plant.watering_interval_days} day${
+      item.plant.watering_interval_days === 1 ? "" : "s"
+    }`;
+  }
+
+  return "No interval yet";
+}
+
+function getStatusTone(status: DashboardPlant["schedule"]["status"]) {
+  if (status === "overdue") {
+    return "text-[color:var(--attention)]";
+  }
+
+  if (status === "due-today" || status === "not-watered") {
+    return "text-[#c66b20]";
+  }
+
+  if (status === "upcoming") {
+    return "text-[color:var(--accent-ink)]";
+  }
+
+  return "text-[color:var(--muted)]";
+}
+
+function groupPlantsByRoom(plants: PlantRecord[]) {
+  const groups = new Map<string, PlantRecord[]>();
+
+  for (const plant of plants) {
+    const room = plant.location?.trim() || "Unassigned";
+    const roomPlants = groups.get(room) ?? [];
+    roomPlants.push(plant);
+    groups.set(room, roomPlants);
+  }
+
+  return [...groups.entries()].sort(([roomA], [roomB]) => {
+    if (roomA === "Unassigned") {
+      return 1;
+    }
+
+    if (roomB === "Unassigned") {
+      return -1;
+    }
+
+    return roomA.localeCompare(roomB);
+  });
+}
+
+function getRecentCareEvents(events: WateringEventRecord[], plants: PlantRecord[]) {
+  const plantsById = new Map(plants.map((plant) => [plant.id, plant]));
+
+  return events
+    .map((event) => ({
+      event,
+      plant: plantsById.get(event.plant_id) ?? null,
+    }))
+    .filter((item): item is { event: WateringEventRecord; plant: PlantRecord } =>
+      Boolean(item.plant),
+    )
+    .slice(0, 5);
+}
+
+function TodayPlantRow({
+  item,
+  photoUrl,
+}: {
+  item: DashboardPlant;
+  photoUrl?: string;
+}) {
+  const primaryLabel = getPlantPrimaryLabel(item.plant);
+  const secondaryLabel = getPlantSecondaryLabel(item.plant);
+  const roomLabel = item.plant.location?.trim() || "Unassigned";
+  const statusClass = getStatusTone(item.schedule.status);
+
+  return (
+    <article className="grid grid-cols-[auto_1fr_auto] gap-3 border-b border-[color:var(--border-soft)] py-4 last:border-b-0">
+      <Link href={`/app/plants/${item.plant.id}`} aria-label={`Open ${primaryLabel}`}>
+        <PlantPhotoFrame
+          photoUrl={photoUrl}
+          alt={photoUrl ? `${primaryLabel} primary plant photo` : ""}
+          variant="thumbnail"
+        />
+      </Link>
+
+      <div className="min-w-0">
+        <Link href={`/app/plants/${item.plant.id}`} className="group block">
+          <h3 className="truncate text-base font-semibold leading-5 transition group-hover:text-[color:var(--accent)]">
+            {primaryLabel}
+          </h3>
+        </Link>
+        <p className="mt-1 truncate text-sm leading-5 text-[color:var(--muted)]">
+          {roomLabel}
+          {secondaryLabel ? ` - ${secondaryLabel}` : ""}
+        </p>
+        <p className="mt-0.5 text-sm leading-5 text-[color:var(--muted)]">
+          {item.schedule.lastWateredLabel}
+        </p>
+        <p className={`mt-0.5 text-sm font-semibold leading-5 ${statusClass}`}>
+          {item.schedule.nextWateringLabel}
+        </p>
+        <p className="mt-1 text-xs leading-5 text-[color:var(--muted)]">
+          {getGuidanceLabel(item)}
+        </p>
+      </div>
+
+      <div className="flex shrink-0 items-start gap-2">
+        <TodayWaterButton action={markWateredAction.bind(null, item.plant.id)} />
+        {item.reminder ? (
+          <TodaySnoozeButton
+            action={snoozeWateringReminderAction.bind(null, item.plant.id)}
+          />
+        ) : (
+          <TodaySnoozeButton
+            action={snoozeWateringReminderAction.bind(null, item.plant.id)}
+            disabled
+          />
+        )}
+      </div>
+    </article>
+  );
+}
 
 export default async function AppPage({ searchParams }: AppPageProps) {
   const [authState, { archived, googleCalendar }] = await Promise.all([
@@ -57,14 +211,15 @@ export default async function AppPage({ searchParams }: AppPageProps) {
   );
   const dashboardGroups = getWateringDashboardGroups(dashboardPlants);
   const attentionCount = getDashboardAttentionCount(dashboardGroups);
-  const allPlantsNeedIntervals =
-    plants.length > 0 && dashboardGroups.needsInterval.length === plants.length;
+  const needsWaterPlants = [...dashboardGroups.overdue, ...dashboardGroups.dueToday];
+  const roomGroups = groupPlantsByRoom(plants);
+  const recentCare = getRecentCareEvents(wateringEventsResult.data ?? [], plants);
 
   return (
     <AppShell
       userEmail={authState.user.email ?? "Signed-in user"}
       title="Today"
-      subtitle="A calm scan of watering needs for the plants that belong to this account."
+      subtitle={`${formatTodayDate()} - water what needs care, then move on with your day.`}
       actions={<SignOutButton />}
     >
       <div className="flex flex-col gap-6">
@@ -78,28 +233,20 @@ export default async function AppPage({ searchParams }: AppPageProps) {
           </div>
         ) : null}
 
-        <section className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface)] p-6 shadow-[var(--shadow)] backdrop-blur sm:p-8">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-2xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--muted)]">
-                Watering dashboard
+        <section className="border-b border-[color:var(--border-soft)] pb-5">
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold text-[color:var(--muted)]">
+                {formatTodayDate()}
               </p>
-              <h2 className="mt-4 text-3xl font-semibold">
-                {attentionCount === 0
-                  ? "No plants need water today."
-                  : `${attentionCount} plant${attentionCount === 1 ? "" : "s"} may need water.`}
-              </h2>
-              <p className="mt-4 text-sm leading-7 text-[color:var(--muted)] sm:text-base">
-                Watering state uses enabled Plant Care reminders first, then falls back to each
-                plant&apos;s latest watering record and editable interval. No notifications are sent.
-              </p>
+              <h2 className="mt-1 text-3xl font-semibold leading-tight">Today</h2>
             </div>
-
             <Link
               href="/app/plants/new"
-              className="inline-flex items-center justify-center rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-95"
+              aria-label="Add plant"
+              className="inline-flex min-h-[var(--tap-target)] min-w-[var(--tap-target)] items-center justify-center rounded-full bg-[color:var(--accent)] text-white shadow-[0_10px_22px_rgba(46,125,83,0.22)] transition hover:opacity-95"
             >
-              Add a plant
+              <PlusIcon className="h-5 w-5" />
             </Link>
           </div>
         </section>
@@ -158,76 +305,124 @@ export default async function AppPage({ searchParams }: AppPageProps) {
         ) : null}
 
         {!plantsResult.error && plants.length === 0 ? (
-          <section className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-6 shadow-[var(--shadow)] sm:p-8">
-            <StatusPill>Empty collection</StatusPill>
-            <h2 className="mt-5 text-3xl font-semibold">No plants yet, and that&apos;s okay.</h2>
+          <section className="rounded-[1.5rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] p-6">
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[color:var(--accent-soft)] text-[color:var(--accent)]">
+              <LeafIcon className="h-6 w-6" />
+            </span>
+            <h2 className="mt-5 text-2xl font-semibold">No plants yet</h2>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-[color:var(--muted)] sm:text-base">
-              Add your first plant to start tracking watering. Photos can come later, no AI
-              identification has happened here, and watering guidance stays editable.
+              Add your first plant to start a calm watering-first collection. Photos and
+              identification can come later.
             </p>
             <div className="mt-6">
               <Link
                 href="/app/plants/new"
-                className="inline-flex items-center justify-center rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-95"
+                className="inline-flex min-h-[var(--tap-target)] items-center justify-center gap-2 rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-95"
               >
-                Add your first plant
+                <PlusIcon className="h-4 w-4" />
+                Add plant
               </Link>
             </div>
           </section>
         ) : null}
 
         {!plantsResult.error && plants.length > 0 ? (
-          <div className="grid gap-5">
-            {allPlantsNeedIntervals ? (
-              <section className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-6 shadow-[var(--shadow)] sm:p-8">
-                <StatusPill>No intervals yet</StatusPill>
-                <h2 className="mt-5 text-2xl font-semibold">Add watering intervals to see what is due.</h2>
-                <p className="mt-3 text-sm leading-7 text-[color:var(--muted)] sm:text-base">
-                  You can still open a plant and record watering now. Intervals or enabled reminders
-                  let the dashboard sort plants into overdue, due today, and upcoming.
-                </p>
-              </section>
-            ) : null}
+          <div className="grid gap-7">
+            <section>
+              <div className="mb-2 flex items-center gap-2">
+                <h2 className="text-lg font-semibold">Needs water</h2>
+                <span className="rounded-full bg-[color:var(--clay)] px-2.5 py-0.5 text-xs font-semibold text-[color:var(--attention)]">
+                  {attentionCount}
+                </span>
+              </div>
+              <div className="rounded-[1.5rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] px-4">
+                {needsWaterPlants.length > 0 ? (
+                  needsWaterPlants.map((item) => (
+                    <TodayPlantRow
+                      key={item.plant.id}
+                      item={item}
+                      photoUrl={photoUrls[item.plant.id]}
+                    />
+                  ))
+                ) : (
+                  <div className="flex items-start gap-3 py-5">
+                    <CheckCircleIcon className="mt-0.5 h-5 w-5 text-[color:var(--accent)]" />
+                    <div>
+                      <h3 className="font-semibold">All caught up</h3>
+                      <p className="mt-1 text-sm leading-6 text-[color:var(--muted)]">
+                        No plants need water right now.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </section>
 
-              <DashboardSection
-                title="Overdue"
-                description="Plants with an enabled reminder or next watering date before today."
-                emptyMessage="Nothing overdue right now."
-                plants={dashboardGroups.overdue}
-                photoUrls={photoUrls}
-                showAction
-              />
-            <DashboardSection
-              title="Due today"
-                description="Plants with an enabled reminder due today, plus interval-based plants due today."
-                emptyMessage="No plants due today."
-                plants={dashboardGroups.dueToday}
-                photoUrls={photoUrls}
-                showAction
-              />
-            <DashboardSection
-              title="Upcoming"
-                description="Plants with an enabled reminder or next watering date in the next 7 days."
-                emptyMessage="Add watering intervals or reminders to see upcoming care."
-                plants={dashboardGroups.upcoming}
-                photoUrls={photoUrls}
-              />
-            <DashboardSection
-              title="Recently watered"
-                description="Plants watered in the last 7 days."
-                emptyMessage="Watering you record will appear here."
-                plants={dashboardGroups.recentlyWatered}
-                photoUrls={photoUrls}
-              />
-            {dashboardGroups.needsInterval.length > 0 ? (
-              <DashboardSection
-                title="Needs interval"
-                description="Plants without a watering interval or enabled reminder date yet."
-                emptyMessage="Every active plant has an interval or enabled reminder date."
-                plants={dashboardGroups.needsInterval}
-                photoUrls={photoUrls}
-              />
-            ) : null}
+            <section>
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <h2 className="text-lg font-semibold">By room</h2>
+                <Link href="/app/plants" className="text-sm font-semibold text-[color:var(--accent-ink)]">
+                  View all
+                </Link>
+              </div>
+              <div className="divide-y divide-[color:var(--border-soft)] rounded-[1.5rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)]">
+                {roomGroups.map(([room, roomPlants]) => (
+                  <Link
+                    key={room}
+                    href="/app/plants"
+                    className="flex min-h-[var(--tap-target)] items-center gap-3 px-4 py-3 transition hover:bg-[color:var(--stone)]"
+                  >
+                    <RoomIcon className="h-5 w-5 text-[color:var(--accent)]" />
+                    <span className="min-w-0 flex-1 truncate text-sm font-semibold">{room}</span>
+                    <span className="rounded-full bg-[color:var(--stone)] px-2.5 py-0.5 text-xs font-semibold text-[color:var(--muted)]">
+                      {roomPlants.length}
+                    </span>
+                    <ChevronRightIcon className="h-4 w-4 text-[color:var(--muted)]" />
+                  </Link>
+                ))}
+              </div>
+            </section>
+
+            <section>
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <h2 className="text-lg font-semibold">Recent care</h2>
+                <ClockIcon className="h-5 w-5 text-[color:var(--accent)]" />
+              </div>
+              <div className="divide-y divide-[color:var(--border-soft)] rounded-[1.5rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)]">
+                {recentCare.length > 0 ? (
+                  recentCare.map(({ event, plant }) => {
+                    const primaryLabel = getPlantPrimaryLabel(plant);
+
+                    return (
+                      <Link
+                        key={event.id}
+                        href={`/app/plants/${plant.id}`}
+                        className="flex min-h-[var(--tap-target)] items-center gap-3 px-4 py-3 transition hover:bg-[color:var(--stone)]"
+                      >
+                        <CalendarIcon className="h-5 w-5 text-[color:var(--accent)]" />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-semibold">{primaryLabel} watered</p>
+                          <p className="mt-0.5 text-xs text-[color:var(--muted)]">
+                            {formatWateringHistoryDate(event.watered_at)}
+                          </p>
+                        </div>
+                        <ChevronRightIcon className="h-4 w-4 text-[color:var(--muted)]" />
+                      </Link>
+                    );
+                  })
+                ) : (
+                  <div className="flex items-start gap-3 px-4 py-5">
+                    <ClockIcon className="mt-0.5 h-5 w-5 text-[color:var(--accent)]" />
+                    <div>
+                      <h3 className="font-semibold">No care logged yet</h3>
+                      <p className="mt-1 text-sm leading-6 text-[color:var(--muted)]">
+                        Watering you record will appear here.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </section>
           </div>
         ) : null}
       </div>
