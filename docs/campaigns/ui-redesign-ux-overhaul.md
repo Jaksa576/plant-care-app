@@ -1,6 +1,6 @@
 # UI Redesign UX Overhaul Campaign
 
-Status: **active**.
+Status: **complete locally through `ui-redesign/06-supporting-features`**.
 
 ## Goal
 
@@ -387,7 +387,7 @@ Notes:
 
 ### Slice 6: Supporting Feature Polish
 
-Status: next.
+Status: complete on `ui-redesign/06-supporting-features`.
 
 Goal:
 
@@ -413,6 +413,13 @@ Acceptance criteria:
 - Supporting features feel coherent with the redesign.
 - AI and calendar remain secondary to watering.
 - Copy remains conservative and user-owned.
+
+Notes:
+
+- Reminder, Google Calendar, photo, and identification panels were visually tightened without changing their semantics.
+- Tap targets and focus treatment were improved on supporting controls.
+- Loading states were softened to match the redesign foundation.
+- No new calendar provider, Health Check, AI diagnosis, schema, or RLS changes were introduced.
 
 ## Campaign QA checklist
 

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useActionState } from "react";
 
 import type { GoogleCalendarActionState } from "@/app/app/integrations/google-calendar/actions";
+import { CalendarIcon } from "@/components/icons";
 import { StatusPill } from "@/components/status-pill";
 import type {
   GoogleCalendarConnectionRecord,
@@ -75,13 +76,16 @@ export function GoogleCalendarSyncPanel({
   const statusTone = connected ? "success" : configured ? "default" : "warning";
 
   return (
-    <section className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-6 shadow-[var(--shadow)] sm:p-8">
+    <section className="rounded-[1.5rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] p-5 sm:p-6">
       <div className="flex flex-col gap-3">
         <StatusPill tone={statusTone}>{statusLabel}</StatusPill>
-        <h3 className="text-2xl font-semibold">Google Calendar</h3>
+        <div className="flex items-center gap-2">
+          <CalendarIcon className="h-5 w-5 text-[color:var(--accent)]" />
+          <h3 className="text-xl font-semibold">Google Calendar</h3>
+        </div>
         <p className="text-sm leading-7 text-[color:var(--muted)]">
-          Mirror this Plant Care watering reminder to your primary Google Calendar. Plant Care
-          stays the source of truth.
+          Mirror this watering reminder to your primary Google Calendar. Plant Care stays the
+          source of truth.
         </p>
         {!configured ? (
           <p className="rounded-[1.25rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950">
@@ -110,7 +114,7 @@ export function GoogleCalendarSyncPanel({
         {configured && !connected ? (
           <Link
             href="/app/integrations/google-calendar/connect"
-            className="inline-flex w-fit items-center justify-center rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-95"
+            className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-95"
           >
             Connect Google Calendar
           </Link>
@@ -121,7 +125,7 @@ export function GoogleCalendarSyncPanel({
             <button
               type="submit"
               disabled={syncPending || !reminderEnabled}
-              className="inline-flex w-fit items-center justify-center rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {syncPending ? "Updating..." : "Update calendar"}
             </button>
@@ -133,7 +137,7 @@ export function GoogleCalendarSyncPanel({
             <button
               type="submit"
               disabled={disconnectPending}
-              className="inline-flex w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)] disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {disconnectPending ? "Disconnecting..." : "Disconnect"}
             </button>

@@ -24,39 +24,36 @@ UI Redesign UX Overhaul Campaign is active.
 Current branch:
 
 ```txt
-ui-redesign/05-add-edit-polish
+ui-redesign/06-supporting-features
 ```
 
-Slice 05 polishes Add Plant and Edit Plant flows using the shared redesign system. It preserves manual setup, optional photo timing, partial/simple saves, editable care guidance, and safe archive handling.
+Slice 06 polishes supporting feature surfaces so the UI redesign is coherent across reminders, Google Calendar sync, photo upload, AI-assisted identification, loading states, and supporting controls.
 
 ## Why This Is Next
 
-The v1 watering, photo, AI-assisted identification, app-owned reminder, and Google Calendar sync stack is implemented on `main`. The approved active campaign is the UI Redesign UX Overhaul. Slice 05 follows the Plant Detail redesign so setup and editing feel consistent with the new inspector and collection surfaces.
+The v1 watering, photo, AI-assisted identification, app-owned reminder, and Google Calendar sync stack is implemented on `main`. The UI Redesign UX Overhaul campaign is complete locally through the stacked `ui-redesign/06-supporting-features` branch. Branches have not been pushed because the app safety reviewer rejected export to the configured GitHub remote without explicit approval.
 
 ## Scope
 
-- Polish the shared Add/Edit plant form with the new visual system.
-- Group identity, room/location, watering guidance, and notes clearly.
-- Keep photo optional and discoverable after save.
-- Preserve manual setup and partial/simple saves.
-- Preserve editable care guidance.
-- Keep archive/destructive action secondary and safe.
+- Polish reminder, Google Calendar, photo, and identification supporting surfaces.
+- Keep AI and calendar secondary to watering.
+- Preserve conservative AI/calendar copy and user-owned truth.
+- Improve loading state styling and control tap/focus treatment.
 - Preserve existing auth, ownership, reminder, AI, calendar, and schema behavior.
 
 ## Non-Goals
 
 - Do not implement Outlook, bidirectional sync, calendar-owned reminder truth, generic tasks, notification delivery, AI scheduling, health diagnosis, or broad scheduler settings without a new approved slice.
-- Do not change schema, make room/location mandatory, make AI-first setup, or change watering/reminder/calendar semantics in Slice 05.
+- Do not add a new calendar provider, Health Check, AI diagnosis, broad automation, schema/RLS changes, or calendar-first behavior in Slice 06.
 - Do not change dependencies, schema, auth/session handling, RLS assumptions, AI behavior, reminder behavior, or calendar sync behavior.
 
 ## Acceptance Criteria
 
-- Add Plant remains beginner-friendly and manual.
-- Edit Plant remains user-owned and safe.
-- User can save simple/partial info.
-- Care basics remain editable guidance.
-- Photo and room/location are optional and discoverable.
-- Archive remains a secondary safe destructive path.
+- Supporting panels match the shared redesign tokens and icon treatment.
+- AI and calendar remain contextual and secondary.
+- Copy remains conservative and user-owned.
+- Loading state matches the redesigned surface language.
+- Tap targets and focus treatment are improved on supporting controls.
 - Empty/error states remain calm and recoverable.
 - Validation gates pass.
 
@@ -73,10 +70,4 @@ Stop if review finds ownership, migration, provider, or validation issues.
 
 ## Next Recommended Action
 
-Create the next stacked branch from `ui-redesign/05-add-edit-polish`:
-
-```txt
-ui-redesign/06-supporting-features
-```
-
-Then polish reminders, Google Calendar sync, photo/identification, empty/loading/error states, accessibility basics, and desktop sanity without adding new feature semantics.
+Recommended next action: review the stacked branches in order, approve the GitHub push/export if remote preview branches are desired, then use Vercel previews for manual QA before merging.

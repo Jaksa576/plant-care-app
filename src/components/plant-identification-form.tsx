@@ -7,6 +7,7 @@ import type {
   PlantIdentificationState,
   SavePlantIdentificationState,
 } from "@/app/app/plants/actions";
+import { CameraIcon, LeafIcon } from "@/components/icons";
 import { StatusPill } from "@/components/status-pill";
 import type { PlantIdentificationCandidate } from "@/lib/plant-identification/types";
 
@@ -64,7 +65,7 @@ function CandidateReviewForm({ candidate, editHref, saveSuggestionAction }: Cand
   return (
     <form
       action={formAction}
-      className="rounded-[1.5rem] border border-[color:var(--border)] bg-white/85 p-4"
+      className="rounded-[1.25rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] p-4"
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
@@ -82,7 +83,7 @@ function CandidateReviewForm({ candidate, editHref, saveSuggestionAction }: Cand
           <input
             name="commonName"
             defaultValue={candidate.commonName ?? ""}
-            className="rounded-[1rem] border border-[color:var(--border)] bg-white px-4 py-3 text-base font-normal outline-none transition focus:border-[color:var(--accent)]"
+            className="min-h-[var(--tap-target)] rounded-[1rem] border border-[color:var(--border)] bg-white px-4 py-3 text-base font-normal outline-none transition focus:border-[color:var(--accent)] focus:ring-2 focus:ring-[color:var(--accent-soft)]"
           />
         </label>
         <label className="flex flex-col gap-2 text-sm font-semibold">
@@ -90,7 +91,7 @@ function CandidateReviewForm({ candidate, editHref, saveSuggestionAction }: Cand
           <input
             name="scientificName"
             defaultValue={candidate.scientificName}
-            className="rounded-[1rem] border border-[color:var(--border)] bg-white px-4 py-3 text-base font-normal italic outline-none transition focus:border-[color:var(--accent)]"
+            className="min-h-[var(--tap-target)] rounded-[1rem] border border-[color:var(--border)] bg-white px-4 py-3 text-base font-normal italic outline-none transition focus:border-[color:var(--accent)] focus:ring-2 focus:ring-[color:var(--accent-soft)]"
           />
         </label>
       </div>
@@ -111,14 +112,14 @@ function CandidateReviewForm({ candidate, editHref, saveSuggestionAction }: Cand
         <button
           type="submit"
           disabled={isPending}
-          className="inline-flex w-fit items-center justify-center rounded-full bg-[color:var(--accent)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full bg-[color:var(--accent)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isPending ? "Saving..." : "Save reviewed names"}
         </button>
         {state.status === "success" ? (
           <Link
             href={editHref}
-            className="inline-flex w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white px-4 py-2 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)]"
+            className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white px-4 py-2 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)]"
           >
             Edit full plant details
           </Link>
@@ -140,11 +141,14 @@ export function PlantIdentificationPanel({
   );
 
   return (
-    <section className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-6 shadow-[var(--shadow)] sm:p-8">
+    <section className="rounded-[1.5rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] p-5 sm:p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <StatusPill>Optional helper</StatusPill>
-          <h3 className="mt-5 text-2xl font-semibold">Help identify this plant</h3>
+          <div className="mt-4 flex items-center gap-2">
+            <LeafIcon className="h-5 w-5 text-[color:var(--accent)]" />
+            <h3 className="text-xl font-semibold">Help identify this plant</h3>
+          </div>
           <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
             These are suggestions, not certainties. Accepted names stay editable and care
             guidance will not be changed.
@@ -164,8 +168,9 @@ export function PlantIdentificationPanel({
           <button
             type="submit"
             disabled={isPending}
-            className="inline-flex w-fit items-center justify-center rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center gap-2 rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
           >
+            <CameraIcon className="h-4 w-4" />
             {isPending ? "Checking possible matches..." : "Help identify this plant"}
           </button>
         </form>
@@ -199,7 +204,7 @@ export function PlantIdentificationPanel({
       <div className="mt-5">
         <Link
           href={editHref}
-          className="inline-flex w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)]"
+          className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)]"
         >
           Keep editing manually
         </Link>

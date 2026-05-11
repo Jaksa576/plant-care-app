@@ -39,6 +39,7 @@ This document tracks product sequencing and slice status. Stable product directi
 - UI redesign Plants tab with full active collection browsing, room chapters, Unassigned grouping, Add Plant access, plant detail links, and reminder-aware watering status labels.
 - UI redesign Plant Detail inspector with large photo/fallback, identity/status, Water now, Snooze, Reminder, care basics rows, care history, photo/identification, reminder, Google Calendar, edit, and archive access.
 - UI redesign Add/Edit Plant form polish with grouped identity, room, watering guidance, notes, photo-after-save affordance, and softened review step.
+- UI redesign supporting feature polish for reminders, Google Calendar sync, photo upload, identification helper, loading states, tap targets, and conservative AI/calendar copy.
 
 ### Active
 
@@ -59,10 +60,11 @@ This document tracks product sequencing and slice status. Stable product directi
 
 Active campaign:
 
-- [UI Redesign UX Overhaul Campaign](campaigns/ui-redesign-ux-overhaul.md)
+- None.
 
 Completed campaigns:
 
+- [UI Redesign UX Overhaul Campaign](campaigns/ui-redesign-ux-overhaul.md)
 - [Plant Profile + Watering Foundation Campaign](campaigns/archived/plant-profile-watering-foundation.md)
 - [Photo Identification + Reminder Sync Campaign](campaigns/archived/photo-identification-reminder-sync.md)
 
