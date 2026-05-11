@@ -273,7 +273,7 @@ Notes:
 
 ### Slice 3: Plants Tab / Collection
 
-Status: next.
+Status: complete on `ui-redesign/03-plants-collection`.
 
 Goal:
 
@@ -302,9 +302,15 @@ Acceptance criteria:
 - Plant detail links work.
 - Route protection and user-owned scoping are preserved.
 
+Notes:
+
+- `/app/plants` now reads active plants, watering events, and reminders through the existing user-scoped helpers.
+- Plants are grouped by `location`; missing room/location appears as `Unassigned`.
+- Plant rows reuse the shared thumbnail, icon, and status treatment introduced in earlier slices.
+
 ### Slice 4: Plant Detail Redesign
 
-Status: planned.
+Status: next.
 
 Goal:
 

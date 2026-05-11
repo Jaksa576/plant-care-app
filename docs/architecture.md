@@ -17,12 +17,13 @@ This document describes implemented technical shape and architectural boundaries
 - `/` is a public landing page.
 - `/login` provides Supabase email sign-in and sign-up.
 - `/app` is the protected signed-in app area.
-- `/app/plants` is a protected full-collection route stub for the redesigned Plants tab.
+- `/app/plants` is the protected redesigned Plants tab for browsing the full active collection by room.
 - `/app/plants/[plantId]` is a protected plant detail/profile route for a single user-owned plant.
 - `/app/plants/[plantId]/edit` is the protected plant edit route.
 - `/app/settings` is a protected settings route stub for account and app-level utility controls.
 - The signed-in shell includes the Home / Plants / Settings bottom app bar, persistent Add Plant access, and sign-out where appropriate.
 - Manual plant create, profile, edit, list, and archive flows are implemented.
+- The Plants tab groups active plants by `location`, uses `Unassigned` for missing room/location, and preserves user-owned collection scoping.
 - Plant-profile watering state and mark-watered behavior are implemented.
 - Plant-profile next watering status uses enabled app-owned reminder dates first, then falls back to watering interval calculations.
 - The signed-in dashboard groups active plants by watering status: overdue, due today, upcoming, and recently watered.

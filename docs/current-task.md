@@ -24,40 +24,39 @@ UI Redesign UX Overhaul Campaign is active.
 Current branch:
 
 ```txt
-ui-redesign/02-home-today
+ui-redesign/03-plants-collection
 ```
 
-Slice 02 redesigns the signed-in Home route as the approved Today care surface. It keeps the existing reminder-aware plant/watering data flow while presenting Needs water, By room, and Recent care with icon-led Water and secondary Snooze actions.
+Slice 03 implements the redesigned Plants tab collection surface. It uses existing user-scoped plant, watering, and reminder reads to show the full active collection grouped by room, with Unassigned handling, Add Plant access, and plant detail navigation.
 
 ## Why This Is Next
 
-The v1 watering, photo, AI-assisted identification, app-owned reminder, and Google Calendar sync stack is implemented on `main`. The approved active campaign is the UI Redesign UX Overhaul. Slice 02 follows the completed shell foundation so the Home screen can become the watering-first Today surface before the full Plants collection redesign.
+The v1 watering, photo, AI-assisted identification, app-owned reminder, and Google Calendar sync stack is implemented on `main`. The approved active campaign is the UI Redesign UX Overhaul. Slice 03 follows the Home / Today redesign so users can browse the full collection outside the daily care queue.
 
 ## Scope
 
-- Replace the old dashboard-card Home presentation with Today/date language.
-- Show overdue and due-today plants first under Needs water.
-- Keep Water as the primary icon-led action.
-- Show Snooze as secondary where current reminder state supports it.
-- Show By room grouping, including Unassigned for missing room/location.
-- Show Recent care as a lightweight watering log.
-- Keep Add Plant visible as a quick action.
+- Implement `/app/plants` as the full Plants tab collection surface.
+- Show the full active plant collection independent of Home.
+- Group by room/location and show Unassigned for missing room/location.
+- Keep Add Plant obvious.
+- Preserve plant detail navigation.
+- Show calm empty/error states.
 - Preserve existing auth, ownership, reminder, AI, calendar, and schema behavior.
 
 ## Non-Goals
 
 - Do not implement Outlook, bidirectional sync, calendar-owned reminder truth, generic tasks, notification delivery, AI scheduling, health diagnosis, or broad scheduler settings without a new approved slice.
-- Do not redesign Plants, Plant Detail, Add/Edit, reminder, AI, or calendar surfaces in Slice 02.
+- Do not redesign Plant Detail, Add/Edit, reminder, AI, or calendar surfaces in Slice 03.
 - Do not change dependencies, schema, auth/session handling, RLS assumptions, AI behavior, reminder behavior, or calendar sync behavior.
 
 ## Acceptance Criteria
 
-- Home uses Today/date copy rather than dashboard language.
-- Needs water includes overdue and due-today plants.
-- Water remains wired to existing mark-watered behavior.
-- Snooze remains wired to existing reminder snooze behavior where supported.
-- By room groups plants by location and treats missing locations as Unassigned.
-- Recent care shows watering events as a log.
+- `/app/plants` is protected and user-scoped.
+- User can browse all active plants outside Home.
+- Room chapters use plant `location`.
+- Missing room/location appears as Unassigned.
+- Add Plant and plant detail links are visible.
+- Watering status labels reuse existing reminder-aware schedule logic.
 - Empty/error states remain calm and recoverable.
 - Validation gates pass.
 
@@ -74,10 +73,10 @@ Stop if review finds ownership, migration, provider, or validation issues.
 
 ## Next Recommended Action
 
-Create the next stacked branch from `ui-redesign/02-home-today`:
+Create the next stacked branch from `ui-redesign/03-plants-collection`:
 
 ```txt
-ui-redesign/03-plants-collection
+ui-redesign/04-plant-detail
 ```
 
-Then implement the full Plants collection surface using the approved Plants tab mockup and the shared shell/tokens from earlier slices.
+Then redesign the plant detail route as the approved inspector-style view while preserving existing watering, reminder, photo, AI, calendar, edit, and archive behavior.

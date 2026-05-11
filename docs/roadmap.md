@@ -18,7 +18,7 @@ This document tracks product sequencing and slice status. Stable product directi
 - Public landing page at `/`.
 - Supabase email auth at `/login`.
 - Protected `/app` route and signed-in shell.
-- Protected `/app/plants` collection tab route stub and `/app/settings` utility route stub.
+- Protected `/app/plants` redesigned collection tab and `/app/settings` utility route stub.
 - Sign-out flow.
 - Supabase environment handling.
 - Browser and server Supabase helpers.
@@ -36,6 +36,7 @@ This document tracks product sequencing and slice status. Stable product directi
 - Reminder flexibility with after-watering mode, fixed schedule mode, snooze controls, reminder-aware dashboard urgency, plain-language next reminder previews, and calendar sync updates from app reminder changes.
 - UI redesign shell foundation with warm design tokens, Nunito Sans font loading, local SVG icon primitives, persistent Add Plant access, and Home / Plants / Settings bottom app bar.
 - UI redesign Home / Today surface with Needs water, By room, Recent care, icon-led Water, and secondary Snooze where app reminder state supports it.
+- UI redesign Plants tab with full active collection browsing, room chapters, Unassigned grouping, Add Plant access, plant detail links, and reminder-aware watering status labels.
 
 ### Active
 
