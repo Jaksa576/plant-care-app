@@ -24,38 +24,39 @@ UI Redesign UX Overhaul Campaign is active.
 Current branch:
 
 ```txt
-ui-redesign/04-plant-detail
+ui-redesign/05-add-edit-polish
 ```
 
-Slice 04 redesigns the plant detail route as a calm inspector-style view. It preserves existing user-owned reads and actions while promoting photo/identity, Water now, Snooze, Reminder, care basics, and care history.
+Slice 05 polishes Add Plant and Edit Plant flows using the shared redesign system. It preserves manual setup, optional photo timing, partial/simple saves, editable care guidance, and safe archive handling.
 
 ## Why This Is Next
 
-The v1 watering, photo, AI-assisted identification, app-owned reminder, and Google Calendar sync stack is implemented on `main`. The approved active campaign is the UI Redesign UX Overhaul. Slice 04 follows the Home and Plants redesigns so opening a plant feels consistent with the new watering-first surfaces.
+The v1 watering, photo, AI-assisted identification, app-owned reminder, and Google Calendar sync stack is implemented on `main`. The approved active campaign is the UI Redesign UX Overhaul. Slice 05 follows the Plant Detail redesign so setup and editing feel consistent with the new inspector and collection surfaces.
 
 ## Scope
 
-- Redesign `/app/plants/[plantId]` as an inspector-style plant detail view.
-- Show large plant photo/fallback, identity, room, and watering status.
-- Keep Water now primary and Snooze/Reminder secondary.
-- Show care basics as clean rows.
-- Show care history near the top.
-- Keep photo/identification, reminder, Google Calendar, edit, and archive access findable.
+- Polish the shared Add/Edit plant form with the new visual system.
+- Group identity, room/location, watering guidance, and notes clearly.
+- Keep photo optional and discoverable after save.
+- Preserve manual setup and partial/simple saves.
+- Preserve editable care guidance.
+- Keep archive/destructive action secondary and safe.
 - Preserve existing auth, ownership, reminder, AI, calendar, and schema behavior.
 
 ## Non-Goals
 
 - Do not implement Outlook, bidirectional sync, calendar-owned reminder truth, generic tasks, notification delivery, AI scheduling, health diagnosis, or broad scheduler settings without a new approved slice.
-- Do not redesign Add/Edit, reminder internals, AI semantics, or calendar sync semantics in Slice 04.
+- Do not change schema, make room/location mandatory, make AI-first setup, or change watering/reminder/calendar semantics in Slice 05.
 - Do not change dependencies, schema, auth/session handling, RLS assumptions, AI behavior, reminder behavior, or calendar sync behavior.
 
 ## Acceptance Criteria
 
-- `/app/plants/[plantId]` remains protected and user-scoped.
-- Existing Water, Snooze, Reminder, Photo, AI identification, Calendar, Edit, and Archive actions remain available.
-- Water is primary in the top action surface.
-- Snooze and Reminder are secondary.
-- Care basics and care history use the new visual system.
+- Add Plant remains beginner-friendly and manual.
+- Edit Plant remains user-owned and safe.
+- User can save simple/partial info.
+- Care basics remain editable guidance.
+- Photo and room/location are optional and discoverable.
+- Archive remains a secondary safe destructive path.
 - Empty/error states remain calm and recoverable.
 - Validation gates pass.
 
@@ -72,10 +73,10 @@ Stop if review finds ownership, migration, provider, or validation issues.
 
 ## Next Recommended Action
 
-Create the next stacked branch from `ui-redesign/04-plant-detail`:
+Create the next stacked branch from `ui-redesign/05-add-edit-polish`:
 
 ```txt
-ui-redesign/05-add-edit-polish
+ui-redesign/06-supporting-features
 ```
 
-Then polish Add Plant and Edit Plant flows with the shared visual system while preserving manual setup and editable care guidance.
+Then polish reminders, Google Calendar sync, photo/identification, empty/loading/error states, accessibility basics, and desktop sanity without adding new feature semantics.

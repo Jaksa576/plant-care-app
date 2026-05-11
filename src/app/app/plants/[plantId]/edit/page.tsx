@@ -57,10 +57,10 @@ export default async function EditPlantPage({ params, searchParams }: EditPlantP
     >
       <div className="flex flex-col gap-6">
         <Link
-          href={plant ? `/app/plants/${plantId}` : "/app"}
+          href={plant ? `/app/plants/${plantId}` : "/app/plants"}
           className="inline-flex w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold text-[color:var(--foreground)] transition hover:bg-[color:var(--accent-soft)]"
         >
-          {plant ? "Back to plant profile" : "Back to your collection"}
+          {plant ? "Back to plant profile" : "Back to Plants"}
         </Link>
 
         {created === "1" ? (

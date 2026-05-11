@@ -38,6 +38,7 @@ This document tracks product sequencing and slice status. Stable product directi
 - UI redesign Home / Today surface with Needs water, By room, Recent care, icon-led Water, and secondary Snooze where app reminder state supports it.
 - UI redesign Plants tab with full active collection browsing, room chapters, Unassigned grouping, Add Plant access, plant detail links, and reminder-aware watering status labels.
 - UI redesign Plant Detail inspector with large photo/fallback, identity/status, Water now, Snooze, Reminder, care basics rows, care history, photo/identification, reminder, Google Calendar, edit, and archive access.
+- UI redesign Add/Edit Plant form polish with grouped identity, room, watering guidance, notes, photo-after-save affordance, and softened review step.
 
 ### Active
 

@@ -350,7 +350,7 @@ Notes:
 
 ### Slice 5: Add/Edit Plant Flow Polish
 
-Status: next.
+Status: complete on `ui-redesign/05-add-edit-polish`.
 
 Goal:
 
@@ -378,9 +378,16 @@ Acceptance criteria:
 - Editable care guidance remains clear.
 - Archive is secondary/destructive and safe.
 
+Notes:
+
+- Shared plant form now uses grouped identity, watering guidance, and notes sections.
+- Photo remains optional and is introduced as a post-save affordance rather than a setup blocker.
+- Manual review copy continues to state that AI suggestions require user review and care guidance remains editable.
+- Add/Edit route back links now return to the redesigned Plants/detail surfaces.
+
 ### Slice 6: Supporting Feature Polish
 
-Status: planned.
+Status: next.
 
 Goal:
 

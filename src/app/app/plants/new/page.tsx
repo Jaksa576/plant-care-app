@@ -27,10 +27,10 @@ export default async function NewPlantPage() {
     >
       <div className="flex flex-col gap-6">
         <Link
-          href="/app"
+          href="/app/plants"
           className="inline-flex w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold text-[color:var(--foreground)] transition hover:bg-[color:var(--accent-soft)]"
         >
-          Back to your collection
+          Back to Plants
         </Link>
 
         <PlantForm
