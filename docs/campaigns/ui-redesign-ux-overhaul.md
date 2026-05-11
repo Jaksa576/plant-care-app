@@ -1,6 +1,6 @@
 # UI Redesign UX Overhaul Campaign
 
-Status: **complete locally through `ui-redesign/07-qa-polish`**.
+Status: **complete locally through `ui-redesign/08-final-qa-polish` and ready for main merge**.
 
 ## Goal
 
@@ -452,6 +452,34 @@ Deferred:
 - landing page redesign
 - Google Calendar relocation to Settings
 - pre-save photo-first AI Add Plant flow
+
+### Slice 8: Final QA Polish
+
+Status: complete on `ui-redesign/08-final-qa-polish`.
+
+Goal:
+
+Apply the final narrow QA patch requested before merging the full UI Redesign UX Overhaul stack into `main`.
+
+Scope completed:
+
+- Re-audited filled green/teal primary actions so normal, hover, focus, active, and disabled states keep readable contrast with white text where appropriate.
+- Added visible Home action labels under the icon-led controls:
+  - Droplet icon plus `Water`.
+  - Alarm clock icon plus `Snooze`.
+- Preserved existing Water and Snooze actions without adding reminder semantics.
+- Preserved Slice 07 fixes for duplicate Add Plant, inline By room rows, plant detail photo display, care basics deduplication, required field clarity, photo/AI discoverability, and approved logo usage.
+
+Validation:
+
+- `npm run lint` passed on the final patch branch.
+- `npm run build` passed on the final patch branch.
+- `npm run typecheck` and `npm test` are not present in `package.json`.
+
+Merge and cleanup:
+
+- The campaign is ready for a fast-forward merge into `main` after final validation.
+- Branch cleanup should run only after `main` is validated, pushed, and confirmed to contain `ui-redesign/08-final-qa-polish`.
 
 ## Campaign QA checklist
 

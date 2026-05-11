@@ -19,41 +19,38 @@
 
 ## Active Slice
 
-UI Redesign UX Overhaul Campaign is active.
+UI Redesign UX Overhaul Campaign is in final QA polish and merge readiness.
 
 Current branch:
 
 ```txt
-ui-redesign/07-qa-polish
+ui-redesign/08-final-qa-polish
 ```
 
-Slice 07 applies a narrow QA polish patch on top of the completed UI Redesign UX Overhaul stack. It fixes visible manual-review issues without changing schema, RLS, auth/session behavior, AI semantics, reminder semantics, or calendar semantics.
+Slice 08 applies the final narrow QA polish patch on top of the completed UI Redesign UX Overhaul stack. It fixes remaining button contrast and Home Water/Snooze label issues without changing schema, RLS, auth/session behavior, AI semantics, reminder semantics, or calendar semantics.
 
 ## Why This Is Next
 
-The v1 watering, photo, AI-assisted identification, app-owned reminder, and Google Calendar sync stack is implemented on `main`. The UI Redesign UX Overhaul campaign is complete through the stacked `ui-redesign/07-qa-polish` branch, with this branch intended for final preview before merge.
+The v1 watering, photo, AI-assisted identification, app-owned reminder, and Google Calendar sync stack is implemented on `main`. The UI Redesign UX Overhaul campaign is complete through the stacked `ui-redesign/07-qa-polish` branch, with Slice 08 providing the final pre-merge QA patch requested after preview review.
 
 ## Scope
 
-- Fix primary button contrast and disabled-state clarity.
-- Remove duplicate Home Add Plant affordance.
-- Show Home By room plants inline under textual room chapters.
-- Improve plant detail photo crop/display.
-- Remove duplicated plant detail care/basic information.
-- Clarify Add/Edit required-name fields and validation errors.
-- Confirm photo upload and Pl@ntNet identification remain discoverable on owned plant detail.
-- Use approved logo/icon asset in visible app surfaces without over-branding.
+- Ensure filled green/teal primary actions keep white, readable text across normal, hover, focus, active, and disabled states.
+- Add visible labels under the Home Water and Snooze icon actions.
+- Preserve the completed Slice 07 QA fixes for Home Add Plant duplication, inline room chapters, plant detail image display, care basics deduplication, Add/Edit required fields, photo/AI discoverability, and approved logo usage.
 - Preserve existing auth, ownership, reminder, AI, calendar, and schema behavior.
 
 ## Non-Goals
 
 - Do not implement Outlook, bidirectional sync, calendar-owned reminder truth, generic tasks, notification delivery, AI scheduling, health diagnosis, or broad scheduler settings without a new approved slice.
-- Do not add onboarding, room management settings, persistent room schema, room dropdown data model, Health Check, landing page overhaul, Google Calendar relocation, pre-save PlantNet identification, AI diagnosis, calendar-first reminder behavior, schema changes, RLS changes, or new dependencies in Slice 07.
+- Do not add onboarding, room management settings, persistent room schema, room dropdown data model, Health Check, landing page overhaul, Google Calendar relocation, pre-save PlantNet identification, AI diagnosis, calendar-first reminder behavior, schema changes, RLS changes, or new dependencies in Slice 08.
 - Do not change dependencies, schema, auth/session handling, RLS assumptions, AI behavior, reminder behavior, or calendar sync behavior.
 
 ## Acceptance Criteria
 
 - Primary buttons are readable.
+- Home Water action shows a droplet icon with the visible label “Water”.
+- Home Snooze action shows an alarm icon with the visible label “Snooze”.
 - Home top area has one Add Plant entry point.
 - Home By room shows plants inline under room chapters, including Unassigned.
 - Water early and Snooze use existing actions only.
@@ -78,4 +75,4 @@ Stop if review finds ownership, migration, provider, or validation issues.
 
 ## Next Recommended Action
 
-Recommended next action: push `ui-redesign/07-qa-polish` for Vercel preview, manually QA the checklist in the branch report, then merge the stacked UI redesign branches in order only after review.
+Recommended next action: validate `ui-redesign/08-final-qa-polish`, fast-forward merge the completed stack into `main`, push `main`, then delete the reviewed `ui-redesign/*` campaign branches locally and remotely after confirming `main` contains the final patch.

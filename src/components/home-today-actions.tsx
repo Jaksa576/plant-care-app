@@ -29,9 +29,10 @@ export function TodayWaterButton({ action }: TodayWaterButtonProps) {
         type="submit"
         disabled={isPending}
         aria-label="Mark watered"
-        className="inline-flex min-h-[var(--tap-target)] min-w-[var(--tap-target)] items-center justify-center rounded-xl bg-[color:var(--accent)] px-3 text-white shadow-[0_10px_22px_rgba(46,125,83,0.22)] transition hover:opacity-95 disabled:cursor-not-allowed disabled:bg-[color:var(--sage)] disabled:text-white disabled:opacity-70"
+        className="inline-flex min-h-[3.25rem] min-w-[3.25rem] flex-col items-center justify-center gap-0.5 rounded-xl bg-[color:var(--accent)] px-2 py-1.5 text-[0.68rem] font-semibold leading-none text-white shadow-[0_10px_22px_rgba(46,125,83,0.22)] transition hover:opacity-95 disabled:cursor-not-allowed disabled:bg-[color:var(--sage)] disabled:text-white disabled:opacity-70"
       >
         <DropletIcon className="h-5 w-5" />
+        <span>Water</span>
       </button>
       {state.message ? (
         <span
@@ -61,9 +62,10 @@ export function TodaySnoozeButton({ action, disabled = false }: TodaySnoozeButto
         type="submit"
         disabled={disabled || isPending}
         aria-label="Snooze watering reminder by 1 day"
-        className="inline-flex min-h-[var(--tap-target)] min-w-[var(--tap-target)] items-center justify-center rounded-xl border border-[color:var(--border)] bg-[color:var(--surface-strong)] px-3 text-[color:var(--foreground)] transition hover:bg-[color:var(--accent-soft)] disabled:cursor-not-allowed disabled:bg-[color:var(--stone)] disabled:text-[color:var(--muted)] disabled:opacity-70"
+        className="inline-flex min-h-[3.25rem] min-w-[3.25rem] flex-col items-center justify-center gap-0.5 rounded-xl border border-[color:var(--border)] bg-[color:var(--surface-strong)] px-2 py-1.5 text-[0.68rem] font-semibold leading-none text-[color:var(--foreground)] transition hover:bg-[color:var(--accent-soft)] disabled:cursor-not-allowed disabled:bg-[color:var(--stone)] disabled:text-[color:var(--muted)] disabled:opacity-70"
       >
         <AlarmClockIcon className="h-5 w-5" />
+        <span>Snooze</span>
       </button>
       {state.message ? (
         <span
