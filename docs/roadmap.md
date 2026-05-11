@@ -36,7 +36,7 @@ This document tracks product sequencing and slice status. Stable product directi
 
 ### Active
 
-- Campaign QA and review for the stacked Photo Identification + Reminder Sync branches.
+- No implementation slice or v1 feature campaign is currently active.
 
 ### Planned
 
@@ -51,9 +51,14 @@ This document tracks product sequencing and slice status. Stable product directi
 
 ## Campaigns
 
-Current active campaign:
+Active campaign:
 
-- [Photo Identification + Reminder Sync Campaign](campaigns/photo-identification-reminder-sync.md)
+- None.
+
+Completed campaigns:
+
+- [Plant Profile + Watering Foundation Campaign](campaigns/archived/plant-profile-watering-foundation.md)
+- [Photo Identification + Reminder Sync Campaign](campaigns/archived/photo-identification-reminder-sync.md)
 
 ## Phase 0: Foundation
 
@@ -205,8 +210,8 @@ Automation can reduce friction after the app has reliable user behavior and care
 
 ## Recommended Implementation Order
 
-1. QA and review the stacked Photo Identification + Reminder Sync branches.
-2. Merge the stacked branches in order after approval.
+1. Complete product-owner production-readiness review of the merged `main` experience.
+2. Decide the next campaign before starting new feature implementation.
 3. Later: health support, richer knowledge, smarter automation, and Outlook sync.
 
-This order keeps the manual plant and watering loop useful before photos, AI, reminders, and calendar integrations.
+This order keeps future work grounded in the implemented watering-first loop instead of adding unapproved scope.

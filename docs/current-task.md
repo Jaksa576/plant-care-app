@@ -19,20 +19,20 @@
 
 ## Active Slice
 
-The Photo Identification + Reminder Sync Campaign is active.
+No implementation slice or v1 feature campaign is currently active.
 
-Slice 5.3: Reminder flexibility is implemented. The Photo Identification + Reminder Sync Campaign is complete pending review, preview QA, and ordered branch merges.
+The Photo Identification + Reminder Sync Campaign is complete and merged to `main`. Its historical campaign doc is archived at [Photo Identification + Reminder Sync Campaign](campaigns/archived/photo-identification-reminder-sync.md).
 
 ## Why This Is Next
 
-The v1 photo, identification, reminder, and Google Calendar stack is now implemented as a stacked campaign. The next work should be QA, review, and merge sequencing rather than new feature scope.
+The v1 watering, photo, AI-assisted identification, app-owned reminder, and Google Calendar sync stack is implemented on `main`. The next work should be product-owner production-readiness review and a decision on the next approved campaign.
 
 ## Scope
 
-- QA the stacked campaign branches in order.
-- Apply Supabase migrations in a preview environment.
-- Verify Google Calendar configuration in a safe preview environment before merging the calendar slice.
-- Verify profile and dashboard grouping with enabled reminders due today, overdue, and upcoming.
+- Verify production or main-preview environment variables for Pl@ntNet and Google Calendar before broad release.
+- Confirm Supabase migrations are applied in the deployment Supabase project.
+- Perform product-owner QA on the merged main experience: photos, AI review flow, reminders, Google sync, profile/dashboard reminder dates, ownership boundaries, and mobile layout.
+- Decide the next product campaign before starting new implementation work.
 
 ## Non-Goals
 
@@ -40,8 +40,9 @@ The v1 photo, identification, reminder, and Google Calendar stack is now impleme
 
 ## Acceptance Criteria
 
-- Branches remain unmerged to main until product owner review.
-- Manual QA covers reminders, profile/dashboard grouping, Google sync, RLS/ownership, and mobile profile controls.
+- Hot-path docs agree that the Photo Identification + Reminder Sync Campaign is implemented on `main`.
+- Manual QA covers photos, AI suggestions, reminders, profile/dashboard grouping, Google sync, RLS/ownership, and mobile profile controls.
+- Deployment environments have required server-only provider configuration before shipping provider-backed flows.
 - Deferred roadmap items stay deferred unless reprioritized.
 
 ## Validation Expectations
@@ -57,4 +58,4 @@ Stop if review finds ownership, migration, provider, or validation issues.
 
 ## Next Recommended Action
 
-Open/review the stacked branches in order, starting with Slice 4.1, then 4.2, 5.1, 5.2, and 5.3.
+Run a production-readiness review of the merged `main` app, then choose the next campaign or leave the roadmap in maintenance mode until the product owner approves new scope.

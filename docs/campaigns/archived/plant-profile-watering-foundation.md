@@ -1,11 +1,11 @@
 # Plant Profile + Watering Foundation Campaign
 
-**Campaign file:** `docs/campaigns/plant-profile-watering-foundation.md`  
+**Campaign file:** `docs/campaigns/archived/plant-profile-watering-foundation.md`
 **Campaign status:** Complete  
 **Roadmap span:** Slice 2.2 through Slice 3.3  
 **Target branch:** `main`  
 **Implementation model:** one PR-sized slice at a time  
-**Follow-on campaign:** `docs/campaigns/photo-identification-reminder-sync.md`
+**Follow-on campaign:** `docs/campaigns/archived/photo-identification-reminder-sync.md`
 
 ## Campaign recommendation
 
@@ -26,7 +26,7 @@ Codex must inspect these before starting each slice:
 - `docs/architecture.md`
 - `docs/roadmap.md`
 - `docs/current-task.md`
-- `docs/campaigns/plant-profile-watering-foundation.md`
+- `docs/campaigns/archived/plant-profile-watering-foundation.md`
 
 If the docs disagree on active slice, roadmap status, route shape, data model, ownership behavior, or product guardrails, Codex must stop and report the conflict before changing code.
 
@@ -1222,7 +1222,7 @@ Use this campaign file as context, but keep each actual handoff slice-sized.
 - docs/architecture.md
 - docs/roadmap.md
 - docs/current-task.md
-- docs/campaigns/plant-profile-watering-foundation.md
+- docs/campaigns/archived/plant-profile-watering-foundation.md
 
 ## Readiness gate
 Stop before coding if the docs do not identify this slice as the active/next slice, or if they conflict on scope, data model, routes, or ownership requirements.
@@ -1316,10 +1316,12 @@ The state packet is a transition note only. Repo docs remain authoritative.
 
 ## Follow-on campaign readiness
 
-Do not start `docs/campaigns/photo-identification-reminder-sync.md` until:
+Do not start the Photo Identification + Reminder Sync follow-on campaign until:
 
 - This campaign is complete through Slice 3.3.
 - Docs identify Slice 4.1 or the follow-on campaign as the next approved work.
 - The user approves moving from watering foundation to photo/AI/reminder work.
+
+Historical note: the follow-on campaign is now complete and archived at `docs/campaigns/archived/photo-identification-reminder-sync.md`.
 
 The follow-on campaign should build on stable watering state. It should not redefine the watering model unless a documented issue requires a narrow patch.

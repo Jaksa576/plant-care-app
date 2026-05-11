@@ -1,5 +1,10 @@
 # Photo Identification + Reminder Sync Campaign
 
+- **Campaign status:** Complete and merged to `main`
+- **Archive note:** This file is historical context for the completed campaign. Current implementation truth lives in [Architecture](../../architecture.md), [Roadmap](../../roadmap.md), and [Current Task](../../current-task.md).
+- **Roadmap span:** Slice 4.1 through Slice 5.3
+- **Target branch:** `main`
+
 ## Campaign recommendation
 
 Use this campaign as the follow-on campaign after `docs/campaigns/archived/plant-profile-watering-foundation.md` is complete through Slice 3.3.
@@ -26,7 +31,7 @@ Codex must inspect these before starting each slice:
 - `docs/roadmap.md`
 - `docs/current-task.md`
 - `docs/campaigns/archived/plant-profile-watering-foundation.md`
-- `docs/campaigns/photo-identification-reminder-sync.md`
+- `docs/campaigns/archived/photo-identification-reminder-sync.md`
 
 If these docs disagree on active slice, implemented state, data model, storage model, provider configuration, reminder semantics, calendar sync direction, or product guardrails, Codex must stop and report the conflict before changing code.
 
@@ -45,7 +50,7 @@ Current implementation status:
 - Slice 5.2: Google Calendar sync is implemented.
 - Slice 5.3: Reminder flexibility is implemented.
 
-The campaign is complete pending stacked branch review, preview QA, and ordered merges.
+The campaign is complete and merged to `main`. The old stacked implementation branches have been cleaned up.
 
 This is not a broad visual redesign, AI product expansion, diagnosis feature, generic task platform, notification platform, or bidirectional calendar integration.
 
@@ -1175,7 +1180,7 @@ Slice 5.2 implements Google Calendar as a one-way reflection of app-owned wateri
 - App reminders remain the source of truth if sync fails.
 - Disconnect preserves app reminders, stops future sync, and attempts cleanup of known app-managed Google events.
 
-Slice 5.3 is now active.
+Slice 5.3 completed the campaign.
 
 ### Recommendation
 
@@ -1624,7 +1629,7 @@ Use this template when starting a slice from this campaign.
 - docs/roadmap.md
 - docs/current-task.md
 - docs/campaigns/archived/plant-profile-watering-foundation.md
-- docs/campaigns/photo-identification-reminder-sync.md
+- docs/campaigns/archived/photo-identification-reminder-sync.md
 
 ## Readiness gate
 
@@ -1675,7 +1680,7 @@ Update:
 - docs/current-task.md
 - docs/roadmap.md
 - docs/architecture.md if architecture/data/provider behavior changes
-- docs/campaigns/photo-identification-reminder-sync.md
+- docs/campaigns/archived/photo-identification-reminder-sync.md
 
 ## Stop conditions
 
@@ -1714,7 +1719,7 @@ Project: Plant Care App
 Branch: [branch]
 Commit: [commit]
 Merged to main: yes/no
-Active campaign: Photo Identification + Reminder Sync Campaign
+Campaign: Photo Identification + Reminder Sync Campaign
 Completed work: [slice/status]
 Current status: [plain-language status]
 Next recommended action: [next slice/QA/patch/merge]
