@@ -1,6 +1,6 @@
 # Landing Page Redesign Campaign
 
-Status: **planned**.
+Status: **implemented on branch `codex/landing-page-redesign`; awaiting validation and preview review**.
 
 ## Goal
 
@@ -65,6 +65,8 @@ Avoid:
 
 ### Slice 1 — Landing page redesign
 
+Status: **implemented; awaiting validation and preview review**.
+
 Goal:
 
 Implement the new public landing page in one PR-sized slice.
@@ -103,6 +105,16 @@ Acceptance criteria:
 - Mobile layout is polished.
 - Sign in / start flows route correctly.
 - Build passes.
+
+Implemented scope:
+
+- Public `/` route only.
+- Header with approved logo/mark, desktop section anchors, and auth CTAs.
+- Hero with approved watering-first copy, static Today preview, botanical/photo-inspired visual treatment, and photo-first note.
+- Core loop, room organization, trust/AI restraint, and final CTA sections.
+- Existing auth routing preserved: signed-out CTAs go to `/login`; signed-in CTAs go to `/app`.
+
+No product/architecture docs were changed because the public route structure and auth behavior are unchanged.
 
 Validation:
 
