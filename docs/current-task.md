@@ -12,29 +12,36 @@
 - AI-assisted plant identification is implemented as an optional Pl@ntNet-backed helper from an owned primary photo.
 - Google Calendar sync is implemented as a one-way reflection of app-owned watering reminders when server OAuth configuration is present.
 - The UI Redesign UX Overhaul campaign is completed, merged to `main`, and archived.
-- The public landing page redesign slice is implemented on branch `codex/landing-page-redesign` and awaiting validation/preview review before merge.
-- The same branch includes a concise login-page UX refresh to align `/login` with the approved landing/app design.
+- The public landing page redesign and concise login-page UX refresh are merged to `main`.
 
 ## Active Slice
 
-Landing Page Redesign — Slice 1.
+Installable App Icon Support.
 
 Scope:
 
-- Public landing page at `/` only.
-- Header, hero, static Today preview, core loop, room organization, trust/AI restraint, and final CTA.
-- Login page visual/copy polish that preserves existing Supabase email/password auth behavior.
-- Approved brand mark, warm palette, Nunito Sans, and existing local icon strategy.
+- Add install-friendly app metadata and icons only.
+- Reuse the approved designed app icon at `public/brand/plant-care-approved-app-icon-1024.png`.
+- Add App Router manifest metadata at `src/app/manifest.ts`.
+- Add manifest icon PNGs at `public/icons/plant-care-icon-192.png`, `public/icons/plant-care-icon-512.png`, and `public/icons/plant-care-icon-maskable-512.png`.
+- Add Next.js app icon conventions at `src/app/favicon.ico`, `src/app/icon.png`, and `src/app/apple-icon.png`.
 
 Non-goals:
 
-- Signed-in app changes.
-- Auth/session changes.
-- Schema, RLS, onboarding, room model, PlantNet, Health Check, or calendar sync changes.
+- Service workers, offline caching, push notifications, reminder/calendar behavior, auth changes, schema/RLS changes, and brand redesign.
+
+## Validation Results
+
+- `npm run lint`: passed.
+- `npm run build`: passed after regenerating `src/app/favicon.ico` with RGBA icon frames.
+- `npm run typecheck`: not run; no script exists.
+- `npm test`: not run; no script exists.
+- Local manifest check: `http://localhost:3000/manifest.webmanifest` returned the expected `name`, `short_name`, `description`, `start_url`, `scope`, `display`, `background_color`, `theme_color`, and icon entries.
+- Local icon endpoint check: manifest icons plus `/icon.png`, `/apple-icon.png`, and `/favicon.ico` returned HTTP 200.
 
 ## Next Recommended Action
 
-Run validation, review the landing page through desktop/mobile viewport QA and Vercel preview, then merge manually if accepted.
+Review the Vercel preview in Chrome DevTools Application > Manifest, then install the preview from Chrome on an Android phone and confirm the launcher icon uses the designed Plant Care App icon.
 
 ## Validation Expectations
 
