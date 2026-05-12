@@ -5,74 +5,31 @@
 - Next.js + TypeScript + Tailwind scaffold is implemented.
 - Supabase email auth at `/login` is implemented.
 - `/app` is protected for signed-in users.
-- Signed-in shell, sign-out, and middleware-based session refresh are implemented.
-- User-owned plant CRUD is implemented with a persisted `plants` table, RLS ownership policies, and soft archive behavior.
-- A dedicated, protected plant detail/profile view is implemented for user-owned plant records.
-- Plant-level watering state and mark-watered behavior are implemented with durable watering events and reminder-aware next-date display.
-- A reminder-aware watering dashboard with overdue, due today, upcoming, and recently watered sections is implemented.
-- Plant-level watering history is implemented from the durable watering event model.
-- Primary plant photo upload is implemented with private Supabase Storage, one optional photo per owned plant, profile display, dashboard thumbnails, replace/remove actions, and calm no-photo fallbacks.
-- AI-assisted plant identification is implemented with a deliberate Pl@ntNet-backed helper from an owned primary photo. Suggestions are transient, names-only, reviewable, editable, rejectable, and saved only after user acceptance into normal plant fields.
-- App-owned watering reminders are implemented with a watering-only reminder model, enabled/disabled state, date-first next reminder, plant profile panel, owner-scoped RLS, and mark-watered updates when an interval exists.
+- Signed-in shell, sign-out, middleware-based session refresh, and Home / Plants / Settings navigation are implemented.
+- User-owned plant CRUD is implemented with persisted plant records, RLS ownership policies, and soft archive behavior.
+- Plant detail/profile, watering state, mark-watered behavior, watering history, reminders, and reminder-aware urgency are implemented.
+- Primary plant photo upload is implemented with private Supabase Storage and user-owned display/fallback behavior.
+- AI-assisted plant identification is implemented as an optional Pl@ntNet-backed helper from an owned primary photo.
 - Google Calendar sync is implemented as a one-way reflection of app-owned watering reminders when server OAuth configuration is present.
-- Reminder flexibility is implemented with after-watering mode, fixed schedule mode, snooze controls, predictable watered-early behavior, and profile/dashboard urgency that reflects enabled reminder dates.
+- The UI Redesign UX Overhaul campaign is completed, merged to `main`, and archived.
 
 ## Active Slice
 
-UI Redesign UX Overhaul Campaign is in final QA polish and merge readiness.
+No implementation slice is currently active.
 
-Current branch:
-
-```txt
-ui-redesign/08-final-qa-polish
-```
-
-Slice 08 applies the final narrow QA polish patch on top of the completed UI Redesign UX Overhaul stack. It fixes remaining button contrast and Home Water/Snooze label issues without changing schema, RLS, auth/session behavior, AI semantics, reminder semantics, or calendar semantics.
-
-## Why This Is Next
-
-The v1 watering, photo, AI-assisted identification, app-owned reminder, and Google Calendar sync stack is implemented on `main`. The UI Redesign UX Overhaul campaign is complete through the stacked `ui-redesign/07-qa-polish` branch, with Slice 08 providing the final pre-merge QA patch requested after preview review.
-
-## Scope
-
-- Ensure filled green/teal primary actions keep white, readable text across normal, hover, focus, active, and disabled states.
-- Add visible labels under the Home Water and Snooze icon actions.
-- Preserve the completed Slice 07 QA fixes for Home Add Plant duplication, inline room chapters, plant detail image display, care basics deduplication, Add/Edit required fields, photo/AI discoverability, and approved logo usage.
-- Preserve existing auth, ownership, reminder, AI, calendar, and schema behavior.
-
-## Non-Goals
-
-- Do not implement Outlook, bidirectional sync, calendar-owned reminder truth, generic tasks, notification delivery, AI scheduling, health diagnosis, or broad scheduler settings without a new approved slice.
-- Do not add onboarding, room management settings, persistent room schema, room dropdown data model, Health Check, landing page overhaul, Google Calendar relocation, pre-save PlantNet identification, AI diagnosis, calendar-first reminder behavior, schema changes, RLS changes, or new dependencies in Slice 08.
-- Do not change dependencies, schema, auth/session handling, RLS assumptions, AI behavior, reminder behavior, or calendar sync behavior.
-
-## Acceptance Criteria
-
-- Primary buttons are readable.
-- Home Water action shows a droplet icon with the visible label “Water”.
-- Home Snooze action shows an alarm icon with the visible label “Snooze”.
-- Home top area has one Add Plant entry point.
-- Home By room shows plants inline under room chapters, including Unassigned.
-- Water early and Snooze use existing actions only.
-- Plant detail uploaded photos display cleanly on desktop and mobile.
-- Care basics appear once on plant detail.
-- Required Add/Edit fields are visibly marked and validation errors are understandable.
-- Photo upload and AI-assisted identification remain reachable from owned plant detail.
-- Approved brand asset is used in visible app surfaces without replacing plant content as the focus.
-- Empty/error states remain calm and recoverable.
-- Validation gates pass.
-
-## Validation Expectations
-
-For implementation slices, run:
-
-- `npm run typecheck` if a typecheck script exists.
-- `npm test` if a test script exists.
-- `npm run build`.
-- `npm run lint` if present.
-
-Stop if review finds ownership, migration, provider, or validation issues.
+No next slice has been selected. The new onboarding, rooms, settings, and photo-first Add Plant campaign doc is a draft/planned campaign, not an approved active slice.
 
 ## Next Recommended Action
 
-Recommended next action: validate `ui-redesign/08-final-qa-polish`, fast-forward merge the completed stack into `main`, push `main`, then delete the reviewed `ui-redesign/*` campaign branches locally and remotely after confirming `main` contains the final patch.
+Review and evolve `docs/campaigns/onboarding-rooms-settings-photo-first-ai.md`, then choose the first slice before implementation begins.
+
+## Validation Expectations
+
+For future implementation slices, run the scripts that exist in `package.json`:
+
+- `npm run typecheck` if present.
+- `npm test` if present.
+- `npm run build`.
+- `npm run lint` if present.
+
+For docs-only cleanup, use targeted doc consistency searches instead of app build validation.

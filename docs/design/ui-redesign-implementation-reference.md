@@ -25,7 +25,7 @@ docs/design/ui-redesign-visual-reference.md
 Campaign doc:
 
 ```txt
-docs/campaigns/ui-redesign-ux-overhaul.md
+docs/campaigns/archived/ui-redesign-ux-overhaul.md
 ```
 
 Brand reference:

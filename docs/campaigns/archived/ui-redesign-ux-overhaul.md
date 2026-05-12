@@ -1,6 +1,8 @@
 # UI Redesign UX Overhaul Campaign
 
-Status: **complete locally through `ui-redesign/08-final-qa-polish` and ready for main merge**.
+Status: **archived; completed and merged to `main`**.
+
+Archive note: this file is historical context for the completed UI redesign campaign. Current implementation truth lives in [Product](../../product.md), [Architecture](../../architecture.md), [Roadmap](../../roadmap.md), and [Current Task](../../current-task.md).
 
 ## Goal
 
@@ -168,7 +170,7 @@ Acceptance criteria:
 - `docs/design/ui-redesign-implementation-reference.md` exists.
 - `docs/design/plant-care-brand-reference.md` exists.
 - final mockups exist under `docs/design/mockups/`.
-- `docs/campaigns/ui-redesign-ux-overhaul.md` exists.
+- `docs/campaigns/archived/ui-redesign-ux-overhaul.md` exists.
 - Docs are internally consistent.
 
 Validation:
@@ -455,11 +457,11 @@ Deferred:
 
 ### Slice 8: Final QA Polish
 
-Status: complete on `ui-redesign/08-final-qa-polish`.
+Status: complete and merged.
 
 Goal:
 
-Apply the final narrow QA patch requested before merging the full UI Redesign UX Overhaul stack into `main`.
+Apply the final narrow QA patch before merging the full UI Redesign UX Overhaul stack into `main`.
 
 Scope completed:
 
@@ -478,8 +480,8 @@ Validation:
 
 Merge and cleanup:
 
-- The campaign is ready for a fast-forward merge into `main` after final validation.
-- Branch cleanup should run only after `main` is validated, pushed, and confirmed to contain `ui-redesign/08-final-qa-polish`.
+- The campaign was fast-forward merged into `main` after final validation.
+- Campaign branches were cleaned up after `main` was pushed and confirmed to contain the last campaign commit.
 
 ## Campaign QA checklist
 
@@ -515,7 +517,7 @@ Every implementation slice should update:
 
 ```txt
 docs/current-task.md
-docs/campaigns/ui-redesign-ux-overhaul.md
+docs/campaigns/archived/ui-redesign-ux-overhaul.md
 ```
 
 Update product/architecture/roadmap only when the slice changes product status, architecture, route structure, integration behavior, milestone status, scope, or sequencing.

@@ -48,6 +48,7 @@ This document tracks product sequencing and slice status. Stable product directi
 ### Planned
 
 - No additional v1 feature slice is active.
+- The onboarding, rooms, settings, and photo-first Add Plant campaign is drafted, but no first slice has been selected.
 
 ### Deferred
 
@@ -64,9 +65,13 @@ Active campaign:
 
 Completed campaigns:
 
-- [UI Redesign UX Overhaul Campaign](campaigns/ui-redesign-ux-overhaul.md)
+- [UI Redesign UX Overhaul Campaign](campaigns/archived/ui-redesign-ux-overhaul.md)
 - [Plant Profile + Watering Foundation Campaign](campaigns/archived/plant-profile-watering-foundation.md)
 - [Photo Identification + Reminder Sync Campaign](campaigns/archived/photo-identification-reminder-sync.md)
+
+Draft / candidate campaigns:
+
+- [Onboarding, Rooms, Settings, and Photo-First Add Plant](campaigns/onboarding-rooms-settings-photo-first-ai.md) — planned / not started; no selected first slice.
 
 ## Phase 0: Foundation
 
