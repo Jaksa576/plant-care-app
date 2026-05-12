@@ -24,7 +24,7 @@ type AuthFormProps = {
 const signedOutFeedback: FeedbackState = {
   tone: "success",
   title: "Signed out",
-  message: "You have been signed out and the app is locked again until you sign back in.",
+  message: "You are signed out. Sign in again when you are ready.",
 };
 
 const missingEnvFeedback: FeedbackState = {
@@ -153,24 +153,27 @@ export function AuthForm({
   const isDisabled = isSubmitting || !supabaseConfigured;
 
   return (
-    <div className="w-full max-w-md rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface)] p-6 shadow-[var(--shadow)] backdrop-blur sm:p-8">
+    <div className="w-full rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface)] p-6 shadow-[var(--shadow)] backdrop-blur sm:p-8">
       <StatusPill tone={supabaseConfigured ? "success" : "warning"}>
-        {supabaseConfigured ? "Supabase auth ready" : "Supabase setup needed"}
+        {supabaseConfigured ? "Account access" : "Supabase setup needed"}
       </StatusPill>
 
-      <h1 className="mt-5 text-3xl font-semibold">Welcome back to your plant care space.</h1>
+      <h1 className="mt-5 text-3xl font-semibold leading-tight">
+        {mode === "sign-in" ? "Sign in to Plant Care." : "Create your Plant Care account."}
+      </h1>
       <p className="mt-3 text-sm leading-7 text-[color:var(--muted)] sm:text-base">
-        Sign in to reach your protected plant collection, or create your account so every
-        manual plant record belongs to a real signed-in user.
+        {mode === "sign-in"
+          ? "Open your plant log and keep today's watering clear."
+          : "Start a private plant log for watering, rooms, photos, and notes."}
       </p>
 
       <div className="mt-7 grid grid-cols-2 rounded-full border border-[color:var(--border)] bg-white/70 p-1">
         <button
           type="button"
           onClick={() => setMode("sign-in")}
-          className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+          className={`rounded-full px-2 py-2 text-sm font-semibold whitespace-nowrap transition sm:px-4 ${
             mode === "sign-in"
-              ? "bg-[color:var(--accent)] text-white"
+              ? "bg-[color:var(--accent-ink)] text-white"
               : "text-[color:var(--muted)] hover:bg-[color:var(--accent-soft)]"
           }`}
         >
@@ -179,9 +182,9 @@ export function AuthForm({
         <button
           type="button"
           onClick={() => setMode("sign-up")}
-          className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+          className={`rounded-full px-2 py-2 text-sm font-semibold whitespace-nowrap transition sm:px-4 ${
             mode === "sign-up"
-              ? "bg-[color:var(--accent)] text-white"
+              ? "bg-[color:var(--accent-ink)] text-white"
               : "text-[color:var(--muted)] hover:bg-[color:var(--accent-soft)]"
           }`}
         >
@@ -204,7 +207,7 @@ export function AuthForm({
             autoComplete="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            className="rounded-[1.25rem] border border-[color:var(--border)] bg-white px-4 py-3 text-base outline-none transition focus:border-[color:var(--accent)]"
+            className="rounded-[1.25rem] border border-[color:var(--border)] bg-white px-4 py-3 text-base outline-none transition focus:border-[color:var(--accent-ink)]"
             placeholder="you@example.com"
             disabled={isDisabled}
             required
@@ -218,7 +221,7 @@ export function AuthForm({
             autoComplete={mode === "sign-in" ? "current-password" : "new-password"}
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            className="rounded-[1.25rem] border border-[color:var(--border)] bg-white px-4 py-3 text-base outline-none transition focus:border-[color:var(--accent)]"
+            className="rounded-[1.25rem] border border-[color:var(--border)] bg-white px-4 py-3 text-base outline-none transition focus:border-[color:var(--accent-ink)]"
             placeholder={mode === "sign-in" ? "Enter your password" : "Choose a secure password"}
             disabled={isDisabled}
             required
@@ -228,7 +231,7 @@ export function AuthForm({
         <button
           type="submit"
           disabled={isDisabled}
-          className="mt-2 inline-flex items-center justify-center rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+          className="mt-2 inline-flex min-h-[var(--tap-target)] items-center justify-center rounded-full bg-[color:var(--accent-ink)] px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(20,90,93,0.18)] transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isSubmitting
             ? mode === "sign-in"
@@ -242,8 +245,8 @@ export function AuthForm({
 
       <p className="mt-5 text-sm leading-6 text-[color:var(--muted)]">
         {mode === "sign-in"
-          ? "Use the account tied to your future plant collection."
-          : "If email confirmation is enabled in Supabase, you will confirm first and then sign in."}
+          ? "Use the account tied to your plant collection."
+          : "If email confirmation is on, check your inbox before signing in."}
       </p>
     </div>
   );

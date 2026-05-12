@@ -113,6 +113,7 @@ Implemented scope:
 - Hero with approved watering-first copy, static Today preview, botanical/photo-inspired visual treatment, and photo-first note.
 - Core loop, room organization, trust/AI restraint, and final CTA sections.
 - Existing auth routing preserved: signed-out CTAs go to `/login`; signed-in CTAs go to `/app`.
+- Follow-up `/login` visual and copy refresh to match the approved public/app design while preserving Supabase email/password auth behavior.
 
 No product/architecture docs were changed because the public route structure and auth behavior are unchanged.
 

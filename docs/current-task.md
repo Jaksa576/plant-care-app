@@ -13,6 +13,7 @@
 - Google Calendar sync is implemented as a one-way reflection of app-owned watering reminders when server OAuth configuration is present.
 - The UI Redesign UX Overhaul campaign is completed, merged to `main`, and archived.
 - The public landing page redesign slice is implemented on branch `codex/landing-page-redesign` and awaiting validation/preview review before merge.
+- The same branch includes a concise login-page UX refresh to align `/login` with the approved landing/app design.
 
 ## Active Slice
 
@@ -22,6 +23,7 @@ Scope:
 
 - Public landing page at `/` only.
 - Header, hero, static Today preview, core loop, room organization, trust/AI restraint, and final CTA.
+- Login page visual/copy polish that preserves existing Supabase email/password auth behavior.
 - Approved brand mark, warm palette, Nunito Sans, and existing local icon strategy.
 
 Non-goals:
