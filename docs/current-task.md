@@ -15,6 +15,7 @@
 - User-owned room data model, nullable plant room assignments, and legacy `plants.location` backfill are implemented on Slice 2.
 - Settings room management is implemented on Slice 3.
 - Room dropdown in Add/Edit Plant and room-aware Home/Plants grouping are implemented on Slice 4.
+- Settings-managed Google Calendar integration is implemented on Slice 5.
 - The UI Redesign UX Overhaul campaign is completed, merged to `main`, and archived.
 - The public landing page redesign, concise login-page UX refresh, and installable app icon support are merged to `main`.
 
@@ -35,31 +36,35 @@ Product-owner selected implementation sequence:
 
 ## Active Slice
 
-Slice 4: Room dropdown in Add/Edit Plant.
+Slice 5: Settings-managed Google Calendar integration.
 
-Status: implemented on branch `campaign/onboarding-rooms-s4-room-plant-forms`; awaiting review/merge.
+Status: implemented on branch `campaign/onboarding-rooms-s5-calendar-settings`; awaiting review/merge.
 
 Completed work:
 
-- Add Plant and Edit Plant now load active user-owned rooms.
-- Plant forms include a managed room dropdown, Unassigned option, inline Add room field, and legacy location note.
-- Plant create/update verifies selected rooms server-side and creates inline rooms under the signed-in user before saving the plant.
-- Home and Plants grouping use active managed room names first, then legacy `plants.location`, then Unassigned.
-- Plant profile room display uses the same managed-room-first fallback.
-- Accepted Pl@ntNet name updates preserve existing `room_id`.
+- Added Settings-level Google Calendar connect/disconnect/status controls under Reminders & Calendar.
+- Settings shows configured/disconnected/connected state, mirrored reminder count, last sync/status metadata, and sync issues where existing records provide them.
+- Google OAuth missing-config, success, cancellation, and error statuses now return to Settings.
+- Removed the heavy plant-detail Google Calendar setup panel.
+- Plant detail now shows only lightweight calendar status when relevant and links to Settings for integration management.
+- Plant-level reminder panels remain responsible for reminder state; app reminders remain the source of truth.
 
-Transition behavior:
+Calendar behavior:
 
-- `plants.location` is still preserved and editable as a legacy location note.
-- Plants can remain Unassigned with `room_id = null`.
-- Inline room creation is optional; selecting an existing room or leaving Unassigned remains low-friction.
+- Google Calendar remains a one-way reflection of enabled app-owned watering reminders.
+- Disconnecting Google preserves app reminders and attempts provider cleanup of known app-managed events.
+- Missing Google server configuration degrades to a Settings warning without affecting reminders.
 
 Non-goals preserved:
 
 - No room restore UI.
 - No room sorting/reordering UI.
 - No deletion of `plants.location`.
-- No room floorplan, room reminders, AI, photo, or calendar changes.
+- No bidirectional calendar sync.
+- No Outlook sync.
+- No calendar-owned reminders.
+- No recurring Google events or non-watering calendar events.
+- No reminder model redesign.
 
 ## Validation Results
 
@@ -68,11 +73,11 @@ Non-goals preserved:
 - `npm run typecheck`: not run; no script exists.
 - `npm test`: not run; no script exists.
 - Supabase migrations: product owner reported Slice 2 room migrations were run successfully before Slice 4 resumed.
-- Migration/RLS review: plant form actions verify selected rooms through user-scoped room queries; inline room creation derives `user_id` from the signed-in session; the database trigger from Slice 2 still blocks cross-user or archived-room plant assignments.
+- Migration/RLS review: no schema changes in Slice 5. Google Calendar connection/event-link reads and disconnect cleanup stay scoped by signed-in `user_id`; existing reminder-to-calendar sync still starts from user-owned plants and reminders.
 
 ## Next Recommended Action
 
-After Slice 4 is reviewed and merged, start Slice 5: Settings-managed Google Calendar integration on a new branch from the latest appropriate base.
+After Slice 5 is reviewed and merged, start Slice 6: Photo-first Add Plant foundation on a new branch from the latest appropriate base.
 
 ## Validation Expectations
 

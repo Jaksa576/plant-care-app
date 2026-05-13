@@ -2,10 +2,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import {
-  disconnectGoogleCalendarAction,
-  syncGoogleCalendarReminderAction,
-} from "@/app/app/integrations/google-calendar/actions";
-import {
   archivePlantAction,
   disableWateringReminderAction,
   identifyPlantPhotoAction,
@@ -25,7 +21,7 @@ import {
   LeafIcon,
   RoomIcon,
 } from "@/components/icons";
-import { GoogleCalendarSyncPanel } from "@/components/google-calendar-sync-panel";
+import { GoogleCalendarPlantStatus } from "@/components/google-calendar-plant-status";
 import { PlantIdentificationPanel } from "@/components/plant-identification-form";
 import { PlantDetailActions } from "@/components/plant-detail-actions";
 import { PlantPhotoForm } from "@/components/plant-photo-form";
@@ -325,13 +321,11 @@ function PlantProfile({
         />
       </div>
 
-      <GoogleCalendarSyncPanel
+      <GoogleCalendarPlantStatus
         configured={googleCalendarConfigured}
         connection={googleCalendarConnection}
         eventLink={googleCalendarEventLink}
         reminderEnabled={Boolean(reminder?.enabled && reminder.next_reminder_date)}
-        syncAction={syncGoogleCalendarReminderAction.bind(null, plant.id)}
-        disconnectAction={disconnectGoogleCalendarAction}
       />
     </div>
   );

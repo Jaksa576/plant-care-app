@@ -3,12 +3,20 @@ import {
   createRoomAction,
   renameRoomAction,
 } from "@/app/app/settings/actions";
+import { disconnectGoogleCalendarAction } from "@/app/app/integrations/google-calendar/actions";
 import { AppShell } from "@/components/app-shell";
-import { BellIcon, CalendarIcon, GearIcon, RoomIcon, SproutIcon } from "@/components/icons";
+import { GoogleCalendarSettingsPanel } from "@/components/google-calendar-settings-panel";
+import { BellIcon, GearIcon, RoomIcon, SproutIcon } from "@/components/icons";
 import { SignOutButton } from "@/components/sign-out-button";
 import { StatusPill } from "@/components/status-pill";
 import { getAuthState } from "@/lib/auth";
+import { getGoogleCalendarConfig } from "@/lib/env";
+import {
+  getGoogleCalendarConnection,
+  listGoogleCalendarEventLinksForUser,
+} from "@/lib/google-calendar/data";
 import { listPlantsForUser } from "@/lib/plants/data";
+import type { GoogleCalendarEventLinkRecord } from "@/lib/plants/types";
 import { listPlantRoomsForUser } from "@/lib/rooms/data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import Link from "next/link";
@@ -17,6 +25,7 @@ import { redirect } from "next/navigation";
 type SettingsPageProps = {
   searchParams: Promise<{
     rooms?: string;
+    googleCalendar?: string;
   }>;
 };
 
@@ -39,6 +48,32 @@ function getRoomStatusMessage(status?: string) {
   }
 }
 
+function getLatestGoogleCalendarEventSync(links: GoogleCalendarEventLinkRecord[]) {
+  let latest: GoogleCalendarEventLinkRecord | null = null;
+
+  for (const link of links) {
+    if (!latest) {
+      latest = link;
+      continue;
+    }
+
+    const linkTime = link.last_synced_at ? Date.parse(link.last_synced_at) : 0;
+    const latestTime = latest.last_synced_at ? Date.parse(latest.last_synced_at) : 0;
+
+    if (linkTime > latestTime) {
+      latest = link;
+    }
+  }
+
+  return latest
+    ? {
+        status: latest.last_sync_status,
+        error: latest.last_sync_error,
+        syncedAt: latest.last_synced_at,
+      }
+    : null;
+}
+
 export default async function SettingsPage({ searchParams }: SettingsPageProps) {
   const [authState, params] = await Promise.all([getAuthState(), searchParams]);
 
@@ -56,12 +91,16 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
     redirect("/login?missingEnv=1");
   }
 
-  const [roomsResult, plantsResult] = await Promise.all([
-    listPlantRoomsForUser(supabase, authState.user.id),
-    listPlantsForUser(supabase, authState.user.id),
-  ]);
+  const [roomsResult, plantsResult, calendarConnectionResult, calendarEventLinksResult] =
+    await Promise.all([
+      listPlantRoomsForUser(supabase, authState.user.id),
+      listPlantsForUser(supabase, authState.user.id),
+      getGoogleCalendarConnection(supabase, authState.user.id),
+      listGoogleCalendarEventLinksForUser(supabase, authState.user.id),
+    ]);
   const rooms = roomsResult.data ?? [];
   const plants = plantsResult.data ?? [];
+  const calendarEventLinks = calendarEventLinksResult.data ?? [];
   const roomPlantCounts = plants.reduce<Record<string, number>>((counts, plant) => {
     if (plant.room_id) {
       counts[plant.room_id] = (counts[plant.room_id] ?? 0) + 1;
@@ -70,6 +109,8 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
     return counts;
   }, {});
   const roomStatus = getRoomStatusMessage(params.rooms);
+  const googleCalendarConfigured = Boolean(getGoogleCalendarConfig());
+  const latestEventSync = getLatestGoogleCalendarEventSync(calendarEventLinks);
 
   return (
     <AppShell
@@ -230,19 +271,14 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
           </div>
         </section>
 
-        <section className="rounded-[1.5rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] p-5">
-          <div className="flex items-start gap-3">
-            <span className="mt-1 text-[color:var(--accent)]">
-              <CalendarIcon className="h-5 w-5" />
-            </span>
-            <div>
-              <h2 className="text-lg font-semibold">Google Calendar</h2>
-              <p className="mt-1 text-sm leading-6 text-[color:var(--muted)]">
-                Calendar events mirror Plant Care reminders. Plant Care stays the source of truth.
-              </p>
-            </div>
-          </div>
-        </section>
+        <GoogleCalendarSettingsPanel
+          configured={googleCalendarConfigured}
+          connection={calendarConnectionResult.data ?? null}
+          linkedEventCount={calendarEventLinks.length}
+          latestEventSync={latestEventSync}
+          queryStatus={params.googleCalendar}
+          disconnectAction={disconnectGoogleCalendarAction}
+        />
       </div>
     </AppShell>
   );

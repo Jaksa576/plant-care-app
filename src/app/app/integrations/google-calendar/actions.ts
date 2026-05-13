@@ -130,6 +130,7 @@ export async function disconnectGoogleCalendarAction(
   const connectionDeleteResult = await deleteGoogleCalendarConnection(supabase, user.id);
 
   revalidatePath("/app");
+  revalidatePath("/app/settings");
 
   if (connectionDeleteResult.error) {
     return {

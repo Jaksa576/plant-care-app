@@ -21,7 +21,7 @@ This document describes implemented technical shape and architectural boundaries
 - `/app/plants` is the protected redesigned Plants tab for browsing the full active collection by room.
 - `/app/plants/[plantId]` is the protected redesigned plant detail/profile inspector for a single user-owned plant.
 - `/app/plants/[plantId]/edit` is the protected plant edit route.
-- `/app/settings` is a protected settings route for account and app-level controls, including setup review, room management, reminders, and Google Calendar guidance.
+- `/app/settings` is a protected settings route for account and app-level controls, including setup review, room management, reminders, and Google Calendar connect/disconnect/status.
 - The signed-in shell includes the Home / Plants / Settings bottom app bar, persistent Add Plant access, and sign-out where appropriate.
 - Manual plant create, profile, edit, list, and archive flows are implemented.
 - The Plants tab groups active plants by managed room name first, then legacy `location`, then `Unassigned`, and preserves user-owned collection scoping.
@@ -34,13 +34,13 @@ This document describes implemented technical shape and architectural boundaries
 - The signed-in Home route presents the redesigned Today surface with Needs water, By room, and Recent care sections.
 - Dashboard urgency uses enabled app-owned reminder dates first, then falls back to watering interval calculations.
 - Plant profiles show watering history from watering events.
-- Plant profiles present a photo/identity hero, primary Water now action, secondary Snooze/Reminder actions, care basics rows, watering history, photo/identification, app reminder, Google Calendar sync, edit, and archive surfaces.
+- Plant profiles present a photo/identity hero, primary Water now action, secondary Snooze/Reminder actions, care basics rows, watering history, photo/identification, app reminder, lightweight Google Calendar status when relevant, edit, and archive surfaces.
 - Plant profiles support one optional primary photo per owned plant.
 - Dashboard cards show a small plant thumbnail or calm fallback.
 - Plant profiles include an optional Pl@ntNet-backed identification helper when a primary photo exists.
 - Plant profiles include an app-owned watering reminder panel.
-- Plant profiles include a compact Google Calendar sync panel when reminders are present.
-- Google Calendar sync is implemented as a one-way reflection of app-owned reminders.
+- Settings includes Google Calendar connection status, last sync/status metadata where available, connect, and disconnect controls.
+- Google Calendar sync is implemented as a one-way reflection of app-owned reminders; setup and disconnect are app-level Settings controls.
 - First-run onboarding is implemented with per-user completion state. Signed-in users with no plants and no completed onboarding state are routed from Today to onboarding; users with plants are not redirected, and Settings can revisit setup without creating a loop.
 
 ## Auth And Session Pattern
@@ -188,6 +188,8 @@ Google OAuth routes:
 - `/app/integrations/google-calendar/connect`
 - `/app/integrations/google-calendar/callback`
 
+OAuth success, cancellation, missing-config, and error statuses redirect back to `/app/settings` because calendar setup is account/app-level behavior.
+
 Server-only Google configuration:
 
 - `GOOGLE_CLIENT_ID`
@@ -210,6 +212,8 @@ Reminder-to-event linkage lives in `google_calendar_event_links`:
 The app creates or updates one upcoming all-day Google Calendar event per active watering reminder. The event title uses `Water [plant label]`, and the description says it was created from Plant Care and that Plant Care remains the source of truth. Recurring Google events, bidirectional sync, Outlook sync, and non-watering calendar events are not implemented.
 
 If Google sync fails, the Plant Care reminder remains saved and authoritative. Disconnecting Google preserves app reminders, stops future sync, and attempts to delete known app-managed Google Calendar events. If provider cleanup fails, the app still disconnects and reports a recoverable cleanup warning.
+
+Plant detail keeps plant-level reminder editing and only shows lightweight calendar status when relevant: reminder on/off, whether an event has been mirrored, last sync/status metadata where available, and a link to manage the integration in Settings. Plant detail does not own Google Calendar connect/disconnect setup.
 
 ### Photos And AI
 

@@ -20,7 +20,7 @@ export async function GET(request: Request) {
   const config = getGoogleCalendarConfig();
 
   if (!config) {
-    return NextResponse.redirect(new URL("/app?googleCalendar=missing-config", appUrl));
+    return NextResponse.redirect(new URL("/app/settings?googleCalendar=missing-config", appUrl));
   }
 
   const state = createGoogleOAuthState();

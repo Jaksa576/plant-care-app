@@ -2,7 +2,7 @@
 
 Status: **active**.
 
-Slice 4 is implemented on branch `campaign/onboarding-rooms-s4-room-plant-forms`; awaiting review/merge.
+Slice 5 is implemented on branch `campaign/onboarding-rooms-s5-calendar-settings`; awaiting review/merge.
 
 Product-owner selected implementation sequence for this autonomous campaign run:
 
@@ -125,11 +125,11 @@ The app already has:
 
 ### Current active status
 
-The product owner selected this campaign for implementation. Slice 4 is implemented on `campaign/onboarding-rooms-s4-room-plant-forms` and awaits review/merge.
+The product owner selected this campaign for implementation. Slice 5 is implemented on `campaign/onboarding-rooms-s5-calendar-settings` and awaits review/merge.
 
 ### Roadmap status
 
-The roadmap lists this campaign as active, with Slice 4 room dropdown in Add/Edit Plant implemented and Settings-managed Google Calendar planned next.
+The roadmap lists this campaign as active, with Slice 5 Settings-managed Google Calendar implemented and photo-first Add Plant foundation planned next.
 
 ### AI Care Setup alignment note
 
@@ -999,7 +999,7 @@ Stop conditions:
 
 ### Slice 6 — Settings-Managed Google Calendar Integration
 
-Status: planned.
+Status: implemented on `campaign/onboarding-rooms-s5-calendar-settings`; awaiting review/merge.
 
 Goal:
 
@@ -1026,6 +1026,15 @@ Recommended copy:
 ```txt
 Plant Care reminders stay in Plant Care. Google Calendar is a one-way reflection.
 ```
+
+Completed notes:
+
+- Added Settings-level Google Calendar connect, disconnect, connection status, mirrored reminder count, last sync/status, and sync issue display.
+- Redirected Google OAuth status returns to Settings.
+- Removed the heavy plant-detail Google Calendar setup panel.
+- Added lightweight plant-detail calendar status when relevant, with integration management linked to Settings.
+- Kept reminder editing on plant detail and kept Google Calendar as a one-way reflection of app-owned reminders.
+- No schema, RLS, provider, or reminder model changes were introduced.
 
 Non-goals:
 
