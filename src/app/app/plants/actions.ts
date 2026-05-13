@@ -139,15 +139,60 @@ async function resolvePlantRoomFromForm(
   };
 }
 
+function getOptionalInitialPhoto(formData: FormData) {
+  const file = formData.get("initialPhoto");
+
+  if (!(file instanceof File) || file.size === 0) {
+    return null;
+  }
+
+  return file;
+}
+
+async function saveInitialPlantPhoto(
+  supabase: SupabaseClient,
+  userId: string,
+  plantId: string,
+  file: File,
+) {
+  const photoPath = getPlantPhotoPath(userId, plantId, file.type);
+  const uploadResult = await supabase.storage.from(PLANT_PHOTO_BUCKET).upload(photoPath, file, {
+    cacheControl: "3600",
+    contentType: file.type,
+  });
+
+  if (uploadResult.error) {
+    return false;
+  }
+
+  const updateResult = await updatePlantPrimaryPhotoForUser(supabase, userId, plantId, photoPath);
+
+  if (updateResult.error || !updateResult.data) {
+    await supabase.storage.from(PLANT_PHOTO_BUCKET).remove([photoPath]);
+    return false;
+  }
+
+  return true;
+}
+
 export async function createPlantAction(
   previousState: PlantFormState = emptyPlantFormState,
   formData: FormData,
 ): Promise<PlantFormState> {
   void previousState;
   const parsed = parsePlantFormData(formData);
+  const initialPhoto = getOptionalInitialPhoto(formData);
 
   if (!parsed.success) {
     return parsed.state;
+  }
+
+  if (initialPhoto) {
+    const photoValidationError = getPlantPhotoValidationError(initialPhoto);
+
+    if (photoValidationError) {
+      return createPlantFormErrorState(parsed.values, photoValidationError);
+    }
   }
 
   const { supabase, user } = await getSignedInPlantContext();
@@ -172,6 +217,14 @@ export async function createPlantAction(
   }
 
   revalidatePath("/app");
+
+  if (initialPhoto) {
+    const photoSaved = await saveInitialPlantPhoto(supabase, user.id, result.data.id, initialPhoto);
+
+    revalidatePath(`/app/plants/${result.data.id}`);
+    redirect(`/app/plants/${result.data.id}?created=1&photo=${photoSaved ? "saved" : "failed"}`);
+  }
+
   redirect(`/app/plants/${result.data.id}?created=1`);
 }
 

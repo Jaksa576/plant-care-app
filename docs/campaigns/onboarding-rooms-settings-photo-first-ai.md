@@ -2,7 +2,7 @@
 
 Status: **active**.
 
-Slice 5 is implemented on branch `campaign/onboarding-rooms-s5-calendar-settings`; awaiting review/merge.
+Slice 6 is implemented on branch `campaign/onboarding-rooms-s6-photo-first-add`; awaiting review/merge.
 
 Product-owner selected implementation sequence for this autonomous campaign run:
 
@@ -125,11 +125,11 @@ The app already has:
 
 ### Current active status
 
-The product owner selected this campaign for implementation. Slice 5 is implemented on `campaign/onboarding-rooms-s5-calendar-settings` and awaits review/merge.
+The product owner selected this campaign for implementation. Slice 6 is implemented on `campaign/onboarding-rooms-s6-photo-first-add` and awaits review/merge.
 
 ### Roadmap status
 
-The roadmap lists this campaign as active, with Slice 5 Settings-managed Google Calendar implemented and photo-first Add Plant foundation planned next.
+The roadmap lists this campaign as active, with Slice 6 photo-first Add Plant foundation implemented and pre-save Pl@ntNet identification planned next.
 
 ### AI Care Setup alignment note
 
@@ -1147,7 +1147,7 @@ Stop conditions:
 
 ### Slice 8 — Photo-First Add Plant Foundation
 
-Status: planned.
+Status: implemented on `campaign/onboarding-rooms-s6-photo-first-add`; awaiting review/merge.
 
 Goal:
 
@@ -1179,6 +1179,16 @@ created_at timestamptz not null default now()
 expires_at timestamptz not null
 consumed_at timestamptz null
 ```
+
+Completed notes:
+
+- Add Plant now offers Add manually and Start with a photo entry choices.
+- Manual Add Plant remains fully available and does not require photo, rooms, AI, reminders, or calendar setup.
+- Photo-first users can choose an optional photo before final save.
+- The server creates the signed-in user's plant first, then uploads the optional photo to the existing private owner/plant-scoped Storage path and saves it as the primary photo.
+- If photo upload fails after plant creation, the plant remains saved and the profile shows a recoverable message.
+- No public storage, draft plant records, staged photo table, or pre-save Pl@ntNet call was introduced.
+- Abandoning Add Plant before save leaves no staged photo object to clean up.
 
 Non-goals:
 

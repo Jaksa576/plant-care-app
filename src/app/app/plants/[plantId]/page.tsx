@@ -69,6 +69,7 @@ type PlantProfilePageProps = {
   searchParams: Promise<{
     created?: string;
     updated?: string;
+    photo?: string;
     archiveError?: string;
   }>;
 };
@@ -332,7 +333,7 @@ function PlantProfile({
 }
 
 export default async function PlantProfilePage({ params, searchParams }: PlantProfilePageProps) {
-  const [{ plantId }, { created, updated, archiveError }, authState] = await Promise.all([
+  const [{ plantId }, { created, updated, photo, archiveError }, authState] = await Promise.all([
     params,
     searchParams,
     getAuthState(),
@@ -403,7 +404,19 @@ export default async function PlantProfilePage({ params, searchParams }: PlantPr
           <div className="rounded-[1.75rem] border border-emerald-200 bg-emerald-50 px-5 py-4">
             <StatusPill tone="success">Plant saved</StatusPill>
             <p className="mt-3 text-sm leading-7 text-emerald-950/80">
-              Your plant profile is ready. You can refine the details any time.
+              {photo === "saved"
+                ? "Your plant profile and photo are ready. You can refine the details any time."
+                : "Your plant profile is ready. You can refine the details any time."}
+            </p>
+          </div>
+        ) : null}
+
+        {photo === "failed" ? (
+          <div className="rounded-[1.75rem] border border-amber-200 bg-amber-50 px-5 py-4">
+            <StatusPill tone="warning">Photo not saved</StatusPill>
+            <p className="mt-3 text-sm leading-7 text-amber-950/80">
+              The plant was saved, but the optional photo did not upload. You can add it from
+              the Photo section below.
             </p>
           </div>
         ) : null}

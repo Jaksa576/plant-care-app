@@ -18,6 +18,8 @@ type PlantFormProps = {
   description: string;
   initialValues?: PlantFormValues;
   rooms?: PlantRoomRecord[];
+  allowInitialPhoto?: boolean;
+  startsWithPhoto?: boolean;
 };
 
 type ReviewItemProps = {
@@ -183,6 +185,8 @@ export function PlantForm({
   description,
   initialValues,
   rooms = [],
+  allowInitialPhoto = false,
+  startsWithPhoto = false,
 }: PlantFormProps) {
   const startingState = {
     ...emptyPlantFormState,
@@ -209,14 +213,20 @@ export function PlantForm({
   return (
     <div className="flex flex-col gap-6">
       <section className="border-b border-[color:var(--border-soft)] pb-5">
-        <StatusPill>{step === "edit" ? "Manual entry" : "Review before save"}</StatusPill>
+        <StatusPill>
+          {step === "edit"
+            ? startsWithPhoto
+              ? "Photo first"
+              : "Manual entry"
+            : "Review before save"}
+        </StatusPill>
         <h2 className="mt-4 text-3xl font-semibold">{title}</h2>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-[color:var(--muted)] sm:text-base">
           {description}
         </p>
         <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] px-4 py-2 text-sm font-semibold text-[color:var(--muted)]">
           <CameraIcon className="h-4 w-4 text-[color:var(--accent)]" />
-          Photo can be added after save
+          {allowInitialPhoto ? "Photo is optional" : "Photo can be added after save"}
         </div>
       </section>
 
@@ -230,12 +240,37 @@ export function PlantForm({
         </div>
       ) : null}
 
-      <form action={formAction} className="flex flex-col gap-6">
+      <form
+        action={formAction}
+        encType={allowInitialPhoto ? "multipart/form-data" : undefined}
+        className="flex flex-col gap-6"
+      >
         <div
           className={`grid gap-5 ${
             step === "review" && state.status !== "error" ? "hidden" : ""
           }`}
         >
+          {allowInitialPhoto ? (
+            <FormSection icon={<CameraIcon className="h-5 w-5" />} title="Photo">
+              <div className="grid gap-3">
+                <label className="flex flex-col gap-2 text-sm font-medium text-[color:var(--foreground)]">
+                  <span>{startsWithPhoto ? "Start with a photo" : "Optional photo"}</span>
+                  <input
+                    name="initialPhoto"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    capture="environment"
+                    className="w-full rounded-[1rem] border border-[color:var(--border)] bg-white/85 px-4 py-3 text-sm font-normal text-[color:var(--foreground)] outline-none transition file:mr-4 file:rounded-full file:border-0 file:bg-[color:var(--accent-soft)] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[color:var(--foreground)] focus:border-[color:var(--accent)] focus:ring-2 focus:ring-[color:var(--accent-soft)]"
+                  />
+                </label>
+                <p className="text-sm leading-6 text-[color:var(--muted)]">
+                  A photo helps you recognize this plant. Identification suggestions stay optional
+                  and are not part of this save step.
+                </p>
+              </div>
+            </FormSection>
+          ) : null}
+
           <FormSection icon={<LeafIcon className="h-5 w-5" />} title="Plant identity">
             <div className="grid gap-4 sm:grid-cols-2">
               <FormField
@@ -358,7 +393,10 @@ export function PlantForm({
           <div className="mt-6 rounded-[1.25rem] border border-[color:var(--border-soft)] bg-[color:var(--stone)] p-5">
             <p className="text-sm font-semibold text-[color:var(--foreground)]">Before you save</p>
             <ul className="mt-4 space-y-3 text-sm leading-7 text-[color:var(--muted)]">
-              <li>This is a manually entered plant record.</li>
+              <li>
+                This is a user-reviewed plant record
+                {allowInitialPhoto ? " with an optional photo." : "."}
+              </li>
               <li>AI suggestions are saved only after you review and accept them.</li>
               <li>No reminders have been scheduled yet.</li>
               <li>Watering guidance stays editable and can be changed later.</li>

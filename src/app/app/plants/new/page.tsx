@@ -5,12 +5,19 @@ import { createPlantAction } from "@/app/app/plants/actions";
 import { AppShell } from "@/components/app-shell";
 import { PlantForm } from "@/components/plant-form";
 import { SignOutButton } from "@/components/sign-out-button";
+import { CameraIcon, LeafIcon } from "@/components/icons";
 import { getAuthState } from "@/lib/auth";
 import { listPlantRoomsForUser } from "@/lib/rooms/data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-export default async function NewPlantPage() {
-  const authState = await getAuthState();
+type NewPlantPageProps = {
+  searchParams: Promise<{
+    start?: string;
+  }>;
+};
+
+export default async function NewPlantPage({ searchParams }: NewPlantPageProps) {
+  const [authState, params] = await Promise.all([getAuthState(), searchParams]);
 
   if (!authState.supabaseConfigured) {
     redirect("/login?missingEnv=1");
@@ -27,6 +34,7 @@ export default async function NewPlantPage() {
   }
 
   const roomsResult = await listPlantRoomsForUser(supabase, authState.user.id);
+  const startsWithPhoto = params.start === "photo";
 
   return (
     <AppShell
@@ -43,12 +51,45 @@ export default async function NewPlantPage() {
           Back to Plants
         </Link>
 
+        <section className="rounded-[1.5rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] p-5 sm:p-6">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Link
+              href="/app/plants/new"
+              className={`flex min-h-[var(--tap-target)] items-center gap-3 rounded-[1.25rem] border px-4 py-3 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)] ${
+                startsWithPhoto
+                  ? "border-[color:var(--border)] bg-white/70 text-[color:var(--foreground)]"
+                  : "border-[color:var(--accent)] bg-[color:var(--accent-soft)] text-[color:var(--foreground)]"
+              }`}
+            >
+              <LeafIcon className="h-5 w-5 shrink-0 text-[color:var(--accent)]" />
+              Add manually
+            </Link>
+            <Link
+              href="/app/plants/new?start=photo"
+              className={`flex min-h-[var(--tap-target)] items-center gap-3 rounded-[1.25rem] border px-4 py-3 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)] ${
+                startsWithPhoto
+                  ? "border-[color:var(--accent)] bg-[color:var(--accent-soft)] text-[color:var(--foreground)]"
+                  : "border-[color:var(--border)] bg-white/70 text-[color:var(--foreground)]"
+              }`}
+            >
+              <CameraIcon className="h-5 w-5 shrink-0 text-[color:var(--accent)]" />
+              Start with a photo
+            </Link>
+          </div>
+        </section>
+
         <PlantForm
           action={createPlantAction}
           submitLabel="Save plant"
-          title="Start with the basics"
-          description="This first plant record is intentionally simple: manual details first, with an optional photo after save and no AI identification or reminders yet."
+          title={startsWithPhoto ? "Start with a photo" : "Start with the basics"}
+          description={
+            startsWithPhoto
+              ? "Add a photo first if it helps, then finish the editable plant details before saving."
+              : "Create a calm, manual plant record. Photo, AI identification, and reminders all stay optional."
+          }
           rooms={roomsResult.data ?? []}
+          allowInitialPhoto
+          startsWithPhoto={startsWithPhoto}
         />
       </div>
     </AppShell>

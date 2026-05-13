@@ -45,15 +45,15 @@ This document tracks product sequencing and slice status. Stable product directi
 - Settings room management with list, add, rename, and safe archive behavior.
 - Room dropdown in Add/Edit Plant with Unassigned, inline Add room, legacy location fallback, and room-aware Home/Plants grouping.
 - Settings-managed Google Calendar integration with connect/disconnect/status controls and lightweight plant-detail calendar status.
+- Photo-first Add Plant foundation with optional pre-save photo selection, post-create owner-scoped upload, and preserved manual entry path.
 
 ### Active
 
 - Onboarding, Rooms, Settings, and Photo-First Add Plant Foundation campaign.
-- Slice 5: Settings-managed Google Calendar integration is implemented on branch `campaign/onboarding-rooms-s5-calendar-settings`; awaiting review/merge.
+- Slice 6: Photo-first Add Plant foundation is implemented on branch `campaign/onboarding-rooms-s6-photo-first-add`; awaiting review/merge.
 
 ### Planned
 
-- Slice 6: Photo-first Add Plant foundation.
 - Slice 7: Pre-save Pl@ntNet identification.
 - Slice 8: Onboarding room/photo integration polish.
 

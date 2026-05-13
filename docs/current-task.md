@@ -16,6 +16,7 @@
 - Settings room management is implemented on Slice 3.
 - Room dropdown in Add/Edit Plant and room-aware Home/Plants grouping are implemented on Slice 4.
 - Settings-managed Google Calendar integration is implemented on Slice 5.
+- Photo-first Add Plant foundation is implemented on Slice 6.
 - The UI Redesign UX Overhaul campaign is completed, merged to `main`, and archived.
 - The public landing page redesign, concise login-page UX refresh, and installable app icon support are merged to `main`.
 
@@ -36,35 +37,36 @@ Product-owner selected implementation sequence:
 
 ## Active Slice
 
-Slice 5: Settings-managed Google Calendar integration.
+Slice 6: Photo-first Add Plant foundation.
 
-Status: implemented on branch `campaign/onboarding-rooms-s5-calendar-settings`; awaiting review/merge.
+Status: implemented on branch `campaign/onboarding-rooms-s6-photo-first-add`; awaiting review/merge.
 
 Completed work:
 
-- Added Settings-level Google Calendar connect/disconnect/status controls under Reminders & Calendar.
-- Settings shows configured/disconnected/connected state, mirrored reminder count, last sync/status metadata, and sync issues where existing records provide them.
-- Google OAuth missing-config, success, cancellation, and error statuses now return to Settings.
-- Removed the heavy plant-detail Google Calendar setup panel.
-- Plant detail now shows only lightweight calendar status when relevant and links to Settings for integration management.
-- Plant-level reminder panels remain responsible for reminder state; app reminders remain the source of truth.
+- Added Add Plant path choices for manual setup and photo-first setup.
+- Added optional photo input to Add Plant before final save.
+- Preserved manual plant creation without photo, rooms, AI, reminders, or calendar setup.
+- On save with a photo, the server creates the owned plant record first, then uploads the photo to the existing owner-scoped private Storage path and saves it as the primary photo.
+- If the optional photo upload fails, the plant remains saved and the profile shows a recoverable photo message.
+- Abandoning Add Plant before save creates no staged photo object and requires no cleanup.
 
-Calendar behavior:
+Photo behavior:
 
-- Google Calendar remains a one-way reflection of enabled app-owned watering reminders.
-- Disconnecting Google preserves app reminders and attempts provider cleanup of known app-managed events.
-- Missing Google server configuration degrades to a Settings warning without affecting reminders.
+- Photos remain private in the existing `plant-photos` bucket.
+- Optional initial photos reuse the same post-save owner/plant-scoped Storage path as profile photo uploads.
+- No public storage, draft plant records, or staged photo table were introduced in Slice 6.
 
 Non-goals preserved:
 
 - No room restore UI.
 - No room sorting/reordering UI.
 - No deletion of `plants.location`.
-- No bidirectional calendar sync.
-- No Outlook sync.
-- No calendar-owned reminders.
-- No recurring Google events or non-watering calendar events.
-- No reminder model redesign.
+- No Pl@ntNet pre-save identification yet.
+- No AI care suggestions.
+- No `care_profiles`.
+- No AI-generated watering fields.
+- No draft plant records.
+- No staged photo table because Slice 6 avoids pre-save uploads.
 
 ## Validation Results
 
@@ -73,11 +75,12 @@ Non-goals preserved:
 - `npm run typecheck`: not run; no script exists.
 - `npm test`: not run; no script exists.
 - Supabase migrations: product owner reported Slice 2 room migrations were run successfully before Slice 4 resumed.
-- Migration/RLS review: no schema changes in Slice 5. Google Calendar connection/event-link reads and disconnect cleanup stay scoped by signed-in `user_id`; existing reminder-to-calendar sync still starts from user-owned plants and reminders.
+- Environment note: `.env.local` was not copied into the Slice 6 worktree because the copy command was blocked by the approval layer; build/lint do not print secrets and can still validate code paths.
+- Migration/RLS review: no schema changes in Slice 6. Initial photo upload happens only after creating a signed-in user-owned plant, then uses the existing owner/plant-scoped private Storage path and existing Storage RLS assumptions.
 
 ## Next Recommended Action
 
-After Slice 5 is reviewed and merged, start Slice 6: Photo-first Add Plant foundation on a new branch from the latest appropriate base.
+After Slice 6 is reviewed and merged, start Slice 7: Pre-save Pl@ntNet identification on a new branch from the latest appropriate base.
 
 ## Validation Expectations
 
