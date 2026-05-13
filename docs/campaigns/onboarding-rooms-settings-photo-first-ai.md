@@ -2,7 +2,7 @@
 
 Status: **active**.
 
-Slice 1 is implemented on branch `campaign/onboarding-rooms-s1-onboarding`; awaiting review/merge.
+Slice 2 is implemented on branch `campaign/onboarding-rooms-s2-room-model`; awaiting review/merge.
 
 Product-owner selected implementation sequence for this autonomous campaign run:
 
@@ -125,11 +125,11 @@ The app already has:
 
 ### Current active status
 
-The product owner selected this campaign for implementation. Slice 1 is implemented on `campaign/onboarding-rooms-s1-onboarding` and awaits review/merge.
+The product owner selected this campaign for implementation. Slice 2 is implemented on `campaign/onboarding-rooms-s2-room-model` and awaits review/merge.
 
 ### Roadmap status
 
-The roadmap lists this campaign as active, with Slice 1 implemented and Slice 2 room data model and migration planned next.
+The roadmap lists this campaign as active, with Slice 2 implemented and Slice 3 room management in Settings planned next.
 
 ### AI Care Setup alignment note
 
@@ -750,7 +750,7 @@ Stop conditions:
 
 ### Slice 3 — Room Data Model and Safe Backfill
 
-Status: planned.
+Status: implemented on `campaign/onboarding-rooms-s2-room-model`; awaiting review/merge.
 
 Goal:
 
@@ -786,20 +786,32 @@ Acceptance criteria:
 
 - Existing plant location data is preserved.
 - Rooms are user-owned.
-- Users cannot read/write other users’ rooms.
+- Users cannot read/write other users' rooms.
 - Plants can remain Unassigned.
 - Room backfill is migration-safe.
 - Existing Home/Plants grouping still works after migration.
-- Build and migration validation pass.
+- Build validation passes.
+
+Completed notes:
+
+- Added additive `plant_rooms` migration with owner-scoped RLS.
+- Added nullable `plants.room_id` with a foreign key to `plant_rooms`.
+- Backfilled rooms from distinct non-empty trimmed `plants.location` values per user.
+- Backfilled `plants.room_id` where legacy location matched an active room name.
+- Preserved `plants.location` unchanged for compatibility and rollback safety.
+- Added database trigger preventing plants from referencing cross-user or archived rooms.
+- Added typed room data helpers for list/create operations.
+- Updated plant record typing with nullable `room_id`.
+- Did not add Settings room management, Add/Edit room dropdowns, Home/Plants grouping changes, or destructive location cleanup.
 
 Validation:
 
-- `npm run typecheck` if present.
-- `npm test` if present.
-- `npm run build`.
-- `npm run lint` if present.
-- Migration review for additive safety.
-- RLS sanity checks.
+- `npm run lint`: passed.
+- `npm run build`: passed.
+- `npm run typecheck`: not present.
+- `npm test`: not present.
+- Supabase CLI migration apply was not run because `supabase` CLI is not installed in this environment.
+- Migration/RLS reviewed for additive safety, location preservation, owner-scoped room access, and same-user active room assignment enforcement.
 
 Manual QA:
 

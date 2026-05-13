@@ -41,15 +41,15 @@ This document tracks product sequencing and slice status. Stable product directi
 - UI redesign Add/Edit Plant form polish with grouped identity, room, watering guidance, notes, photo-after-save affordance, and softened review step.
 - UI redesign supporting feature polish for reminders, Google Calendar sync, photo upload, identification helper, loading states, tap targets, and conservative AI/calendar copy.
 - Skippable first-run onboarding shell with per-user completion state and a Settings revisit entry point.
+- User-owned room data model with nullable plant room assignments and safe legacy location backfill.
 
 ### Active
 
 - Onboarding, Rooms, Settings, and Photo-First Add Plant Foundation campaign.
-- Slice 1: Onboarding shell and first-run routing is implemented on branch `campaign/onboarding-rooms-s1-onboarding`; awaiting review/merge.
+- Slice 2: Room data model and migration is implemented on branch `campaign/onboarding-rooms-s2-room-model`; awaiting review/merge.
 
 ### Planned
 
-- Slice 2: Room data model and migration.
 - Slice 3: Room management in Settings.
 - Slice 4: Room dropdown in Add/Edit Plant.
 - Slice 5: Settings-managed Google Calendar integration.

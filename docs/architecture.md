@@ -25,6 +25,7 @@ This document describes implemented technical shape and architectural boundaries
 - The signed-in shell includes the Home / Plants / Settings bottom app bar, persistent Add Plant access, and sign-out where appropriate.
 - Manual plant create, profile, edit, list, and archive flows are implemented.
 - The Plants tab groups active plants by `location`, uses `Unassigned` for missing room/location, and preserves user-owned collection scoping.
+- Managed room records are implemented in `plant_rooms`; `plants.room_id` is nullable and legacy `plants.location` is preserved for compatibility.
 - Plant-profile watering state and mark-watered behavior are implemented.
 - Plant-profile next watering status uses enabled app-owned reminder dates first, then falls back to watering interval calculations.
 - The signed-in dashboard groups active plants by watering status: overdue, due today, upcoming, and recently watered.
@@ -60,6 +61,8 @@ This document describes implemented technical shape and architectural boundaries
 - Watering reminder reads and mutations filter by the authenticated user's ID on the server and are backed by RLS policies tied to owned plants.
 - Google Calendar connection and event-link reads/mutations filter by the authenticated user's ID on the server and are backed by RLS policies.
 - User app preference reads and mutations filter by the authenticated user's ID on the server and are backed by RLS policies.
+- Plant room reads and mutations filter by the authenticated user's ID on the server and are backed by RLS policies.
+- Plant room assignment is enforced in the database: a plant can only reference an active room with the same `user_id`.
 - RLS must stay enabled on user-owned tables.
 - App queries and database policies should agree on ownership boundaries.
 - Cross-user access checks are required whenever routes, queries, mutations, or schema touch user-owned data.
@@ -94,6 +97,7 @@ The implemented `plants` model stores:
 - `common_name`
 - optional `scientific_name`
 - optional `location`
+- optional `room_id`
 - optional `notes`
 - optional `watering_interval_days`
 - optional `watering_guidance`
@@ -108,6 +112,22 @@ Application validation plus a database check require at least one user-friendly 
 Watering interval and watering guidance are user-entered guidance only. The interval drives app date calculations, but it must not be treated as botanical truth.
 
 Archived plants are soft-hidden from the default collection by filtering `archived_at is null`. Restore UX is not implemented.
+
+`plants.location` remains in place for compatibility. Room migration backfills managed rooms from distinct non-empty legacy location values per user, then assigns matching `plants.room_id` values without clearing or rewriting `plants.location`.
+
+### Rooms
+
+Managed rooms are implemented in `plant_rooms`:
+
+- `id`
+- `user_id`
+- `name`
+- optional `sort_order`
+- optional `archived_at`
+- `created_at`
+- `updated_at`
+
+Active room names are unique per user using case-insensitive trimmed comparison. Rooms are user-owned and protected by RLS. A database trigger on `plants` prevents cross-user room assignment and prevents assignment to archived rooms. Archiving behavior and room management UI are not implemented yet.
 
 ### Care Events
 
