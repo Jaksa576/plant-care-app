@@ -17,11 +17,11 @@ This document describes implemented technical shape and architectural boundaries
 - `/` is a public landing page.
 - `/login` provides Supabase email sign-in and sign-up.
 - `/app` is the protected signed-in app area.
-- `/app/onboarding` is the protected, skippable setup route for signed-in users who have no plants and have not completed onboarding.
+- `/app/onboarding` is the protected, skippable setup route for signed-in users who have no plants and have not completed onboarding. It can also be revisited from Settings.
 - `/app/plants` is the protected redesigned Plants tab for browsing the full active collection by room.
 - `/app/plants/[plantId]` is the protected redesigned plant detail/profile inspector for a single user-owned plant.
 - `/app/plants/[plantId]/edit` is the protected plant edit route.
-- `/app/settings` is a protected settings route for account and app-level controls, including setup review, room management, reminders, and Google Calendar connect/disconnect/status.
+- `/app/settings` is a protected settings route for account and app-level controls, including setup review, a state-derived setup checklist, room management, reminders, and Google Calendar connect/disconnect/status.
 - The signed-in shell includes the Home / Plants / Settings bottom app bar, persistent Add Plant access, and sign-out where appropriate.
 - Manual plant create, profile, edit, list, and archive flows are implemented.
 - Add Plant supports manual entry and a photo-first entry path. Initial photos are optional and upload only after the owned plant record is created.
@@ -42,7 +42,7 @@ This document describes implemented technical shape and architectural boundaries
 - Plant profiles include an app-owned watering reminder panel.
 - Settings includes Google Calendar connection status, last sync/status metadata where available, connect, and disconnect controls.
 - Google Calendar sync is implemented as a one-way reflection of app-owned reminders; setup and disconnect are app-level Settings controls.
-- First-run onboarding is implemented with per-user completion state. Signed-in users with no plants and no completed onboarding state are routed from Today to onboarding; users with plants are not redirected, and Settings can revisit setup without creating a loop.
+- First-run onboarding is implemented with per-user completion state. Signed-in users with no plants and no completed onboarding state are routed from Today to onboarding; users with plants are not redirected, and Settings can revisit setup without creating a loop. Onboarding can optionally create initial user-owned rooms, then route to Today, manual Add Plant, or photo-first Add Plant.
 
 ## Auth And Session Pattern
 
@@ -88,7 +88,7 @@ Per-user setup state is implemented in `user_app_preferences`:
 - `created_at`
 - `updated_at`
 
-Onboarding completion is optional and user-scoped. Existing users with plants are not redirected into onboarding when no preference row exists. Completing or skipping onboarding writes `onboarding_completed_at`; it does not require room setup, plant creation, photo upload, AI identification, reminders, or calendar sync.
+Onboarding completion is optional and user-scoped. Existing users with plants are not redirected into onboarding when no preference row exists. Completing or skipping onboarding writes `onboarding_completed_at`; it does not require room setup, plant creation, photo upload, AI identification, reminders, or calendar sync. If optional room names are submitted during onboarding, the server creates them for the signed-in user before marking onboarding complete; duplicate active room names are skipped.
 
 ### Plants
 
@@ -135,6 +135,8 @@ Managed rooms are implemented in `plant_rooms`:
 Active room names are unique per user using case-insensitive trimmed comparison. Rooms are user-owned and protected by RLS. A database trigger on `plants` prevents cross-user room assignment and prevents assignment to archived rooms.
 
 Renaming a room preserves plant assignments because plants reference the room id. Archiving a room soft-archives the room record with `archived_at` and moves assigned plants to Unassigned by setting `plants.room_id` to null. Plant records and legacy `plants.location` values are preserved.
+
+Rooms can be created from Settings, inline Add Plant, or optional onboarding room setup. All room creation derives `user_id` from the signed-in server session.
 
 ### Care Events
 

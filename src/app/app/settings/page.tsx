@@ -6,7 +6,14 @@ import {
 import { disconnectGoogleCalendarAction } from "@/app/app/integrations/google-calendar/actions";
 import { AppShell } from "@/components/app-shell";
 import { GoogleCalendarSettingsPanel } from "@/components/google-calendar-settings-panel";
-import { BellIcon, GearIcon, RoomIcon, SproutIcon } from "@/components/icons";
+import {
+  BellIcon,
+  CameraIcon,
+  CheckCircleIcon,
+  GearIcon,
+  RoomIcon,
+  SproutIcon,
+} from "@/components/icons";
 import { SignOutButton } from "@/components/sign-out-button";
 import { StatusPill } from "@/components/status-pill";
 import { getAuthState } from "@/lib/auth";
@@ -18,6 +25,7 @@ import {
 import { listPlantsForUser } from "@/lib/plants/data";
 import type { GoogleCalendarEventLinkRecord } from "@/lib/plants/types";
 import { listPlantRoomsForUser } from "@/lib/rooms/data";
+import { listWateringRemindersForUser } from "@/lib/reminders/data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -74,6 +82,33 @@ function getLatestGoogleCalendarEventSync(links: GoogleCalendarEventLinkRecord[]
     : null;
 }
 
+function SetupChecklistItem({
+  complete,
+  label,
+  href,
+}: {
+  complete: boolean;
+  label: string;
+  href: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="flex min-h-[var(--tap-target)] items-center gap-3 rounded-[1rem] border border-[color:var(--border-soft)] bg-white/70 px-4 py-3 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)]"
+    >
+      <CheckCircleIcon
+        className={`h-5 w-5 shrink-0 ${
+          complete ? "text-[color:var(--accent)]" : "text-[color:var(--muted)]"
+        }`}
+      />
+      <span className="min-w-0 flex-1">{label}</span>
+      <span className="text-xs font-semibold text-[color:var(--muted)]">
+        {complete ? "Done" : "Optional"}
+      </span>
+    </Link>
+  );
+}
+
 export default async function SettingsPage({ searchParams }: SettingsPageProps) {
   const [authState, params] = await Promise.all([getAuthState(), searchParams]);
 
@@ -91,10 +126,17 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
     redirect("/login?missingEnv=1");
   }
 
-  const [roomsResult, plantsResult, calendarConnectionResult, calendarEventLinksResult] =
+  const [
+    roomsResult,
+    plantsResult,
+    remindersResult,
+    calendarConnectionResult,
+    calendarEventLinksResult,
+  ] =
     await Promise.all([
       listPlantRoomsForUser(supabase, authState.user.id),
       listPlantsForUser(supabase, authState.user.id),
+      listWateringRemindersForUser(supabase, authState.user.id),
       getGoogleCalendarConnection(supabase, authState.user.id),
       listGoogleCalendarEventLinksForUser(supabase, authState.user.id),
     ]);
@@ -111,6 +153,10 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
   const roomStatus = getRoomStatusMessage(params.rooms);
   const googleCalendarConfigured = Boolean(getGoogleCalendarConfig());
   const latestEventSync = getLatestGoogleCalendarEventSync(calendarEventLinks);
+  const reminders = remindersResult.data ?? [];
+  const hasPhoto = plants.some((plant) => Boolean(plant.primary_photo_path));
+  const hasEnabledReminder = reminders.some((reminder) => reminder.enabled);
+  const hasCalendarConnection = Boolean(calendarConnectionResult.data);
 
   return (
     <AppShell
@@ -129,6 +175,9 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
               <h2 className="text-lg font-semibold">Account</h2>
               <p className="mt-1 text-sm leading-6 text-[color:var(--muted)]">
                 Signed in as {authState.user.email ?? "this account"}.
+              </p>
+              <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">
+                Your plants, rooms, photos, and reminders are private to your account.
               </p>
               <div className="mt-4">
                 <SignOutButton />
@@ -247,12 +296,49 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                 Review the short onboarding path any time. It stays optional and never blocks
                 the watering dashboard.
               </p>
-              <Link
-                href="/app/onboarding?review=1"
-                className="mt-4 inline-flex min-h-[var(--tap-target)] items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold text-[color:var(--foreground)] transition hover:bg-[color:var(--accent-soft)]"
-              >
-                Review setup
-              </Link>
+              <div className="mt-4 grid gap-2">
+                <SetupChecklistItem
+                  complete={plants.length > 0}
+                  label="Add your first plant"
+                  href="/app/plants/new"
+                />
+                <SetupChecklistItem
+                  complete={rooms.length > 0}
+                  label="Add a room"
+                  href="/app/onboarding?review=1"
+                />
+                <SetupChecklistItem
+                  complete={hasEnabledReminder}
+                  label="Set a watering reminder"
+                  href={plants[0] ? `/app/plants/${plants[0].id}` : "/app/plants/new"}
+                />
+                <SetupChecklistItem
+                  complete={hasPhoto}
+                  label="Add a photo"
+                  href={plants[0] ? `/app/plants/${plants[0].id}` : "/app/plants/new?start=photo"}
+                />
+                <SetupChecklistItem
+                  complete={hasCalendarConnection}
+                  label="Connect Google Calendar"
+                  href="/app/settings"
+                />
+              </div>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <Link
+                  href="/app/onboarding?review=1"
+                  className="inline-flex min-h-[var(--tap-target)] items-center justify-center gap-2 rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold text-[color:var(--foreground)] transition hover:bg-[color:var(--accent-soft)]"
+                >
+                  <SproutIcon className="h-4 w-4" />
+                  Review setup
+                </Link>
+                <Link
+                  href="/app/plants/new?start=photo"
+                  className="inline-flex min-h-[var(--tap-target)] items-center justify-center gap-2 rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold text-[color:var(--foreground)] transition hover:bg-[color:var(--accent-soft)]"
+                >
+                  <CameraIcon className="h-4 w-4" />
+                  Start with photo
+                </Link>
+              </div>
             </div>
           </div>
         </section>

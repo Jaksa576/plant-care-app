@@ -2,7 +2,7 @@
 
 Status: **active**.
 
-Slice 7 is implemented on branch `campaign/onboarding-rooms-s7-presave-plantnet`; awaiting review/merge.
+Slice 8 is implemented on branch `campaign/onboarding-rooms-s8-onboarding-polish`; awaiting review/merge.
 
 Product-owner selected implementation sequence for this autonomous campaign run:
 
@@ -125,11 +125,11 @@ The app already has:
 
 ### Current active status
 
-The product owner selected this campaign for implementation. Slice 7 is implemented on `campaign/onboarding-rooms-s7-presave-plantnet` and awaits review/merge.
+The product owner selected this campaign for implementation. Slice 8 is implemented on `campaign/onboarding-rooms-s8-onboarding-polish` and awaits review/merge.
 
 ### Roadmap status
 
-The roadmap lists this campaign as active, with Slice 7 pre-save Pl@ntNet identification implemented and onboarding room/photo integration polish planned next.
+The roadmap lists this campaign as active, with Slice 8 onboarding room/photo integration polish implemented and product-owner QA planned next.
 
 ### AI Care Setup alignment note
 
@@ -1083,7 +1083,7 @@ Stop conditions:
 
 ### Slice 7 — Onboarding Room Setup Integration
 
-Status: planned.
+Status: implemented on `campaign/onboarding-rooms-s8-onboarding-polish`; awaiting review/merge.
 
 Goal:
 
@@ -1104,6 +1104,14 @@ Scope:
 - Save selected rooms into `plant_rooms`.
 - Continue to first plant choice or Today.
 - Keep room setup skippable.
+
+Completed notes:
+
+- Onboarding now includes optional suggested room chips and comma-separated custom room entry.
+- Submitted room names are normalized, de-duplicated, checked against active rooms, and created under the signed-in user before onboarding completion is saved.
+- Duplicate active room names are skipped so setup can continue.
+- Room setup remains optional and can be skipped.
+- Created rooms are visible in Settings and Add/Edit Plant through the existing room helpers.
 
 Non-goals:
 
@@ -1326,7 +1334,7 @@ Stop conditions:
 
 ### Slice 10 — Onboarding First Plant Integration Polish
 
-Status: planned.
+Status: implemented on `campaign/onboarding-rooms-s8-onboarding-polish`; awaiting review/merge.
 
 Goal:
 
@@ -1341,6 +1349,14 @@ Scope:
 - Getting Started checklist reflects first plant/photo/room state.
 - Returning users can manage everything from Settings.
 - Polish mobile flow and loading/error states.
+
+Completed notes:
+
+- Onboarding finish actions route to Today, manual Add Plant, or photo-first Add Plant.
+- Settings includes a state-derived setup checklist for first plant, rooms, reminders, photos, and Google Calendar connection.
+- Today's no-plants empty state links to manual and photo-first Add Plant paths.
+- Account privacy copy in Settings now reassures users that plants, rooms, photos, and reminders are private to their account.
+- Existing-user onboarding protections remain in place: users with plants are not redirected into onboarding, and Settings review does not create a loop.
 
 Non-goals:
 

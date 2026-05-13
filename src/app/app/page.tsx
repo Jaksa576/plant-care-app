@@ -322,13 +322,19 @@ export default async function AppPage({ searchParams }: AppPageProps) {
               Add your first plant to start a calm watering-first collection. Photos and
               identification can come later.
             </p>
-            <div className="mt-6">
+            <div className="mt-6 flex flex-wrap gap-3">
               <Link
                 href="/app/plants/new"
                 className="inline-flex min-h-[var(--tap-target)] items-center justify-center gap-2 rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-95"
               >
                 <PlusIcon className="h-4 w-4" />
-                Add plant
+                Add manually
+              </Link>
+              <Link
+                href="/app/plants/new?start=photo"
+                className="inline-flex min-h-[var(--tap-target)] items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-5 py-3 text-sm font-semibold text-[color:var(--foreground)] transition hover:bg-[color:var(--accent-soft)]"
+              >
+                Start with a photo
               </Link>
             </div>
           </section>

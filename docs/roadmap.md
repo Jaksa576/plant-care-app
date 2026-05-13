@@ -47,15 +47,16 @@ This document tracks product sequencing and slice status. Stable product directi
 - Settings-managed Google Calendar integration with connect/disconnect/status controls and lightweight plant-detail calendar status.
 - Photo-first Add Plant foundation with optional pre-save photo selection, post-create owner-scoped upload, and preserved manual entry path.
 - Pre-save Pl@ntNet identification from the selected Add Plant photo with transient names-only suggestions, uncertainty labels, explicit user review, and no AI care guidance.
+- Onboarding room/photo integration polish with optional room collection, manual/photo-first Add Plant routing, Settings setup checklist, and calm empty-state entry points.
 
 ### Active
 
 - Onboarding, Rooms, Settings, and Photo-First Add Plant Foundation campaign.
-- Slice 7: Pre-save Pl@ntNet identification is implemented on branch `campaign/onboarding-rooms-s7-presave-plantnet`; awaiting review/merge.
+- Slice 8: Onboarding room/photo integration polish is implemented on branch `campaign/onboarding-rooms-s8-onboarding-polish`; awaiting review/merge.
 
 ### Planned
 
-- Slice 8: Onboarding room/photo integration polish.
+- Product-owner QA of the completed campaign branch stack.
 
 ### Deferred
 

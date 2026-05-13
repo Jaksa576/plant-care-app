@@ -18,6 +18,7 @@
 - Settings-managed Google Calendar integration is implemented on Slice 5.
 - Photo-first Add Plant foundation is implemented on Slice 6.
 - Pre-save Pl@ntNet identification is implemented on Slice 7.
+- Onboarding room/photo integration polish is implemented on Slice 8.
 - The UI Redesign UX Overhaul campaign is completed, merged to `main`, and archived.
 - The public landing page redesign, concise login-page UX refresh, and installable app icon support are merged to `main`.
 
@@ -38,25 +39,24 @@ Product-owner selected implementation sequence:
 
 ## Active Slice
 
-Slice 7: Pre-save Pl@ntNet identification.
+Slice 8: Onboarding room/photo integration polish.
 
-Status: implemented on branch `campaign/onboarding-rooms-s7-presave-plantnet`; awaiting review/merge.
+Status: implemented on branch `campaign/onboarding-rooms-s8-onboarding-polish`; awaiting review/merge.
 
 Completed work:
 
-- Added optional Pl@ntNet identification from the selected Add Plant photo before final save.
-- Kept identification transient: the server reads the submitted photo bytes directly from the form, calls Pl@ntNet server-side, and stores no draft photo, public URL, signed URL, or raw provider response.
-- Shows names-only suggestions with conservative uncertainty labels.
-- Requires user action to copy a suggestion into editable common/scientific name fields.
-- Allows users to reject suggestions and continue manually.
-- Preserves manual plant creation without photo, rooms, AI, reminders, or calendar setup.
+- Added optional room collection to onboarding with suggested room chips and comma-separated custom room names.
+- Onboarding now routes to Today, manual Add Plant, or photo-first Add Plant after completion.
+- Room names submitted during onboarding are created as user-owned `plant_rooms`; duplicate active names are skipped.
+- Existing users remain protected from onboarding loops, and Settings can still revisit setup.
+- Settings now includes a state-derived setup checklist for first plant, room, reminder, photo, and Google Calendar connection.
+- Today's empty state offers manual and photo-first Add Plant paths.
 
-AI/photo behavior:
+Room/photo behavior:
 
-- Photos remain private in the existing `plant-photos` bucket after plant save.
-- Pre-save identification does not upload staged photos and leaves no abandoned storage object.
-- Accepted suggestions only fill editable plant name fields before the user saves the plant.
-- No watering interval, watering guidance, care profile, diagnosis, treatment, or care truth is generated or saved by AI.
+- Room creation in onboarding derives `user_id` from the signed-in server session.
+- Onboarding room setup is optional and can be skipped without blocking Today or Add Plant.
+- Photo-first routing uses the existing `/app/plants/new?start=photo` path and does not require photo upload or AI identification.
 
 Non-goals preserved:
 
@@ -64,6 +64,7 @@ Non-goals preserved:
 - No AI-generated watering fields.
 - No diagnosis, disease, pest, toxicity, or treatment guidance.
 - No public storage, staged photo table, or draft plant records.
+- No mandatory onboarding, room setup, photo upload, AI identification, reminder setup, or calendar connection.
 - No deletion of `plants.location`.
 
 ## Validation Results
@@ -73,11 +74,11 @@ Non-goals preserved:
 - `npm run typecheck`: not run; no script exists.
 - `npm test`: not run; no script exists.
 - Supabase migrations: product owner reported Slice 2 room migrations were run successfully before Slice 4 resumed.
-- Migration/RLS review: no schema changes in Slice 7. Pre-save identification verifies a signed-in user and sends only the submitted image bytes to Pl@ntNet from the server. It does not create staged storage objects or expose provider credentials.
+- Migration/RLS review: no schema changes in Slice 8. Onboarding room creation uses existing user-owned room helpers and RLS-backed `plant_rooms` behavior.
 
 ## Next Recommended Action
 
-After Slice 7 is reviewed and merged, start Slice 8: Onboarding room/photo integration polish on a new branch from the latest appropriate base.
+Product-owner QA should review the completed campaign branch stack in slice order, then merge when satisfied.
 
 ## Validation Expectations
 
