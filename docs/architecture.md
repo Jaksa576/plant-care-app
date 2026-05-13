@@ -21,11 +21,12 @@ This document describes implemented technical shape and architectural boundaries
 - `/app/plants` is the protected redesigned Plants tab for browsing the full active collection by room.
 - `/app/plants/[plantId]` is the protected redesigned plant detail/profile inspector for a single user-owned plant.
 - `/app/plants/[plantId]/edit` is the protected plant edit route.
-- `/app/settings` is a protected settings route stub for account and app-level utility controls.
+- `/app/settings` is a protected settings route for account and app-level controls, including setup review, room management, reminders, and Google Calendar guidance.
 - The signed-in shell includes the Home / Plants / Settings bottom app bar, persistent Add Plant access, and sign-out where appropriate.
 - Manual plant create, profile, edit, list, and archive flows are implemented.
 - The Plants tab groups active plants by `location`, uses `Unassigned` for missing room/location, and preserves user-owned collection scoping.
 - Managed room records are implemented in `plant_rooms`; `plants.room_id` is nullable and legacy `plants.location` is preserved for compatibility.
+- Settings room management can list, add, rename, and archive active rooms.
 - Plant-profile watering state and mark-watered behavior are implemented.
 - Plant-profile next watering status uses enabled app-owned reminder dates first, then falls back to watering interval calculations.
 - The signed-in dashboard groups active plants by watering status: overdue, due today, upcoming, and recently watered.
@@ -127,7 +128,9 @@ Managed rooms are implemented in `plant_rooms`:
 - `created_at`
 - `updated_at`
 
-Active room names are unique per user using case-insensitive trimmed comparison. Rooms are user-owned and protected by RLS. A database trigger on `plants` prevents cross-user room assignment and prevents assignment to archived rooms. Archiving behavior and room management UI are not implemented yet.
+Active room names are unique per user using case-insensitive trimmed comparison. Rooms are user-owned and protected by RLS. A database trigger on `plants` prevents cross-user room assignment and prevents assignment to archived rooms.
+
+Renaming a room preserves plant assignments because plants reference the room id. Archiving a room soft-archives the room record with `archived_at` and moves assigned plants to Unassigned by setting `plants.room_id` to null. Plant records and legacy `plants.location` values are preserved.
 
 ### Care Events
 

@@ -2,7 +2,7 @@
 
 Status: **active**.
 
-Slice 2 is implemented on branch `campaign/onboarding-rooms-s2-room-model`; awaiting review/merge.
+Slice 3 is implemented on branch `campaign/onboarding-rooms-s3-room-settings`; awaiting review/merge.
 
 Product-owner selected implementation sequence for this autonomous campaign run:
 
@@ -125,11 +125,11 @@ The app already has:
 
 ### Current active status
 
-The product owner selected this campaign for implementation. Slice 2 is implemented on `campaign/onboarding-rooms-s2-room-model` and awaits review/merge.
+The product owner selected this campaign for implementation. Slice 3 is implemented on `campaign/onboarding-rooms-s3-room-settings` and awaits review/merge.
 
 ### Roadmap status
 
-The roadmap lists this campaign as active, with Slice 2 implemented and Slice 3 room management in Settings planned next.
+The roadmap lists this campaign as active, with Slice 3 implemented and Slice 4 room dropdown in Add/Edit Plant planned next.
 
 ### AI Care Setup alignment note
 
@@ -829,7 +829,7 @@ Stop conditions:
 
 ### Slice 4 — Settings Room Management and Backfilled Room Review
 
-Status: planned.
+Status: implemented on `campaign/onboarding-rooms-s3-room-settings`; awaiting review/merge.
 
 Goal:
 
@@ -884,10 +884,20 @@ Acceptance criteria:
 
 Validation:
 
-- `npm run typecheck` if present.
-- `npm test` if present.
-- `npm run build`.
-- `npm run lint` if present.
+- `npm run lint`: passed.
+- `npm run build`: passed.
+- `npm run typecheck`: not present.
+- `npm test`: not present.
+- Supabase CLI migration apply was not run because `supabase` CLI is not installed in this environment.
+- Room archive behavior reviewed: archive is a soft archive, assigned plants are moved to Unassigned by clearing `room_id`, and plant records plus legacy `plants.location` are preserved.
+
+Completed notes:
+
+- Added Settings Rooms section with active room list and assigned plant counts.
+- Added room create, rename, and archive actions scoped to the signed-in user.
+- Duplicate/blank/error outcomes surface as calm Settings messages.
+- Added database `archive_plant_room` function to keep room archiving and plant unassignment together.
+- Did not add room restore, sorting/reordering, onboarding room setup, Add/Edit dropdown, or Home/Plants grouping changes.
 
 Manual QA:
 

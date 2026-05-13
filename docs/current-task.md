@@ -13,6 +13,7 @@
 - Google Calendar sync is implemented as a one-way reflection of app-owned watering reminders when server OAuth configuration is present.
 - Skippable first-run onboarding with per-user completion state is implemented on Slice 1.
 - User-owned room data model, nullable plant room assignments, and legacy `plants.location` backfill are implemented on Slice 2.
+- Settings room management is implemented on Slice 3.
 - The UI Redesign UX Overhaul campaign is completed, merged to `main`, and archived.
 - The public landing page redesign, concise login-page UX refresh, and installable app icon support are merged to `main`.
 
@@ -33,27 +34,34 @@ Product-owner selected implementation sequence:
 
 ## Active Slice
 
-Slice 2: Room data model and migration.
+Slice 3: Room management in Settings.
 
-Status: implemented on branch `campaign/onboarding-rooms-s2-room-model`; awaiting review/merge.
+Status: implemented on branch `campaign/onboarding-rooms-s3-room-settings`; awaiting review/merge.
 
 Completed work:
 
-- Added user-owned `plant_rooms` table with active per-user case-insensitive room-name uniqueness.
-- Added nullable `plants.room_id` referencing `plant_rooms`.
-- Backfilled room records from existing non-empty `plants.location` values per user.
-- Backfilled `plants.room_id` for matching legacy locations while preserving `plants.location`.
-- Added owner-scoped RLS policies for selecting, inserting, and updating rooms.
-- Added a database trigger that blocks assigning a plant to a room owned by another user or to an archived room.
-- Added typed server data helpers for listing and creating user-owned rooms.
-- Updated plant record typing to include nullable `room_id`.
+- Added Settings Rooms section.
+- Listed active rooms with active assigned plant counts.
+- Added room creation form.
+- Added room rename forms that preserve plant assignments because room ids stay stable.
+- Added archive action for rooms.
+- Added database `archive_plant_room` function so archiving a room and moving assigned plants to Unassigned happen together.
+- Added duplicate/blank/error status handling through Settings query-state messages.
+- Preserved `plants.location` and plant records during room archive.
+
+Safe archive behavior:
+
+- Room records are soft-archived with `archived_at`.
+- Plants assigned to the archived room are preserved and moved to Unassigned by setting `plants.room_id` to null.
+- Legacy `plants.location` is not deleted or rewritten.
 
 Non-goals preserved:
 
-- No Settings room-management UI yet.
 - No Add/Edit Plant room dropdown yet.
 - No Home or Plants grouping changes yet.
-- No deletion or cleanup of `plants.location`.
+- No room restore UI.
+- No room sorting/reordering UI.
+- No deletion of `plants.location`.
 - No room floorplan, room reminders, AI, photo, or calendar changes.
 
 ## Validation Results
@@ -64,11 +72,11 @@ Non-goals preserved:
 - `npm run typecheck`: not run; no script exists.
 - `npm test`: not run; no script exists.
 - Supabase CLI migration apply: not run; `supabase` CLI is not installed in this environment.
-- Migration/RLS review: additive table/column, `plants.location` preserved, room backfill uses non-empty trimmed legacy locations, RLS constrains room rows with `auth.uid() = user_id`, and plant room assignment trigger enforces same-user active rooms.
+- Migration/RLS review: room archive function uses `auth.uid()`, room helpers scope mutations by signed-in `user_id`, active room uniqueness handles duplicate names, and archive preserves plant records while clearing assigned `room_id`.
 
 ## Next Recommended Action
 
-After Slice 2 is reviewed and merged, start Slice 3: Room management in Settings on a new branch from the latest appropriate base.
+After Slice 3 is reviewed and merged, start Slice 4: Room dropdown in Add/Edit Plant on a new branch from the latest appropriate base.
 
 ## Validation Expectations
 

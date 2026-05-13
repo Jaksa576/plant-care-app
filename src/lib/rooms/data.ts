@@ -75,3 +75,55 @@ export async function createPlantRoomForUser(
     error: null,
   };
 }
+
+export async function renamePlantRoomForUser(
+  supabase: RoomClient,
+  userId: string,
+  roomId: string,
+  name: string,
+): Promise<PlantRoomQueryResult<PlantRoomRecord>> {
+  const { data, error } = await supabase
+    .from("plant_rooms")
+    .update({ name })
+    .eq("id", roomId)
+    .eq("user_id", userId)
+    .is("archived_at", null)
+    .select("*")
+    .maybeSingle();
+
+  if (error || !data) {
+    return {
+      data: null,
+      error: getRoomErrorMessage("We couldn't rename this room right now.", error),
+    };
+  }
+
+  return {
+    data: data as PlantRoomRecord,
+    error: null,
+  };
+}
+
+export async function archivePlantRoomForUser(
+  supabase: RoomClient,
+  roomId: string,
+): Promise<PlantRoomQueryResult<PlantRoomRecord>> {
+  const { data, error } = await supabase.rpc("archive_plant_room", {
+    p_room_id: roomId,
+  });
+
+  if (error || !data) {
+    return {
+      data: null,
+      error: getRoomErrorMessage(
+        "We couldn't archive this room right now. Plants were not changed.",
+        error,
+      ),
+    };
+  }
+
+  return {
+    data: data as PlantRoomRecord,
+    error: null,
+  };
+}
