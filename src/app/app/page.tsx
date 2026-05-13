@@ -22,6 +22,7 @@ import { getPlantPrimaryLabel, getPlantSecondaryLabel } from "@/lib/plants/prese
 import type { PlantRecord, WateringEventRecord } from "@/lib/plants/types";
 import { listWateringRemindersForUser } from "@/lib/reminders/data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getUserAppPreferencesForUser } from "@/lib/user-preferences/data";
 import {
   getDashboardAttentionCount,
   getDashboardPlants,
@@ -196,12 +197,28 @@ export default async function AppPage({ searchParams }: AppPageProps) {
     redirect("/login?missingEnv=1");
   }
 
-  const [plantsResult, wateringEventsResult, remindersResult] = await Promise.all([
+  const [
+    preferencesResult,
+    plantsResult,
+    wateringEventsResult,
+    remindersResult,
+  ] = await Promise.all([
+    getUserAppPreferencesForUser(supabase, authState.user.id),
     listPlantsForUser(supabase, authState.user.id),
     listWateringEventsForUser(supabase, authState.user.id),
     listWateringRemindersForUser(supabase, authState.user.id),
   ]);
   const plants = plantsResult.data ?? [];
+
+  if (
+    !preferencesResult.error &&
+    !preferencesResult.data?.onboarding_completed_at &&
+    !plantsResult.error &&
+    plants.length === 0
+  ) {
+    redirect("/app/onboarding");
+  }
+
   const photoUrls = await createPlantPhotoUrlMap(supabase, plants);
   const dashboardPlants = getDashboardPlants(
     plants,

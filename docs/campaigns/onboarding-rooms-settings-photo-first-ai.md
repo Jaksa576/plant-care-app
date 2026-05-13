@@ -1,8 +1,21 @@
 # Plant Care Campaign — Onboarding, Rooms, Settings, and Photo-First Add Plant Foundation
 
-Status: **draft / planned / not started**.
+Status: **active**.
 
-No implementation slice is active yet.
+Slice 1 is implemented on branch `campaign/onboarding-rooms-s1-onboarding`; awaiting review/merge.
+
+Product-owner selected implementation sequence for this autonomous campaign run:
+
+```txt
+1. Onboarding shell and first-run routing
+2. Room data model and migration
+3. Room management in Settings
+4. Room dropdown in Add/Edit Plant
+5. Settings-managed Google Calendar integration
+6. Photo-first Add Plant foundation
+7. Pre-save Pl@ntNet identification
+8. Onboarding room/photo integration polish
+```
 
 ## Recommendation
 
@@ -112,11 +125,11 @@ The app already has:
 
 ### Current active status
 
-No implementation slice is active. The current-task doc says the next recommended action is to review and evolve this campaign, then choose the first slice before implementation begins.
+The product owner selected this campaign for implementation. Slice 1 is implemented on `campaign/onboarding-rooms-s1-onboarding` and awaits review/merge.
 
 ### Roadmap status
 
-The roadmap lists this campaign as draft/candidate, planned/not started, with no selected first slice. It also says no v1 feature campaign is currently active.
+The roadmap lists this campaign as active, with Slice 1 implemented and Slice 2 room data model and migration planned next.
 
 ### AI Care Setup alignment note
 
@@ -588,7 +601,7 @@ Validation:
 
 ### Slice 1 — Onboarding State and Skippable First-Run Shell
 
-Status: planned.
+Status: implemented on `campaign/onboarding-rooms-s1-onboarding`; awaiting review/merge.
 
 Goal:
 
@@ -617,14 +630,32 @@ Non-goals:
 
 Acceptance criteria:
 
-- New signed-in user sees onboarding once.
+- New signed-in user with no plants and no completed onboarding state sees onboarding once.
 - User can skip onboarding.
 - User can complete onboarding.
-- Completion persists per user.
-- Existing users are not trapped or redirected unexpectedly.
-- User can revisit setup from Settings or a safe placeholder.
+- Completion persists per user in `user_app_preferences`.
+- Existing users with plants are not trapped or redirected unexpectedly.
+- User can revisit setup from Settings without creating an onboarding loop.
 - Route protection and server-side user checks remain intact.
 - Missing environment values degrade to guided setup state rather than crash.
+
+Completed notes:
+
+- Added additive `user_app_preferences` migration with owner-scoped RLS.
+- Added `/app/onboarding` protected route.
+- Added skip/complete server action that derives `user_id` from the signed-in session.
+- Added Today redirect only for signed-in users with zero plants and no completed onboarding state.
+- Added Settings "Review setup" entry point.
+- Did not add room setup, photo-first Add Plant, AI, or calendar changes.
+
+Validation:
+
+- `npm run lint`: passed.
+- `npm run build`: passed.
+- `npm run typecheck`: not present.
+- `npm test`: not present.
+- Supabase CLI migration apply was not run because `supabase` CLI is not installed in this environment.
+- Migration/RLS reviewed for additive safety and `auth.uid() = user_id` ownership boundaries.
 
 Validation:
 

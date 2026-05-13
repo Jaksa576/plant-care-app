@@ -17,6 +17,7 @@ This document describes implemented technical shape and architectural boundaries
 - `/` is a public landing page.
 - `/login` provides Supabase email sign-in and sign-up.
 - `/app` is the protected signed-in app area.
+- `/app/onboarding` is the protected, skippable setup route for signed-in users who have no plants and have not completed onboarding.
 - `/app/plants` is the protected redesigned Plants tab for browsing the full active collection by room.
 - `/app/plants/[plantId]` is the protected redesigned plant detail/profile inspector for a single user-owned plant.
 - `/app/plants/[plantId]/edit` is the protected plant edit route.
@@ -37,6 +38,7 @@ This document describes implemented technical shape and architectural boundaries
 - Plant profiles include an app-owned watering reminder panel.
 - Plant profiles include a compact Google Calendar sync panel when reminders are present.
 - Google Calendar sync is implemented as a one-way reflection of app-owned reminders.
+- First-run onboarding is implemented with per-user completion state. Signed-in users with no plants and no completed onboarding state are routed from Today to onboarding; users with plants are not redirected, and Settings can revisit setup without creating a loop.
 
 ## Auth And Session Pattern
 
@@ -57,6 +59,7 @@ This document describes implemented technical shape and architectural boundaries
 - AI identification first verifies the signed-in user's ownership of the plant and primary photo before reading Storage or calling the provider.
 - Watering reminder reads and mutations filter by the authenticated user's ID on the server and are backed by RLS policies tied to owned plants.
 - Google Calendar connection and event-link reads/mutations filter by the authenticated user's ID on the server and are backed by RLS policies.
+- User app preference reads and mutations filter by the authenticated user's ID on the server and are backed by RLS policies.
 - RLS must stay enabled on user-owned tables.
 - App queries and database policies should agree on ownership boundaries.
 - Cross-user access checks are required whenever routes, queries, mutations, or schema touch user-owned data.
@@ -67,6 +70,19 @@ This document describes implemented technical shape and architectural boundaries
 
 - Account identity comes from Supabase Auth.
 - Product data is scoped to the signed-in user.
+
+### User App Preferences
+
+Per-user setup state is implemented in `user_app_preferences`:
+
+- `id`
+- `user_id`
+- optional `onboarding_completed_at`
+- optional `setup_checklist_dismissed_at`
+- `created_at`
+- `updated_at`
+
+Onboarding completion is optional and user-scoped. Existing users with plants are not redirected into onboarding when no preference row exists. Completing or skipping onboarding writes `onboarding_completed_at`; it does not require room setup, plant creation, photo upload, AI identification, reminders, or calendar sync.
 
 ### Plants
 

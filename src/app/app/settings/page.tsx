@@ -1,8 +1,9 @@
 import { AppShell } from "@/components/app-shell";
-import { BellIcon, CalendarIcon, GearIcon } from "@/components/icons";
+import { BellIcon, CalendarIcon, GearIcon, SproutIcon } from "@/components/icons";
 import { SignOutButton } from "@/components/sign-out-button";
 import { getAuthState } from "@/lib/auth";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function SettingsPage() {
@@ -43,6 +44,27 @@ export default async function SettingsPage() {
               <div className="mt-4">
                 <SignOutButton />
               </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-[1.5rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] p-5">
+          <div className="flex items-start gap-3">
+            <span className="mt-1 text-[color:var(--accent)]">
+              <SproutIcon className="h-5 w-5" />
+            </span>
+            <div>
+              <h2 className="text-lg font-semibold">Setup</h2>
+              <p className="mt-1 text-sm leading-6 text-[color:var(--muted)]">
+                Review the short onboarding path any time. It stays optional and never blocks
+                the watering dashboard.
+              </p>
+              <Link
+                href="/app/onboarding?review=1"
+                className="mt-4 inline-flex min-h-[var(--tap-target)] items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold text-[color:var(--foreground)] transition hover:bg-[color:var(--accent-soft)]"
+              >
+                Review setup
+              </Link>
             </div>
           </div>
         </section>

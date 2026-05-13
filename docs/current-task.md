@@ -12,36 +12,59 @@
 - AI-assisted plant identification is implemented as an optional Pl@ntNet-backed helper from an owned primary photo.
 - Google Calendar sync is implemented as a one-way reflection of app-owned watering reminders when server OAuth configuration is present.
 - The UI Redesign UX Overhaul campaign is completed, merged to `main`, and archived.
-- The public landing page redesign and concise login-page UX refresh are merged to `main`.
+- The public landing page redesign, concise login-page UX refresh, and installable app icon support are merged to `main`.
+
+## Active Campaign
+
+Onboarding, Rooms, Settings, and Photo-First Add Plant Foundation.
+
+Product-owner selected implementation sequence:
+
+1. Onboarding shell and first-run routing.
+2. Room data model and migration.
+3. Room management in Settings.
+4. Room dropdown in Add/Edit Plant.
+5. Settings-managed Google Calendar integration.
+6. Photo-first Add Plant foundation.
+7. Pre-save Pl@ntNet identification.
+8. Onboarding room/photo integration polish.
 
 ## Active Slice
 
-Installable App Icon Support.
+Slice 1: Onboarding shell and first-run routing.
 
-Scope:
+Status: implemented on branch `campaign/onboarding-rooms-s1-onboarding`; awaiting review/merge.
 
-- Add install-friendly app metadata and icons only.
-- Reuse the approved designed app icon at `public/brand/plant-care-approved-app-icon-1024.png`.
-- Add App Router manifest metadata at `src/app/manifest.ts`.
-- Add manifest icon PNGs at `public/icons/plant-care-icon-192.png`, `public/icons/plant-care-icon-512.png`, and `public/icons/plant-care-icon-maskable-512.png`.
-- Add Next.js app icon conventions at `src/app/favicon.ico`, `src/app/icon.png`, and `src/app/apple-icon.png`.
+Completed work:
 
-Non-goals:
+- Added user-owned `user_app_preferences` table for onboarding completion state.
+- Added owner-scoped RLS policies for selecting, inserting, and updating app preferences.
+- Added `/app/onboarding` as a protected, skippable onboarding route.
+- Redirected signed-in users with no plants and no completed onboarding state from Today to onboarding.
+- Preserved existing users by not redirecting users who already have plants.
+- Added skip/complete actions that persist completion and route to Today or Add Plant.
+- Added Settings entry point to revisit setup without re-triggering onboarding loops.
 
-- Service workers, offline caching, push notifications, reminder/calendar behavior, auth changes, schema/RLS changes, and brand redesign.
+Non-goals preserved:
+
+- No room data model yet.
+- No photo-first Add Plant changes.
+- No AI behavior changes.
+- No Google Calendar behavior changes.
 
 ## Validation Results
 
+- `.env.local` copied into the worktree; required Supabase, PlantNet, and Google key names are present without printing secret values.
 - `npm run lint`: passed.
-- `npm run build`: passed after regenerating `src/app/favicon.ico` with RGBA icon frames.
+- `npm run build`: passed.
 - `npm run typecheck`: not run; no script exists.
 - `npm test`: not run; no script exists.
-- Local manifest check: `http://localhost:3000/manifest.webmanifest` returned the expected `name`, `short_name`, `description`, `start_url`, `scope`, `display`, `background_color`, `theme_color`, and icon entries.
-- Local icon endpoint check: manifest icons plus `/icon.png`, `/apple-icon.png`, and `/favicon.ico` returned HTTP 200.
+- Supabase CLI migration apply: not run; `supabase` CLI is not installed in this environment.
+- Migration/RLS review: additive table, per-user unique preference row, RLS enabled, and policies constrain access with `auth.uid() = user_id`.
 
 ## Next Recommended Action
 
-Review the Vercel preview in Chrome DevTools Application > Manifest, then install the preview from Chrome on an Android phone and confirm the launcher icon uses the designed Plant Care App icon.
+After Slice 1 is reviewed and merged, start Slice 2: Room data model and migration on a new branch from latest `main`.
 
 ## Validation Expectations
 
@@ -52,4 +75,4 @@ For future implementation slices, run the scripts that exist in `package.json`:
 - `npm run build`.
 - `npm run lint` if present.
 
-For docs-only cleanup, use targeted doc consistency searches instead of app build validation.
+For migration/RLS slices, also validate migrations and owner-scoped access wherever local tooling is available.

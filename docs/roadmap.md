@@ -40,15 +40,22 @@ This document tracks product sequencing and slice status. Stable product directi
 - UI redesign Plant Detail inspector with large photo/fallback, identity/status, Water now, Snooze, Reminder, care basics rows, care history, photo/identification, reminder, Google Calendar, edit, and archive access.
 - UI redesign Add/Edit Plant form polish with grouped identity, room, watering guidance, notes, photo-after-save affordance, and softened review step.
 - UI redesign supporting feature polish for reminders, Google Calendar sync, photo upload, identification helper, loading states, tap targets, and conservative AI/calendar copy.
+- Skippable first-run onboarding shell with per-user completion state and a Settings revisit entry point.
 
 ### Active
 
-- No implementation slice or v1 feature campaign is currently active.
+- Onboarding, Rooms, Settings, and Photo-First Add Plant Foundation campaign.
+- Slice 1: Onboarding shell and first-run routing is implemented on branch `campaign/onboarding-rooms-s1-onboarding`; awaiting review/merge.
 
 ### Planned
 
-- No additional v1 feature slice is active.
-- The onboarding, rooms, settings, and photo-first Add Plant campaign is drafted, but no first slice has been selected.
+- Slice 2: Room data model and migration.
+- Slice 3: Room management in Settings.
+- Slice 4: Room dropdown in Add/Edit Plant.
+- Slice 5: Settings-managed Google Calendar integration.
+- Slice 6: Photo-first Add Plant foundation.
+- Slice 7: Pre-save Pl@ntNet identification.
+- Slice 8: Onboarding room/photo integration polish.
 
 ### Deferred
 
@@ -61,7 +68,7 @@ This document tracks product sequencing and slice status. Stable product directi
 
 Active campaign:
 
-- None.
+- [Onboarding, Rooms, Settings, and Photo-First Add Plant](campaigns/onboarding-rooms-settings-photo-first-ai.md)
 
 Completed campaigns:
 
@@ -71,7 +78,7 @@ Completed campaigns:
 
 Draft / candidate campaigns:
 
-- [Onboarding, Rooms, Settings, and Photo-First Add Plant](campaigns/onboarding-rooms-settings-photo-first-ai.md) — planned / not started; no selected first slice.
+- AI Care Setup remains a later candidate and must not overlap this campaign's identity-only pre-save Pl@ntNet scope.
 
 ## Phase 0: Foundation
 
