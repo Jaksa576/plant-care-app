@@ -2,7 +2,7 @@
 
 Status: **active**.
 
-Slice 6 is implemented on branch `campaign/onboarding-rooms-s6-photo-first-add`; awaiting review/merge.
+Slice 7 is implemented on branch `campaign/onboarding-rooms-s7-presave-plantnet`; awaiting review/merge.
 
 Product-owner selected implementation sequence for this autonomous campaign run:
 
@@ -125,11 +125,11 @@ The app already has:
 
 ### Current active status
 
-The product owner selected this campaign for implementation. Slice 6 is implemented on `campaign/onboarding-rooms-s6-photo-first-add` and awaits review/merge.
+The product owner selected this campaign for implementation. Slice 7 is implemented on `campaign/onboarding-rooms-s7-presave-plantnet` and awaits review/merge.
 
 ### Roadmap status
 
-The roadmap lists this campaign as active, with Slice 6 photo-first Add Plant foundation implemented and pre-save Pl@ntNet identification planned next.
+The roadmap lists this campaign as active, with Slice 7 pre-save Pl@ntNet identification implemented and onboarding room/photo integration polish planned next.
 
 ### AI Care Setup alignment note
 
@@ -1192,7 +1192,7 @@ Completed notes:
 
 Non-goals:
 
-- No Pl@ntNet pre-save call yet unless product owner combines with Slice 9.
+- No Pl@ntNet pre-save call was introduced in this photo-first foundation slice; it was added later in Slice 9.
 - No care suggestions.
 - No `care_profiles`.
 - No AI-generated watering fields.
@@ -1236,7 +1236,7 @@ Stop conditions:
 
 ### Slice 9 — Pre-Save Identity-Only Pl@ntNet Assistance
 
-Status: planned.
+Status: implemented on `campaign/onboarding-rooms-s7-presave-plantnet`; awaiting review/merge.
 
 Goal:
 
@@ -1252,6 +1252,16 @@ Scope:
 - Reuse existing conservative uncertainty labels unless a separate AI Care Setup slice changes recommendation UX later.
 - Do not persist raw provider response by default.
 - Do not show care suggestions.
+
+Completed notes:
+
+- Add Plant can identify from the selected initial photo before final plant save.
+- The server validates the signed-in session and submitted image, then sends transient file bytes directly to Pl@ntNet.
+- No staged photo object, draft plant, public URL, signed Supabase URL, or raw provider response is stored.
+- The UI shows up to three names-only suggestions with existing uncertainty labels.
+- Suggestions only fill editable common/scientific name fields after the user chooses one.
+- Users can reject suggestions and continue manual setup.
+- AI does not modify watering interval, watering guidance, reminders, rooms, notes, diagnosis, or care guidance.
 
 AI boundary:
 

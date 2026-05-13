@@ -17,6 +17,7 @@
 - Room dropdown in Add/Edit Plant and room-aware Home/Plants grouping are implemented on Slice 4.
 - Settings-managed Google Calendar integration is implemented on Slice 5.
 - Photo-first Add Plant foundation is implemented on Slice 6.
+- Pre-save Pl@ntNet identification is implemented on Slice 7.
 - The UI Redesign UX Overhaul campaign is completed, merged to `main`, and archived.
 - The public landing page redesign, concise login-page UX refresh, and installable app icon support are merged to `main`.
 
@@ -37,36 +38,33 @@ Product-owner selected implementation sequence:
 
 ## Active Slice
 
-Slice 6: Photo-first Add Plant foundation.
+Slice 7: Pre-save Pl@ntNet identification.
 
-Status: implemented on branch `campaign/onboarding-rooms-s6-photo-first-add`; awaiting review/merge.
+Status: implemented on branch `campaign/onboarding-rooms-s7-presave-plantnet`; awaiting review/merge.
 
 Completed work:
 
-- Added Add Plant path choices for manual setup and photo-first setup.
-- Added optional photo input to Add Plant before final save.
-- Preserved manual plant creation without photo, rooms, AI, reminders, or calendar setup.
-- On save with a photo, the server creates the owned plant record first, then uploads the photo to the existing owner-scoped private Storage path and saves it as the primary photo.
-- If the optional photo upload fails, the plant remains saved and the profile shows a recoverable photo message.
-- Abandoning Add Plant before save creates no staged photo object and requires no cleanup.
+- Added optional Pl@ntNet identification from the selected Add Plant photo before final save.
+- Kept identification transient: the server reads the submitted photo bytes directly from the form, calls Pl@ntNet server-side, and stores no draft photo, public URL, signed URL, or raw provider response.
+- Shows names-only suggestions with conservative uncertainty labels.
+- Requires user action to copy a suggestion into editable common/scientific name fields.
+- Allows users to reject suggestions and continue manually.
+- Preserves manual plant creation without photo, rooms, AI, reminders, or calendar setup.
 
-Photo behavior:
+AI/photo behavior:
 
-- Photos remain private in the existing `plant-photos` bucket.
-- Optional initial photos reuse the same post-save owner/plant-scoped Storage path as profile photo uploads.
-- No public storage, draft plant records, or staged photo table were introduced in Slice 6.
+- Photos remain private in the existing `plant-photos` bucket after plant save.
+- Pre-save identification does not upload staged photos and leaves no abandoned storage object.
+- Accepted suggestions only fill editable plant name fields before the user saves the plant.
+- No watering interval, watering guidance, care profile, diagnosis, treatment, or care truth is generated or saved by AI.
 
 Non-goals preserved:
 
-- No room restore UI.
-- No room sorting/reordering UI.
-- No deletion of `plants.location`.
-- No Pl@ntNet pre-save identification yet.
-- No AI care suggestions.
 - No `care_profiles`.
 - No AI-generated watering fields.
-- No draft plant records.
-- No staged photo table because Slice 6 avoids pre-save uploads.
+- No diagnosis, disease, pest, toxicity, or treatment guidance.
+- No public storage, staged photo table, or draft plant records.
+- No deletion of `plants.location`.
 
 ## Validation Results
 
@@ -75,12 +73,11 @@ Non-goals preserved:
 - `npm run typecheck`: not run; no script exists.
 - `npm test`: not run; no script exists.
 - Supabase migrations: product owner reported Slice 2 room migrations were run successfully before Slice 4 resumed.
-- Environment note: `.env.local` was not copied into the Slice 6 worktree because the copy command was blocked by the approval layer; build/lint do not print secrets and can still validate code paths.
-- Migration/RLS review: no schema changes in Slice 6. Initial photo upload happens only after creating a signed-in user-owned plant, then uses the existing owner/plant-scoped private Storage path and existing Storage RLS assumptions.
+- Migration/RLS review: no schema changes in Slice 7. Pre-save identification verifies a signed-in user and sends only the submitted image bytes to Pl@ntNet from the server. It does not create staged storage objects or expose provider credentials.
 
 ## Next Recommended Action
 
-After Slice 6 is reviewed and merged, start Slice 7: Pre-save Pl@ntNet identification on a new branch from the latest appropriate base.
+After Slice 7 is reviewed and merged, start Slice 8: Onboarding room/photo integration polish on a new branch from the latest appropriate base.
 
 ## Validation Expectations
 

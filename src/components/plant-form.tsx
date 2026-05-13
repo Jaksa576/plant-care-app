@@ -4,6 +4,8 @@ import { useActionState, useState } from "react";
 
 import { CameraIcon, DropletIcon, LeafIcon, RoomIcon } from "@/components/icons";
 import { StatusPill } from "@/components/status-pill";
+import type { PlantIdentificationState } from "@/app/app/plants/actions";
+import type { PlantIdentificationCandidate } from "@/lib/plant-identification/types";
 import {
   emptyPlantFormState,
   type PlantFormState,
@@ -20,6 +22,10 @@ type PlantFormProps = {
   rooms?: PlantRoomRecord[];
   allowInitialPhoto?: boolean;
   startsWithPhoto?: boolean;
+  identifyInitialPhotoAction?: (
+    state: PlantIdentificationState,
+    formData: FormData,
+  ) => Promise<PlantIdentificationState>;
 };
 
 type ReviewItemProps = {
@@ -178,6 +184,136 @@ function FormSection({
   );
 }
 
+const emptyIdentificationState: PlantIdentificationState = {
+  status: "idle",
+  message: null,
+  candidates: [],
+};
+
+function getConfidenceText(label: PlantIdentificationCandidate["confidenceLabel"]) {
+  if (label === "likely") {
+    return "likely";
+  }
+
+  if (label === "possible") {
+    return "possible";
+  }
+
+  return "not sure";
+}
+
+function InitialPhotoIdentificationControls({
+  identifyAction,
+  onAcceptCandidate,
+}: {
+  identifyAction: (
+    state: PlantIdentificationState,
+    formData: FormData,
+  ) => Promise<PlantIdentificationState>;
+  onAcceptCandidate: (candidate: PlantIdentificationCandidate) => void;
+}) {
+  const [state, identifyFormAction, isPending] = useActionState(
+    identifyAction,
+    emptyIdentificationState,
+  );
+  const [showCandidates, setShowCandidates] = useState(true);
+  const [reviewMessage, setReviewMessage] = useState<string | null>(null);
+  const hasCandidates = state.candidates.length > 0 && showCandidates;
+
+  return (
+    <div className="mt-4 rounded-[1.25rem] border border-[color:var(--border-soft)] bg-white/75 p-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-sm font-semibold text-[color:var(--foreground)]">
+            Optional identification help
+          </p>
+          <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">
+            Plant suggestions are names only. Choose one to fill editable fields, or continue
+            manually.
+          </p>
+          <p className="mt-1 text-xs leading-5 text-[color:var(--muted)]">
+            Plant suggestions powered by Pl@ntNet.
+          </p>
+        </div>
+        <button
+          type="submit"
+          formAction={identifyFormAction}
+          disabled={isPending}
+          onClick={() => {
+            setShowCandidates(true);
+            setReviewMessage(null);
+          }}
+          className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center gap-2 rounded-full bg-[color:var(--accent)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <CameraIcon className="h-4 w-4" />
+          {isPending ? "Checking..." : "Identify from photo"}
+        </button>
+      </div>
+
+      {state.message ? (
+        <div
+          className={`mt-4 rounded-[1rem] border px-4 py-3 text-sm leading-6 ${
+            state.status === "success"
+              ? "border-emerald-200 bg-emerald-50 text-emerald-950"
+              : "border-amber-200 bg-amber-50 text-amber-950"
+          }`}
+        >
+          {state.message}
+        </div>
+      ) : null}
+
+      {hasCandidates ? (
+        <div className="mt-4 grid gap-3">
+          {state.candidates.map((candidate) => (
+            <div
+              key={`${candidate.scientificName}-${candidate.commonName ?? "no-common"}`}
+              className="rounded-[1rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-4"
+            >
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <StatusPill>{getConfidenceText(candidate.confidenceLabel)}</StatusPill>
+                  <p className="mt-3 text-base font-semibold">{candidate.scientificName}</p>
+                  <p className="mt-1 text-sm leading-6 text-[color:var(--muted)]">
+                    {candidate.commonName ?? "No common name returned"}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onAcceptCandidate(candidate);
+                    setReviewMessage(
+                      "Suggestion copied into the editable name fields. Review it before saving.",
+                    );
+                  }}
+                  className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white px-4 py-2 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)]"
+                >
+                  Use these names
+                </button>
+              </div>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => {
+              setShowCandidates(false);
+              setReviewMessage("Suggestions rejected. Continue with manual plant details.");
+            }}
+            className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)]"
+          >
+            Continue manually
+          </button>
+        </div>
+      ) : null}
+
+      {reviewMessage ? (
+        <p className="mt-4 text-sm font-semibold leading-6 text-[color:var(--foreground)]">
+          {reviewMessage}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 export function PlantForm({
   action,
   submitLabel,
@@ -187,6 +323,7 @@ export function PlantForm({
   rooms = [],
   allowInitialPhoto = false,
   startsWithPhoto = false,
+  identifyInitialPhotoAction,
 }: PlantFormProps) {
   const startingState = {
     ...emptyPlantFormState,
@@ -202,6 +339,14 @@ export function PlantForm({
     setValues((current) => ({
       ...current,
       [name]: value,
+    }));
+  }
+
+  function acceptIdentificationCandidate(candidate: PlantIdentificationCandidate) {
+    setValues((current) => ({
+      ...current,
+      commonName: candidate.commonName ?? current.commonName,
+      scientificName: candidate.scientificName,
     }));
   }
 
@@ -264,9 +409,15 @@ export function PlantForm({
                   />
                 </label>
                 <p className="text-sm leading-6 text-[color:var(--muted)]">
-                  A photo helps you recognize this plant. Identification suggestions stay optional
-                  and are not part of this save step.
+                  A photo helps you recognize this plant. Identification suggestions stay optional,
+                  names-only, and editable before saving.
                 </p>
+                {identifyInitialPhotoAction ? (
+                  <InitialPhotoIdentificationControls
+                    identifyAction={identifyInitialPhotoAction}
+                    onAcceptCandidate={acceptIdentificationCandidate}
+                  />
+                ) : null}
               </div>
             </FormSection>
           ) : null}

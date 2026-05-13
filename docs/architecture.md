@@ -233,6 +233,8 @@ AI-assisted identification uses Pl@ntNet for optional plant name suggestions. Re
 
 The provider boundary lives in `src/lib/plant-identification/plantnet.ts`. Server actions verify plant ownership, download the owned private photo bytes from Supabase Storage, and send those bytes to `POST /v2/identify/{project}` as multipart form data with `images` and `organs=auto`. The app does not expose the API key to browser code and does not send Pl@ntNet public or signed Supabase URLs.
 
+Add Plant also supports optional pre-save Pl@ntNet identification from the selected initial photo. That flow verifies a signed-in user, validates the submitted image, sends the transient file bytes to Pl@ntNet server-side, and returns only normalized candidate names to the client. It does not upload a staged object, create a draft plant, persist raw provider responses, or expose provider credentials. A user must choose a suggestion before common/scientific name fields are filled, and those fields remain editable before final plant save.
+
 Pl@ntNet responses are normalized into transient candidates with:
 
 - provider

@@ -539,6 +539,71 @@ export async function identifyPlantPhotoAction(
   };
 }
 
+export async function identifyInitialPlantPhotoAction(
+  previousState: PlantIdentificationState,
+  formData: FormData,
+): Promise<PlantIdentificationState> {
+  void previousState;
+  const file = getOptionalInitialPhoto(formData);
+
+  if (!file) {
+    return {
+      status: "error",
+      message: "Choose a photo before asking for identification help.",
+      candidates: [],
+    };
+  }
+
+  const validationError = getPlantPhotoValidationError(file);
+
+  if (validationError) {
+    return {
+      status: "error",
+      message: validationError,
+      candidates: [],
+    };
+  }
+
+  await getSignedInPlantContext();
+
+  const plantNetConfig = getPlantNetConfig();
+
+  if (!plantNetConfig) {
+    return {
+      status: "error",
+      message:
+        "Plant identification is not configured. Add PLANTNET_API_KEY on the server to enable this helper.",
+      candidates: [],
+    };
+  }
+
+  const identifyResult = await identifyPlantWithPlantNet(plantNetConfig, file);
+
+  if (identifyResult.error || !identifyResult.data) {
+    return {
+      status: "error",
+      message:
+        identifyResult.error ??
+        "Identification is unavailable right now. Your plant details are still editable.",
+      candidates: [],
+    };
+  }
+
+  if (identifyResult.data.length === 0) {
+    return {
+      status: "no-candidates",
+      message: "We are not sure about this one. You can keep editing manually.",
+      candidates: [],
+    };
+  }
+
+  return {
+    status: "success",
+    message: "These are suggestions, not certainties. Review and edit names before saving.",
+    candidates: identifyResult.data,
+  };
+}
+
 export async function savePlantIdentificationSuggestionAction(
   plantId: string,
   previousState: SavePlantIdentificationState,

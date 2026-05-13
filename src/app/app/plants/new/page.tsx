@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { createPlantAction } from "@/app/app/plants/actions";
+import {
+  createPlantAction,
+  identifyInitialPlantPhotoAction,
+} from "@/app/app/plants/actions";
 import { AppShell } from "@/components/app-shell";
 import { PlantForm } from "@/components/plant-form";
 import { SignOutButton } from "@/components/sign-out-button";
@@ -90,6 +93,7 @@ export default async function NewPlantPage({ searchParams }: NewPlantPageProps) 
           rooms={roomsResult.data ?? []}
           allowInitialPhoto
           startsWithPhoto={startsWithPhoto}
+          identifyInitialPhotoAction={identifyInitialPlantPhotoAction}
         />
       </div>
     </AppShell>
