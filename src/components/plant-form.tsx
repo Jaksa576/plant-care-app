@@ -9,6 +9,7 @@ import {
   type PlantFormState,
   type PlantFormValues,
 } from "@/lib/plants/types";
+import type { PlantRoomRecord } from "@/lib/rooms/types";
 
 type PlantFormProps = {
   action: (state: PlantFormState, formData: FormData) => Promise<PlantFormState>;
@@ -16,6 +17,7 @@ type PlantFormProps = {
   title: string;
   description: string;
   initialValues?: PlantFormValues;
+  rooms?: PlantRoomRecord[];
 };
 
 type ReviewItemProps = {
@@ -110,6 +112,50 @@ function ReviewItem({ label, value, emptyLabel = "Not added yet" }: ReviewItemPr
   );
 }
 
+function RoomSelectField({
+  rooms,
+  value,
+  onChange,
+  error,
+}: {
+  rooms: PlantRoomRecord[];
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
+}) {
+  const errorId = "roomId-error";
+
+  return (
+    <label className="flex flex-col gap-2 text-sm font-medium text-[color:var(--foreground)]">
+      <span>Managed room</span>
+      <select
+        name="roomId"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        aria-invalid={Boolean(error)}
+        aria-describedby={error ? errorId : undefined}
+        className={`min-h-[var(--tap-target)] rounded-[1rem] border bg-[color:var(--surface-strong)] px-4 py-3 text-base outline-none transition focus:border-[color:var(--accent)] focus:ring-2 focus:ring-[color:var(--accent-soft)] ${
+          error
+            ? "border-amber-400 bg-amber-50/70"
+            : "border-[color:var(--border)]"
+        }`}
+      >
+        <option value="">Unassigned</option>
+        {rooms.map((room) => (
+          <option key={room.id} value={room.id}>
+            {room.name}
+          </option>
+        ))}
+      </select>
+      {error ? (
+        <span id={errorId} className="text-sm font-semibold text-amber-900">
+          {error}
+        </span>
+      ) : null}
+    </label>
+  );
+}
+
 function FormSection({
   icon,
   title,
@@ -136,6 +182,7 @@ export function PlantForm({
   title,
   description,
   initialValues,
+  rooms = [],
 }: PlantFormProps) {
   const startingState = {
     ...emptyPlantFormState,
@@ -153,6 +200,11 @@ export function PlantForm({
       [name]: value,
     }));
   }
+
+  const selectedRoomLabel =
+    values.newRoomName.trim() ||
+    rooms.find((room) => room.id === values.roomId)?.name ||
+    "Unassigned";
 
   return (
     <div className="flex flex-col gap-6">
@@ -211,8 +263,22 @@ export function PlantForm({
                 onChange={(value) => updateField("scientificName", value)}
                 placeholder="Epipremnum aureum"
               />
+              <RoomSelectField
+                rooms={rooms}
+                value={values.roomId}
+                onChange={(value) => updateField("roomId", value)}
+                error={fieldErrors.roomId}
+              />
               <FormField
-                label="Room or location"
+                label="Add a new room"
+                name="newRoomName"
+                value={values.newRoomName}
+                onChange={(value) => updateField("newRoomName", value)}
+                error={fieldErrors.newRoomName}
+                placeholder="Sunroom"
+              />
+              <FormField
+                label="Legacy location note"
                 name="location"
                 value={values.location}
                 onChange={(value) => updateField("location", value)}
@@ -275,7 +341,8 @@ export function PlantForm({
             <ReviewItem label="Nickname" value={values.nickname} />
             <ReviewItem label="Common name" value={values.commonName} />
             <ReviewItem label="Scientific name" value={values.scientificName} />
-            <ReviewItem label="Room or location" value={values.location} />
+            <ReviewItem label="Room" value={selectedRoomLabel} emptyLabel="Unassigned" />
+            <ReviewItem label="Legacy location note" value={values.location} />
             <ReviewItem
               label="Watering interval"
               value={

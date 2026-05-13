@@ -2,7 +2,7 @@
 
 Status: **active**.
 
-Slice 3 is implemented on branch `campaign/onboarding-rooms-s3-room-settings`; awaiting review/merge.
+Slice 4 is implemented on branch `campaign/onboarding-rooms-s4-room-plant-forms`; awaiting review/merge.
 
 Product-owner selected implementation sequence for this autonomous campaign run:
 
@@ -125,11 +125,11 @@ The app already has:
 
 ### Current active status
 
-The product owner selected this campaign for implementation. Slice 3 is implemented on `campaign/onboarding-rooms-s3-room-settings` and awaits review/merge.
+The product owner selected this campaign for implementation. Slice 4 is implemented on `campaign/onboarding-rooms-s4-room-plant-forms` and awaits review/merge.
 
 ### Roadmap status
 
-The roadmap lists this campaign as active, with Slice 3 implemented and Slice 4 room dropdown in Add/Edit Plant planned next.
+The roadmap lists this campaign as active, with Slice 4 room dropdown in Add/Edit Plant implemented and Settings-managed Google Calendar planned next.
 
 ### AI Care Setup alignment note
 
@@ -918,7 +918,7 @@ Stop conditions:
 
 ### Slice 5 — Room Dropdown in Add/Edit Plant and Room-Aware Grouping
 
-Status: planned.
+Status: implemented on `campaign/onboarding-rooms-s4-room-plant-forms`; awaiting review/merge.
 
 Goal:
 
@@ -946,6 +946,14 @@ else:
 ```
 
 After room migration is stable, later cleanup may deprecate `location`, but not in this slice.
+
+Completed notes:
+
+- Add Plant and Edit Plant load active user-owned rooms.
+- Plant forms include a managed room dropdown, Unassigned, inline Add room, and legacy location note.
+- Plant create/update verifies selected rooms through user-scoped server checks and creates inline rooms under the signed-in user.
+- Home, Plants, and plant profile display use managed room name first, then legacy `plants.location`, then Unassigned.
+- Accepted Pl@ntNet name updates preserve existing room assignments.
 
 Non-goals:
 

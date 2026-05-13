@@ -43,15 +43,15 @@ This document tracks product sequencing and slice status. Stable product directi
 - Skippable first-run onboarding shell with per-user completion state and a Settings revisit entry point.
 - User-owned room data model with nullable plant room assignments and safe legacy location backfill.
 - Settings room management with list, add, rename, and safe archive behavior.
+- Room dropdown in Add/Edit Plant with Unassigned, inline Add room, legacy location fallback, and room-aware Home/Plants grouping.
 
 ### Active
 
 - Onboarding, Rooms, Settings, and Photo-First Add Plant Foundation campaign.
-- Slice 3: Room management in Settings is implemented on branch `campaign/onboarding-rooms-s3-room-settings`; awaiting review/merge.
+- Slice 4: Room dropdown in Add/Edit Plant is implemented on branch `campaign/onboarding-rooms-s4-room-plant-forms`; awaiting review/merge.
 
 ### Planned
 
-- Slice 4: Room dropdown in Add/Edit Plant.
 - Slice 5: Settings-managed Google Calendar integration.
 - Slice 6: Photo-first Add Plant foundation.
 - Slice 7: Pre-save Pl@ntNet identification.

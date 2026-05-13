@@ -48,6 +48,32 @@ export async function listPlantRoomsForUser(
   };
 }
 
+export async function getPlantRoomForUser(
+  supabase: RoomClient,
+  userId: string,
+  roomId: string,
+): Promise<PlantRoomQueryResult<PlantRoomRecord | null>> {
+  const { data, error } = await supabase
+    .from("plant_rooms")
+    .select("*")
+    .eq("id", roomId)
+    .eq("user_id", userId)
+    .is("archived_at", null)
+    .maybeSingle();
+
+  if (error) {
+    return {
+      data: null,
+      error: getRoomErrorMessage("We couldn't open that room right now.", error),
+    };
+  }
+
+  return {
+    data: (data as PlantRoomRecord | null) ?? null,
+    error: null,
+  };
+}
+
 export async function createPlantRoomForUser(
   supabase: RoomClient,
   userId: string,

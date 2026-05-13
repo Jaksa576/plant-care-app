@@ -6,6 +6,8 @@ import { AppShell } from "@/components/app-shell";
 import { PlantForm } from "@/components/plant-form";
 import { SignOutButton } from "@/components/sign-out-button";
 import { getAuthState } from "@/lib/auth";
+import { listPlantRoomsForUser } from "@/lib/rooms/data";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export default async function NewPlantPage() {
   const authState = await getAuthState();
@@ -17,6 +19,14 @@ export default async function NewPlantPage() {
   if (!authState.user) {
     redirect("/login");
   }
+
+  const supabase = await createSupabaseServerClient();
+
+  if (!supabase) {
+    redirect("/login?missingEnv=1");
+  }
+
+  const roomsResult = await listPlantRoomsForUser(supabase, authState.user.id);
 
   return (
     <AppShell
@@ -38,6 +48,7 @@ export default async function NewPlantPage() {
           submitLabel="Save plant"
           title="Start with the basics"
           description="This first plant record is intentionally simple: manual details first, with an optional photo after save and no AI identification or reminders yet."
+          rooms={roomsResult.data ?? []}
         />
       </div>
     </AppShell>

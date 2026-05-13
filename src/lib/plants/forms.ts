@@ -26,6 +26,8 @@ function getValues(formData: FormData): PlantFormValues {
     commonName: readString(formData, "commonName"),
     scientificName: readString(formData, "scientificName"),
     location: readString(formData, "location"),
+    roomId: readString(formData, "roomId"),
+    newRoomName: readString(formData, "newRoomName"),
     notes: readString(formData, "notes"),
     wateringIntervalDays: readString(formData, "wateringIntervalDays"),
     wateringGuidance: readString(formData, "wateringGuidance"),
@@ -53,6 +55,7 @@ export function parsePlantFormData(formData: FormData) {
   const common_name = normalizeText(values.commonName);
   const scientific_name = normalizeText(values.scientificName);
   const location = normalizeText(values.location);
+  const room_id = normalizeText(values.roomId);
   const notes = normalizeLongText(values.notes);
   const watering_guidance = normalizeLongText(values.wateringGuidance);
 
@@ -93,6 +96,7 @@ export function parsePlantFormData(formData: FormData) {
       common_name,
       scientific_name,
       location,
+      room_id,
       notes,
       watering_interval_days,
       watering_guidance,
@@ -110,6 +114,8 @@ export function toPlantFormValues(input?: Partial<PlantInput> | null): PlantForm
     commonName: input.common_name ?? "",
     scientificName: input.scientific_name ?? "",
     location: input.location ?? "",
+    roomId: input.room_id ?? "",
+    newRoomName: "",
     notes: input.notes ?? "",
     wateringIntervalDays:
       typeof input.watering_interval_days === "number"

@@ -14,6 +14,7 @@
 - Skippable first-run onboarding with per-user completion state is implemented on Slice 1.
 - User-owned room data model, nullable plant room assignments, and legacy `plants.location` backfill are implemented on Slice 2.
 - Settings room management is implemented on Slice 3.
+- Room dropdown in Add/Edit Plant and room-aware Home/Plants grouping are implemented on Slice 4.
 - The UI Redesign UX Overhaul campaign is completed, merged to `main`, and archived.
 - The public landing page redesign, concise login-page UX refresh, and installable app icon support are merged to `main`.
 
@@ -34,31 +35,27 @@ Product-owner selected implementation sequence:
 
 ## Active Slice
 
-Slice 3: Room management in Settings.
+Slice 4: Room dropdown in Add/Edit Plant.
 
-Status: implemented on branch `campaign/onboarding-rooms-s3-room-settings`; awaiting review/merge.
+Status: implemented on branch `campaign/onboarding-rooms-s4-room-plant-forms`; awaiting review/merge.
 
 Completed work:
 
-- Added Settings Rooms section.
-- Listed active rooms with active assigned plant counts.
-- Added room creation form.
-- Added room rename forms that preserve plant assignments because room ids stay stable.
-- Added archive action for rooms.
-- Added database `archive_plant_room` function so archiving a room and moving assigned plants to Unassigned happen together.
-- Added duplicate/blank/error status handling through Settings query-state messages.
-- Preserved `plants.location` and plant records during room archive.
+- Add Plant and Edit Plant now load active user-owned rooms.
+- Plant forms include a managed room dropdown, Unassigned option, inline Add room field, and legacy location note.
+- Plant create/update verifies selected rooms server-side and creates inline rooms under the signed-in user before saving the plant.
+- Home and Plants grouping use active managed room names first, then legacy `plants.location`, then Unassigned.
+- Plant profile room display uses the same managed-room-first fallback.
+- Accepted Pl@ntNet name updates preserve existing `room_id`.
 
-Safe archive behavior:
+Transition behavior:
 
-- Room records are soft-archived with `archived_at`.
-- Plants assigned to the archived room are preserved and moved to Unassigned by setting `plants.room_id` to null.
-- Legacy `plants.location` is not deleted or rewritten.
+- `plants.location` is still preserved and editable as a legacy location note.
+- Plants can remain Unassigned with `room_id = null`.
+- Inline room creation is optional; selecting an existing room or leaving Unassigned remains low-friction.
 
 Non-goals preserved:
 
-- No Add/Edit Plant room dropdown yet.
-- No Home or Plants grouping changes yet.
 - No room restore UI.
 - No room sorting/reordering UI.
 - No deletion of `plants.location`.
@@ -66,17 +63,16 @@ Non-goals preserved:
 
 ## Validation Results
 
-- `.env.local` copied into the worktree; required Supabase, PlantNet, and Google key names are present without printing secret values.
 - `npm run lint`: passed.
 - `npm run build`: passed.
 - `npm run typecheck`: not run; no script exists.
 - `npm test`: not run; no script exists.
-- Supabase CLI migration apply: not run; `supabase` CLI is not installed in this environment.
-- Migration/RLS review: room archive function uses `auth.uid()`, room helpers scope mutations by signed-in `user_id`, active room uniqueness handles duplicate names, and archive preserves plant records while clearing assigned `room_id`.
+- Supabase migrations: product owner reported Slice 2 room migrations were run successfully before Slice 4 resumed.
+- Migration/RLS review: plant form actions verify selected rooms through user-scoped room queries; inline room creation derives `user_id` from the signed-in session; the database trigger from Slice 2 still blocks cross-user or archived-room plant assignments.
 
 ## Next Recommended Action
 
-After Slice 3 is reviewed and merged, start Slice 4: Room dropdown in Add/Edit Plant on a new branch from the latest appropriate base.
+After Slice 4 is reviewed and merged, start Slice 5: Settings-managed Google Calendar integration on a new branch from the latest appropriate base.
 
 ## Validation Expectations
 

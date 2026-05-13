@@ -1,5 +1,6 @@
 "use server";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -39,6 +40,10 @@ import {
   updateWateringReminderAfterWatered,
   upsertWateringReminderForPlant,
 } from "@/lib/reminders/data";
+import {
+  createPlantRoomForUser,
+  getPlantRoomForUser,
+} from "@/lib/rooms/data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createWateringEventForPlant } from "@/lib/watering/data";
 
@@ -86,6 +91,54 @@ async function getSignedInPlantContext() {
   };
 }
 
+async function resolvePlantRoomFromForm(
+  supabase: SupabaseClient,
+  userId: string,
+  parsed: ReturnType<typeof parsePlantFormData> & { success: true },
+) {
+  const inlineRoomName = parsed.values.newRoomName.trim();
+
+  if (inlineRoomName) {
+    const roomResult = await createPlantRoomForUser(supabase, userId, {
+      name: inlineRoomName,
+    });
+
+    if (roomResult.error || !roomResult.data) {
+      return {
+        error:
+          "We couldn't add that room. Use an existing room or choose a different room name.",
+        roomId: null,
+      };
+    }
+
+    return {
+      error: null,
+      roomId: roomResult.data.id,
+    };
+  }
+
+  if (!parsed.plantInput.room_id) {
+    return {
+      error: null,
+      roomId: null,
+    };
+  }
+
+  const roomResult = await getPlantRoomForUser(supabase, userId, parsed.plantInput.room_id);
+
+  if (roomResult.error || !roomResult.data) {
+    return {
+      error: "Choose one of your active rooms, add a new room, or leave this plant Unassigned.",
+      roomId: null,
+    };
+  }
+
+  return {
+    error: null,
+    roomId: roomResult.data.id,
+  };
+}
+
 export async function createPlantAction(
   previousState: PlantFormState = emptyPlantFormState,
   formData: FormData,
@@ -98,7 +151,18 @@ export async function createPlantAction(
   }
 
   const { supabase, user } = await getSignedInPlantContext();
-  const result = await createPlantForUser(supabase, user.id, parsed.plantInput);
+  const roomResult = await resolvePlantRoomFromForm(supabase, user.id, parsed);
+
+  if (roomResult.error) {
+    return createPlantFormErrorState(parsed.values, roomResult.error, {
+      roomId: roomResult.error,
+    });
+  }
+
+  const result = await createPlantForUser(supabase, user.id, {
+    ...parsed.plantInput,
+    room_id: roomResult.roomId,
+  });
 
   if (result.error || !result.data) {
     return createPlantFormErrorState(
@@ -124,7 +188,18 @@ export async function updatePlantAction(
   }
 
   const { supabase, user } = await getSignedInPlantContext();
-  const result = await updatePlantForUser(supabase, user.id, plantId, parsed.plantInput);
+  const roomResult = await resolvePlantRoomFromForm(supabase, user.id, parsed);
+
+  if (roomResult.error) {
+    return createPlantFormErrorState(parsed.values, roomResult.error, {
+      roomId: roomResult.error,
+    });
+  }
+
+  const result = await updatePlantForUser(supabase, user.id, plantId, {
+    ...parsed.plantInput,
+    room_id: roomResult.roomId,
+  });
 
   if (result.error || !result.data) {
     return createPlantFormErrorState(
@@ -453,6 +528,7 @@ export async function savePlantIdentificationSuggestionAction(
     common_name: commonName || null,
     scientific_name: scientificName || null,
     location: plant.location,
+    room_id: plant.room_id,
     notes: plant.notes,
     watering_interval_days: plant.watering_interval_days,
     watering_guidance: plant.watering_guidance,
