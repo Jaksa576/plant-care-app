@@ -62,12 +62,17 @@ Completed work:
 - Moved the full Getting Started checklist emphasis to Today; Settings now keeps a lightweight setup review entry.
 - Fixed the watering reminder regression so fixed schedule reminders can be saved without a watering interval, while after-watering reminders still require an interval.
 - Simplified Add Plant into a sequential photo-first setup flow with progress: optional photo, identity, room, watering basics, and review.
+- Fixed stepped Add/Edit Plant form submission so the review step submits all controlled plant values, including nickname and preserved legacy location.
+- Combined photo selection, pre-save identification, and plant name fields into the first Add Plant step.
+- Simplified the room step to choose one path at a time: Unassigned, existing room, or add new room.
+- Removed the user-facing legacy location note field while preserving existing `plants.location` values through hidden form state.
 
 Room/photo behavior:
 
 - Room creation in onboarding derives `user_id` from the signed-in server session.
 - Onboarding room setup is optional and can be skipped without blocking Today or Add Plant.
 - Add Plant now defaults to the same skippable photo-first sequence for `/app/plants/new` and `/app/plants/new?start=photo`; the legacy query path remains compatible but no longer creates a separate choice-card fork.
+- The review step submits controlled hidden fields for plant details because the visible fields are split across steps.
 - Photo-first preview uses a browser-local object URL. The file is not uploaded until the signed-in server creates the owned plant record.
 - Pre-save Pl@ntNet still receives only transient file bytes server-side and does not persist raw provider responses.
 - Fixed schedule watering reminders require a next reminder date only. After-watering reminders require a user-entered watering interval because they recalculate from watering history.

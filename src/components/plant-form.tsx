@@ -35,7 +35,8 @@ type ReviewItemProps = {
   emptyLabel?: string;
 };
 
-type PlantFormStep = "photo" | "identity" | "room" | "watering" | "review";
+type PlantFormStep = "details" | "room" | "watering" | "review";
+type RoomChoice = "unassigned" | "existing" | "new";
 
 function FormField({
   label,
@@ -164,6 +165,102 @@ function RoomSelectField({
         </span>
       ) : null}
     </label>
+  );
+}
+
+function RoomChoiceField({
+  rooms,
+  choice,
+  roomId,
+  newRoomName,
+  onChoiceChange,
+  onRoomIdChange,
+  onNewRoomNameChange,
+  error,
+}: {
+  rooms: PlantRoomRecord[];
+  choice: RoomChoice;
+  roomId: string;
+  newRoomName: string;
+  onChoiceChange: (choice: RoomChoice) => void;
+  onRoomIdChange: (value: string) => void;
+  onNewRoomNameChange: (value: string) => void;
+  error?: string;
+}) {
+  return (
+    <div className="grid gap-4">
+      <fieldset className="grid gap-3">
+        <legend className="text-sm font-semibold text-[color:var(--foreground)]">
+          Where does this plant live?
+        </legend>
+        <label className="flex gap-3 rounded-[1.25rem] border border-[color:var(--border)] bg-white/75 p-4 text-sm leading-6">
+          <input
+            type="radio"
+            name="roomChoice"
+            checked={choice === "unassigned"}
+            onChange={() => onChoiceChange("unassigned")}
+            className="mt-1"
+          />
+          <span>
+            <span className="block font-semibold">Unassigned</span>
+            <span className="text-[color:var(--muted)]">Add a room later if you want.</span>
+          </span>
+        </label>
+        <label className="flex gap-3 rounded-[1.25rem] border border-[color:var(--border)] bg-white/75 p-4 text-sm leading-6">
+          <input
+            type="radio"
+            name="roomChoice"
+            checked={choice === "existing"}
+            onChange={() => onChoiceChange("existing")}
+            disabled={rooms.length === 0}
+            className="mt-1"
+          />
+          <span>
+            <span className="block font-semibold">Choose existing room</span>
+            <span className="text-[color:var(--muted)]">
+              {rooms.length > 0
+                ? "Use one of your saved rooms."
+                : "Create a room first, or add a new one here."}
+            </span>
+          </span>
+        </label>
+        <label className="flex gap-3 rounded-[1.25rem] border border-[color:var(--border)] bg-white/75 p-4 text-sm leading-6">
+          <input
+            type="radio"
+            name="roomChoice"
+            checked={choice === "new"}
+            onChange={() => onChoiceChange("new")}
+            className="mt-1"
+          />
+          <span>
+            <span className="block font-semibold">Add new room</span>
+            <span className="text-[color:var(--muted)]">
+              Save a room name and assign this plant to it.
+            </span>
+          </span>
+        </label>
+      </fieldset>
+
+      {choice === "existing" ? (
+        <RoomSelectField
+          rooms={rooms}
+          value={roomId}
+          onChange={onRoomIdChange}
+          error={error}
+        />
+      ) : null}
+
+      {choice === "new" ? (
+        <FormField
+          label="New room name"
+          name="newRoomName"
+          value={newRoomName}
+          onChange={onNewRoomNameChange}
+          error={error}
+          placeholder="Sunroom"
+        />
+      ) : null}
+    </div>
   );
 }
 
@@ -350,7 +447,7 @@ function InitialPhotoIdentificationControls({
 
 function getFirstErrorStep(fieldErrors: PlantFormState["fieldErrors"]): PlantFormStep | null {
   if (fieldErrors.nickname || fieldErrors.commonName || fieldErrors.scientificName) {
-    return "identity";
+    return "details";
   }
 
   if (fieldErrors.roomId || fieldErrors.newRoomName) {
@@ -372,7 +469,6 @@ export function PlantForm({
   initialValues,
   rooms = [],
   allowInitialPhoto = false,
-  startsWithPhoto = false,
   identifyInitialPhotoAction,
 }: PlantFormProps) {
   const startingState = {
@@ -380,11 +476,16 @@ export function PlantForm({
     values: initialValues ?? emptyPlantFormState.values,
   };
   const [state, formAction, isPending] = useActionState(action, startingState);
-  const steps: PlantFormStep[] = allowInitialPhoto
-    ? ["photo", "identity", "room", "watering", "review"]
-    : ["identity", "room", "watering", "review"];
+  const steps: PlantFormStep[] = ["details", "room", "watering", "review"];
   const [step, setStep] = useState<PlantFormStep>(steps[0]);
   const [values, setValues] = useState<PlantFormValues>(startingState.values);
+  const [roomChoice, setRoomChoice] = useState<RoomChoice>(
+    startingState.values.newRoomName
+      ? "new"
+      : startingState.values.roomId
+        ? "existing"
+        : "unassigned",
+  );
   const [selectedInitialPhoto, setSelectedInitialPhoto] = useState<File | null>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [isSubmitTransitionPending, startSubmitTransition] = useTransition();
@@ -433,6 +534,32 @@ export function PlantForm({
     setPhotoError(file ? getPlantPhotoValidationError(file) : null);
   }
 
+  function updateRoomChoice(nextChoice: RoomChoice) {
+    setRoomChoice(nextChoice);
+
+    if (nextChoice === "unassigned") {
+      setValues((current) => ({
+        ...current,
+        roomId: "",
+        newRoomName: "",
+      }));
+    }
+
+    if (nextChoice === "existing") {
+      setValues((current) => ({
+        ...current,
+        newRoomName: "",
+      }));
+    }
+
+    if (nextChoice === "new") {
+      setValues((current) => ({
+        ...current,
+        roomId: "",
+      }));
+    }
+  }
+
   function goToNextStep() {
     const index = steps.indexOf(visibleStep);
 
@@ -457,11 +584,20 @@ export function PlantForm({
     event.preventDefault();
 
     if (photoError) {
-      setStep("photo");
+      setStep("details");
       return;
     }
 
     const formData = new FormData(event.currentTarget);
+    formData.set("nickname", values.nickname);
+    formData.set("commonName", values.commonName);
+    formData.set("scientificName", values.scientificName);
+    formData.set("location", values.location);
+    formData.set("roomId", roomChoice === "existing" ? values.roomId : "");
+    formData.set("newRoomName", roomChoice === "new" ? values.newRoomName : "");
+    formData.set("wateringIntervalDays", values.wateringIntervalDays);
+    formData.set("wateringGuidance", values.wateringGuidance);
+    formData.set("notes", values.notes);
 
     if (selectedInitialPhoto) {
       formData.set("initialPhoto", selectedInitialPhoto, selectedInitialPhoto.name);
@@ -480,19 +616,19 @@ export function PlantForm({
   return (
     <div className="flex flex-col gap-6">
       <section className="border-b border-[color:var(--border-soft)] pb-5">
-        <StatusPill>{isReviewStep ? "Review before save" : "Photo-first setup"}</StatusPill>
+        <StatusPill>
+          {isReviewStep
+            ? "Review before save"
+            : allowInitialPhoto
+              ? "Photo-first setup"
+              : "Plant details"}
+        </StatusPill>
         <h2 className="mt-4 text-3xl font-semibold">{title}</h2>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-[color:var(--muted)] sm:text-base">
           {description}
         </p>
-        <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
-          <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] px-4 py-2 text-sm font-semibold text-[color:var(--muted)]">
-            <CameraIcon className="h-4 w-4 text-[color:var(--accent)]" />
-            {allowInitialPhoto ? "Photo is optional" : "Photo can be added after save"}
-          </div>
-          <div className="inline-flex w-fit items-center rounded-full border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] px-4 py-2 text-sm font-semibold text-[color:var(--muted)]">
-            Step {currentStepNumber} of {steps.length}
-          </div>
+        <div className="mt-4 inline-flex w-fit items-center rounded-full border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] px-4 py-2 text-sm font-semibold text-[color:var(--muted)]">
+          Step {currentStepNumber} of {steps.length}
         </div>
       </section>
 
@@ -512,149 +648,156 @@ export function PlantForm({
         encType={allowInitialPhoto ? "multipart/form-data" : undefined}
         className="flex flex-col gap-6"
       >
+        <input type="hidden" name="nickname" value={values.nickname} />
+        <input type="hidden" name="commonName" value={values.commonName} />
+        <input type="hidden" name="scientificName" value={values.scientificName} />
+        <input type="hidden" name="location" value={values.location} />
+        <input type="hidden" name="roomId" value={roomChoice === "existing" ? values.roomId : ""} />
+        <input
+          type="hidden"
+          name="newRoomName"
+          value={roomChoice === "new" ? values.newRoomName : ""}
+        />
+        <input
+          type="hidden"
+          name="wateringIntervalDays"
+          value={values.wateringIntervalDays}
+        />
+        <input type="hidden" name="wateringGuidance" value={values.wateringGuidance} />
+        <input type="hidden" name="notes" value={values.notes} />
         <div
           className={`grid gap-5 ${
             isReviewStep && state.status !== "error" ? "hidden" : ""
           }`}
         >
-          {allowInitialPhoto && visibleStep === "photo" ? (
-            <FormSection icon={<CameraIcon className="h-5 w-5" />} title="Photo">
+          {visibleStep === "details" ? (
+            <FormSection
+              icon={<LeafIcon className="h-5 w-5" />}
+              title={allowInitialPhoto ? "Photo & plant name" : "Plant name"}
+            >
               <div className="grid gap-3">
-                <label className="flex flex-col gap-2 text-sm font-medium text-[color:var(--foreground)]">
-                  <span>{startsWithPhoto ? "Start with a photo" : "Optional photo"}</span>
-                  <input
-                    name="initialPhoto"
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    capture="environment"
-                    onChange={(event) => handleInitialPhotoChange(event.target.files)}
-                    className="w-full rounded-[1rem] border border-[color:var(--border)] bg-white/85 px-4 py-3 text-sm font-normal text-[color:var(--foreground)] outline-none transition file:mr-4 file:rounded-full file:border-0 file:bg-[color:var(--accent-soft)] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[color:var(--foreground)] focus:border-[color:var(--accent)] focus:ring-2 focus:ring-[color:var(--accent-soft)]"
+                {allowInitialPhoto ? (
+                  <>
+                    <label className="flex flex-col gap-2 text-sm font-medium text-[color:var(--foreground)]">
+                      <span>Optional photo</span>
+                      <input
+                        name="initialPhoto"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        capture="environment"
+                        onChange={(event) => handleInitialPhotoChange(event.target.files)}
+                        className="w-full rounded-[1rem] border border-[color:var(--border)] bg-white/85 px-4 py-3 text-sm font-normal text-[color:var(--foreground)] outline-none transition file:mr-4 file:rounded-full file:border-0 file:bg-[color:var(--accent-soft)] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[color:var(--foreground)] focus:border-[color:var(--accent)] focus:ring-2 focus:ring-[color:var(--accent-soft)]"
+                      />
+                    </label>
+                    {photoPreviewUrl ? (
+                      <div className="overflow-hidden rounded-[1.25rem] border border-[color:var(--border-soft)] bg-[color:var(--stone)]">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={photoPreviewUrl}
+                          alt="Selected plant photo preview"
+                          className="h-64 w-full object-cover sm:h-80"
+                        />
+                        <div className="border-t border-[color:var(--border-soft)] px-4 py-3 text-sm leading-6 text-[color:var(--muted)]">
+                          {selectedInitialPhoto?.name ?? "Selected photo"} will be used for
+                          identification and saved as this plant&apos;s primary photo.
+                        </div>
+                      </div>
+                    ) : null}
+                    {photoError ? (
+                      <div className="rounded-[1rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950">
+                        {photoError}
+                      </div>
+                    ) : null}
+                    <p className="text-sm leading-6 text-[color:var(--muted)]">
+                      A photo helps you recognize this plant. Identification suggestions stay
+                      optional, names-only, and editable before saving. Use a JPG, PNG, or WebP
+                      image under {PLANT_PHOTO_MAX_MB} MB.
+                    </p>
+                    {identifyInitialPhotoAction ? (
+                      <InitialPhotoIdentificationControls
+                        identifyAction={identifyInitialPhotoAction}
+                        selectedPhoto={selectedInitialPhoto}
+                        photoError={photoError}
+                        onAcceptCandidate={acceptIdentificationCandidate}
+                      />
+                    ) : null}
+                  </>
+                ) : null}
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <FormField
+                    label="Nickname"
+                    name="nickname"
+                    value={values.nickname}
+                    onChange={(value) => updateField("nickname", value)}
+                    error={fieldErrors.nickname}
+                    placeholder="Kitchen pothos"
+                    requiredHint="Required"
                   />
-                </label>
-                {photoPreviewUrl ? (
-                  <div className="overflow-hidden rounded-[1.25rem] border border-[color:var(--border-soft)] bg-[color:var(--stone)]">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={photoPreviewUrl}
-                      alt="Selected plant photo preview"
-                      className="h-64 w-full object-cover sm:h-80"
-                    />
-                    <div className="border-t border-[color:var(--border-soft)] px-4 py-3 text-sm leading-6 text-[color:var(--muted)]">
-                      {selectedInitialPhoto?.name ?? "Selected photo"} will be used for
-                      identification and saved as this plant&apos;s primary photo.
-                    </div>
-                  </div>
-                ) : null}
-                {photoError ? (
-                  <div className="rounded-[1rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950">
-                    {photoError}
-                  </div>
-                ) : null}
-                <p className="text-sm leading-6 text-[color:var(--muted)]">
-                  A photo helps you recognize this plant. Identification suggestions stay optional,
-                  names-only, and editable before saving. Use a JPG, PNG, or WebP image under{" "}
-                  {PLANT_PHOTO_MAX_MB} MB.
-                </p>
-                {identifyInitialPhotoAction ? (
-                  <InitialPhotoIdentificationControls
-                    identifyAction={identifyInitialPhotoAction}
-                    selectedPhoto={selectedInitialPhoto}
-                    photoError={photoError}
-                    onAcceptCandidate={acceptIdentificationCandidate}
+                  <FormField
+                    label="Common name"
+                    name="commonName"
+                    value={values.commonName}
+                    onChange={(value) => updateField("commonName", value)}
+                    error={fieldErrors.commonName}
+                    placeholder="Pothos"
                   />
-                ) : null}
+                  <FormField
+                    label="Scientific name"
+                    name="scientificName"
+                    value={values.scientificName}
+                    onChange={(value) => updateField("scientificName", value)}
+                    placeholder="Epipremnum aureum"
+                  />
+                </div>
               </div>
             </FormSection>
           ) : null}
 
-          {visibleStep === "identity" ? (
-          <FormSection icon={<LeafIcon className="h-5 w-5" />} title="Plant identity">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <FormField
-                label="Nickname"
-                name="nickname"
-                value={values.nickname}
-                onChange={(value) => updateField("nickname", value)}
-                error={fieldErrors.nickname}
-                placeholder="Kitchen pothos"
-                requiredHint="Required"
-              />
-              <FormField
-                label="Common name"
-                name="commonName"
-                value={values.commonName}
-                onChange={(value) => updateField("commonName", value)}
-                error={fieldErrors.commonName}
-                placeholder="Pothos"
-              />
-              <FormField
-                label="Scientific name"
-                name="scientificName"
-                value={values.scientificName}
-                onChange={(value) => updateField("scientificName", value)}
-                placeholder="Epipremnum aureum"
-              />
-            </div>
-          </FormSection>
-          ) : null}
-
           {visibleStep === "room" ? (
-          <FormSection icon={<RoomIcon className="h-5 w-5" />} title="Room">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <RoomSelectField
+            <FormSection icon={<RoomIcon className="h-5 w-5" />} title="Room">
+              <RoomChoiceField
                 rooms={rooms}
-                value={values.roomId}
-                onChange={(value) => updateField("roomId", value)}
-                error={fieldErrors.roomId}
+                choice={roomChoice}
+                roomId={values.roomId}
+                newRoomName={values.newRoomName}
+                onChoiceChange={updateRoomChoice}
+                onRoomIdChange={(value) => updateField("roomId", value)}
+                onNewRoomNameChange={(value) => updateField("newRoomName", value)}
+                error={fieldErrors.roomId ?? fieldErrors.newRoomName}
               />
-              <FormField
-                label="Add a new room"
-                name="newRoomName"
-                value={values.newRoomName}
-                onChange={(value) => updateField("newRoomName", value)}
-                error={fieldErrors.newRoomName}
-                placeholder="Sunroom"
-              />
-              <FormField
-                label="Legacy location note"
-                name="location"
-                value={values.location}
-                onChange={(value) => updateField("location", value)}
-                placeholder="Kitchen shelf"
-              />
-            </div>
-          </FormSection>
+            </FormSection>
           ) : null}
 
           {visibleStep === "watering" ? (
-          <FormSection icon={<DropletIcon className="h-5 w-5" />} title="Watering basics">
-            <div className="grid gap-4">
-              <FormField
-                label="Watering interval in days"
-                name="wateringIntervalDays"
-                value={values.wateringIntervalDays}
-                onChange={(value) => updateField("wateringIntervalDays", value)}
-                error={fieldErrors.wateringIntervalDays}
-                placeholder="7"
-              />
-            <FormField
-              label="Watering guidance"
-              name="wateringGuidance"
-              value={values.wateringGuidance}
-              onChange={(value) => updateField("wateringGuidance", value)}
-              placeholder="Let the top inch dry out first."
-              rows={4}
-            />
-            <FormField
-              label="Notes"
-              name="notes"
-              value={values.notes}
-              onChange={(value) => updateField("notes", value)}
-              placeholder="Repotted last month and seems happy near the window."
-              rows={5}
-            />
-            </div>
-          </FormSection>
+            <FormSection icon={<DropletIcon className="h-5 w-5" />} title="Watering basics">
+              <div className="grid gap-4">
+                <FormField
+                  label="Watering interval in days"
+                  name="wateringIntervalDays"
+                  value={values.wateringIntervalDays}
+                  onChange={(value) => updateField("wateringIntervalDays", value)}
+                  error={fieldErrors.wateringIntervalDays}
+                  placeholder="7"
+                />
+                <FormField
+                  label="Watering guidance"
+                  name="wateringGuidance"
+                  value={values.wateringGuidance}
+                  onChange={(value) => updateField("wateringGuidance", value)}
+                  placeholder="Let the top inch dry out first."
+                  rows={4}
+                />
+                <FormField
+                  label="Notes"
+                  name="notes"
+                  value={values.notes}
+                  onChange={(value) => updateField("notes", value)}
+                  placeholder="Repotted last month and seems happy near the window."
+                  rows={5}
+                />
+              </div>
+            </FormSection>
           ) : null}
 
           <div className="flex flex-col gap-3 sm:flex-row">
@@ -687,7 +830,6 @@ export function PlantForm({
             <ReviewItem label="Common name" value={values.commonName} />
             <ReviewItem label="Scientific name" value={values.scientificName} />
             <ReviewItem label="Room" value={selectedRoomLabel} emptyLabel="Unassigned" />
-            <ReviewItem label="Legacy location note" value={values.location} />
             <ReviewItem
               label="Watering interval"
               value={
@@ -705,7 +847,7 @@ export function PlantForm({
             <ul className="mt-4 space-y-3 text-sm leading-7 text-[color:var(--muted)]">
               <li>
                 This is a user-reviewed plant record
-                {allowInitialPhoto ? " with an optional photo." : "."}
+                {allowInitialPhoto ? " with a photo if you added one." : "."}
               </li>
               <li>AI suggestions are saved only after you review and accept them.</li>
               <li>No reminders have been scheduled yet.</li>

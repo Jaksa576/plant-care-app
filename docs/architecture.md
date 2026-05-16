@@ -24,7 +24,7 @@ This document describes implemented technical shape and architectural boundaries
 - `/app/settings` is a protected settings route for account and app-level controls, including setup review, room management, reminders, and Google Calendar connect/disconnect/status.
 - The signed-in shell includes the Home / Plants / Settings bottom app bar, persistent Add Plant access, and sign-out where appropriate.
 - Manual plant create, profile, edit, list, and archive flows are implemented.
-- Add Plant is a sequential, skippable photo-first flow with progress through optional photo, plant identity, room, watering basics, and review. Selected initial photos preview immediately, can be used for pre-save identification, and upload only after the owned plant record is created. Manual creation remains available by skipping the photo and identification steps.
+- Add Plant is a sequential, skippable photo-first flow with progress through photo and plant name, room, watering basics, and review. Selected initial photos preview immediately, can be used for pre-save identification, and upload only after the owned plant record is created. Manual creation remains available by skipping the photo and identification controls.
 - The Plants tab groups active plants by managed room name first, then legacy `location`, then `Unassigned`, and preserves user-owned collection scoping.
 - Managed room records are implemented in `plant_rooms`; `plants.room_id` is nullable and legacy `plants.location` is preserved for compatibility.
 - Settings room management can list, add, rename, and archive active rooms.
@@ -118,7 +118,7 @@ Archived plants are soft-hidden from the default collection by filtering `archiv
 
 `plants.location` remains in place for compatibility. Room migration backfills managed rooms from distinct non-empty legacy location values per user, then assigns matching `plants.room_id` values without clearing or rewriting `plants.location`.
 
-Add/Edit Plant writes nullable `plants.room_id` from a managed room dropdown after server-side ownership verification. Inline room creation derives `user_id` from the signed-in session and uses the newly created room id for the plant save. Display and grouping use this precedence during the transition: active managed room name, then non-empty legacy `plants.location`, then `Unassigned`.
+Add/Edit Plant writes nullable `plants.room_id` from a room choice step after server-side ownership verification. The room step lets the user leave a plant Unassigned, choose an existing room, or add a new room without showing all room controls at once. Inline room creation derives `user_id` from the signed-in session and uses the newly created room id for the plant save. `plants.location` is not user-facing in Add/Edit Plant, but existing legacy values are submitted as hidden state so editing does not clear them accidentally. Display and grouping use this precedence during the transition: active managed room name, then non-empty legacy `plants.location`, then `Unassigned`.
 
 ### Rooms
 

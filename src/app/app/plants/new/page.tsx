@@ -56,7 +56,7 @@ export default async function NewPlantPage({ searchParams }: NewPlantPageProps) 
           action={createPlantAction}
           submitLabel="Save plant"
           title="Add a plant"
-          description="Start with an optional photo, then move through the basics. You can skip photo and identification and save a manual plant record."
+          description="Add a plant in a few short steps. You can skip identification and save a manual plant record."
           rooms={roomsResult.data ?? []}
           allowInitialPhoto
           startsWithPhoto

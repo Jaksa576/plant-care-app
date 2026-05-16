@@ -98,6 +98,13 @@ async function resolvePlantRoomFromForm(
 ) {
   const inlineRoomName = parsed.values.newRoomName.trim();
 
+  if (inlineRoomName && parsed.plantInput.room_id) {
+    return {
+      error: "Choose an existing room or add a new room, not both.",
+      roomId: null,
+    };
+  }
+
   if (inlineRoomName) {
     const roomResult = await createPlantRoomForUser(supabase, userId, {
       name: inlineRoomName,

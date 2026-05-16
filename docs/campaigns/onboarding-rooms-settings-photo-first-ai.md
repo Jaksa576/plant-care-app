@@ -84,6 +84,8 @@ By the end of this campaign:
 - Pre-save Pl@ntNet support is identity-only and conservative.
 - Photo-first Add Plant previews the selected image immediately and uses the same selected file for optional identification and final primary-photo save.
 - Add Plant now uses one sequential, skippable photo-first setup flow instead of separate manual/photo choice cards.
+- The Add Plant review step submits all controlled plant fields from earlier steps, and the first step combines photo, identification, nickname, common name, and scientific name.
+- The Add/Edit room step now asks for one room path at a time: Unassigned, existing room, or add new room. The legacy location note is no longer user-facing but existing `plants.location` values are preserved while editing.
 - The Getting Started checklist is primarily on Today when setup is incomplete; Settings keeps a lightweight setup review entry.
 - Add/Edit Plant requires a nickname. Common and scientific names remain optional.
 - Fixed schedule watering reminders can be saved without a watering interval; after-watering reminders still require an interval so they can recalculate from watering history.
