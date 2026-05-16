@@ -24,7 +24,7 @@ This document describes implemented technical shape and architectural boundaries
 - `/app/settings` is a protected settings route for account and app-level controls, including setup review, room management, reminders, and Google Calendar connect/disconnect/status.
 - The signed-in shell includes the Home / Plants / Settings bottom app bar, persistent Add Plant access, and sign-out where appropriate.
 - Manual plant create, profile, edit, list, and archive flows are implemented.
-- Add Plant supports manual entry and a photo-first entry path. Selected initial photos preview immediately, can be used for pre-save identification, and upload only after the owned plant record is created.
+- Add Plant is a sequential, skippable photo-first flow with progress through optional photo, plant identity, room, watering basics, and review. Selected initial photos preview immediately, can be used for pre-save identification, and upload only after the owned plant record is created. Manual creation remains available by skipping the photo and identification steps.
 - The Plants tab groups active plants by managed room name first, then legacy `location`, then `Unassigned`, and preserves user-owned collection scoping.
 - Managed room records are implemented in `plant_rooms`; `plants.room_id` is nullable and legacy `plants.location` is preserved for compatibility.
 - Settings room management can list, add, rename, and archive active rooms.
@@ -169,7 +169,7 @@ Watering reminders are implemented in `watering_reminders`:
 - `created_at`
 - `updated_at`
 
-Reminders are app-owned and work without Google Calendar. The profile panel shows the next reminder date in plain language and avoids notification delivery claims. Users can turn a watering reminder on with a chosen date and turn it off without changing plant details or watering history.
+Reminders are app-owned and work without Google Calendar. The profile panel shows the next reminder date in plain language and avoids notification delivery claims. Users can turn a watering reminder on with a chosen date and turn it off without changing plant details or watering history. Fixed schedule reminders require only a next reminder date; after-watering reminders require a watering interval because they recalculate from watering history.
 
 Reminder modes are watering-specific:
 

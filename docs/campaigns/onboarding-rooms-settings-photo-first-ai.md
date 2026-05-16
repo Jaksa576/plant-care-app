@@ -4,7 +4,7 @@ Status: **active**.
 
 Slice 8 is implemented on branch `campaign/onboarding-rooms-s8-onboarding-polish`; awaiting review/merge.
 
-Pre-merge QA patch is implemented on the same branch.
+Pre-merge QA patches are implemented on the same branch.
 
 Product-owner selected implementation sequence for this autonomous campaign run:
 
@@ -83,8 +83,10 @@ By the end of this campaign:
 - Add Plant can begin with photo capture/upload, but manual creation remains equally available.
 - Pre-save Pl@ntNet support is identity-only and conservative.
 - Photo-first Add Plant previews the selected image immediately and uses the same selected file for optional identification and final primary-photo save.
+- Add Plant now uses one sequential, skippable photo-first setup flow instead of separate manual/photo choice cards.
 - The Getting Started checklist is primarily on Today when setup is incomplete; Settings keeps a lightweight setup review entry.
 - Add/Edit Plant requires a nickname. Common and scientific names remain optional.
+- Fixed schedule watering reminders can be saved without a watering interval; after-watering reminders still require an interval so they can recalculate from watering history.
 - No AI care guidance or suggested watering cadence is introduced in this campaign.
 
 ## Current state and source-of-truth notes
@@ -1196,8 +1198,8 @@ consumed_at timestamptz null
 
 Completed notes:
 
-- Add Plant now offers Add manually and Start with a photo entry choices.
-- Manual Add Plant remains fully available and does not require photo, rooms, AI, reminders, or calendar setup.
+- Add Plant now starts in one sequential, skippable photo-first flow with progress through photo, identity, room, watering basics, and review.
+- Manual Add Plant remains fully available by skipping the optional photo and identification steps; it does not require rooms, AI, reminders, or calendar setup.
 - Photo-first users can choose an optional photo before final save and see an immediate browser-local preview.
 - The server creates the signed-in user's plant first, then uploads the optional photo to the existing private owner/plant-scoped Storage path and saves it as the primary photo.
 - The same selected photo is retained through optional pre-save identification and final save, so users do not need to upload it twice.

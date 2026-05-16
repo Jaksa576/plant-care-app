@@ -60,14 +60,17 @@ Completed work:
 - Made nickname required in UI and server validation; common/scientific names remain optional.
 - Changed the review step CTA to `Review and save`.
 - Moved the full Getting Started checklist emphasis to Today; Settings now keeps a lightweight setup review entry.
+- Fixed the watering reminder regression so fixed schedule reminders can be saved without a watering interval, while after-watering reminders still require an interval.
+- Simplified Add Plant into a sequential photo-first setup flow with progress: optional photo, identity, room, watering basics, and review.
 
 Room/photo behavior:
 
 - Room creation in onboarding derives `user_id` from the signed-in server session.
 - Onboarding room setup is optional and can be skipped without blocking Today or Add Plant.
-- Photo-first routing uses the existing `/app/plants/new?start=photo` path and does not require photo upload or AI identification.
+- Add Plant now defaults to the same skippable photo-first sequence for `/app/plants/new` and `/app/plants/new?start=photo`; the legacy query path remains compatible but no longer creates a separate choice-card fork.
 - Photo-first preview uses a browser-local object URL. The file is not uploaded until the signed-in server creates the owned plant record.
 - Pre-save Pl@ntNet still receives only transient file bytes server-side and does not persist raw provider responses.
+- Fixed schedule watering reminders require a next reminder date only. After-watering reminders require a user-entered watering interval because they recalculate from watering history.
 
 Non-goals preserved:
 

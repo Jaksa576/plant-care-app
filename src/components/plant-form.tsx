@@ -35,6 +35,8 @@ type ReviewItemProps = {
   emptyLabel?: string;
 };
 
+type PlantFormStep = "photo" | "identity" | "room" | "watering" | "review";
+
 function FormField({
   label,
   name,
@@ -346,6 +348,22 @@ function InitialPhotoIdentificationControls({
   );
 }
 
+function getFirstErrorStep(fieldErrors: PlantFormState["fieldErrors"]): PlantFormStep | null {
+  if (fieldErrors.nickname || fieldErrors.commonName || fieldErrors.scientificName) {
+    return "identity";
+  }
+
+  if (fieldErrors.roomId || fieldErrors.newRoomName) {
+    return "room";
+  }
+
+  if (fieldErrors.wateringIntervalDays) {
+    return "watering";
+  }
+
+  return null;
+}
+
 export function PlantForm({
   action,
   submitLabel,
@@ -362,7 +380,10 @@ export function PlantForm({
     values: initialValues ?? emptyPlantFormState.values,
   };
   const [state, formAction, isPending] = useActionState(action, startingState);
-  const [step, setStep] = useState<"edit" | "review">("edit");
+  const steps: PlantFormStep[] = allowInitialPhoto
+    ? ["photo", "identity", "room", "watering", "review"]
+    : ["identity", "room", "watering", "review"];
+  const [step, setStep] = useState<PlantFormStep>(steps[0]);
   const [values, setValues] = useState<PlantFormValues>(startingState.values);
   const [selectedInitialPhoto, setSelectedInitialPhoto] = useState<File | null>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
@@ -370,6 +391,13 @@ export function PlantForm({
 
   const fieldErrors = state.fieldErrors;
   const submitPending = isPending || isSubmitTransitionPending;
+  const errorStep =
+    state.status === "error" && step === "review" ? getFirstErrorStep(fieldErrors) : null;
+  const visibleStep = errorStep ?? step;
+  const currentStepIndex = steps.indexOf(visibleStep);
+  const currentStepNumber = currentStepIndex >= 0 ? currentStepIndex + 1 : 1;
+  const isFirstStep = visibleStep === steps[0];
+  const isReviewStep = visibleStep === "review";
 
   const photoPreviewUrl = useMemo(
     () => (selectedInitialPhoto ? URL.createObjectURL(selectedInitialPhoto) : null),
@@ -405,6 +433,22 @@ export function PlantForm({
     setPhotoError(file ? getPlantPhotoValidationError(file) : null);
   }
 
+  function goToNextStep() {
+    const index = steps.indexOf(visibleStep);
+
+    if (index < steps.length - 1) {
+      setStep(steps[index + 1]);
+    }
+  }
+
+  function goToPreviousStep() {
+    const index = steps.indexOf(visibleStep);
+
+    if (index > 0) {
+      setStep(steps[index - 1]);
+    }
+  }
+
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     if (!allowInitialPhoto) {
       return;
@@ -413,7 +457,7 @@ export function PlantForm({
     event.preventDefault();
 
     if (photoError) {
-      setStep("edit");
+      setStep("photo");
       return;
     }
 
@@ -436,20 +480,19 @@ export function PlantForm({
   return (
     <div className="flex flex-col gap-6">
       <section className="border-b border-[color:var(--border-soft)] pb-5">
-        <StatusPill>
-          {step === "edit"
-            ? startsWithPhoto
-              ? "Photo first"
-              : "Manual entry"
-            : "Review before save"}
-        </StatusPill>
+        <StatusPill>{isReviewStep ? "Review before save" : "Photo-first setup"}</StatusPill>
         <h2 className="mt-4 text-3xl font-semibold">{title}</h2>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-[color:var(--muted)] sm:text-base">
           {description}
         </p>
-        <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] px-4 py-2 text-sm font-semibold text-[color:var(--muted)]">
-          <CameraIcon className="h-4 w-4 text-[color:var(--accent)]" />
-          {allowInitialPhoto ? "Photo is optional" : "Photo can be added after save"}
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] px-4 py-2 text-sm font-semibold text-[color:var(--muted)]">
+            <CameraIcon className="h-4 w-4 text-[color:var(--accent)]" />
+            {allowInitialPhoto ? "Photo is optional" : "Photo can be added after save"}
+          </div>
+          <div className="inline-flex w-fit items-center rounded-full border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] px-4 py-2 text-sm font-semibold text-[color:var(--muted)]">
+            Step {currentStepNumber} of {steps.length}
+          </div>
         </div>
       </section>
 
@@ -471,10 +514,10 @@ export function PlantForm({
       >
         <div
           className={`grid gap-5 ${
-            step === "review" && state.status !== "error" ? "hidden" : ""
+            isReviewStep && state.status !== "error" ? "hidden" : ""
           }`}
         >
-          {allowInitialPhoto ? (
+          {allowInitialPhoto && visibleStep === "photo" ? (
             <FormSection icon={<CameraIcon className="h-5 w-5" />} title="Photo">
               <div className="grid gap-3">
                 <label className="flex flex-col gap-2 text-sm font-medium text-[color:var(--foreground)]">
@@ -524,6 +567,7 @@ export function PlantForm({
             </FormSection>
           ) : null}
 
+          {visibleStep === "identity" ? (
           <FormSection icon={<LeafIcon className="h-5 w-5" />} title="Plant identity">
             <div className="grid gap-4 sm:grid-cols-2">
               <FormField
@@ -550,6 +594,13 @@ export function PlantForm({
                 onChange={(value) => updateField("scientificName", value)}
                 placeholder="Epipremnum aureum"
               />
+            </div>
+          </FormSection>
+          ) : null}
+
+          {visibleStep === "room" ? (
+          <FormSection icon={<RoomIcon className="h-5 w-5" />} title="Room">
+            <div className="grid gap-4 sm:grid-cols-2">
               <RoomSelectField
                 rooms={rooms}
                 value={values.roomId}
@@ -573,8 +624,10 @@ export function PlantForm({
               />
             </div>
           </FormSection>
+          ) : null}
 
-          <FormSection icon={<DropletIcon className="h-5 w-5" />} title="Watering guidance">
+          {visibleStep === "watering" ? (
+          <FormSection icon={<DropletIcon className="h-5 w-5" />} title="Watering basics">
             <div className="grid gap-4">
               <FormField
                 label="Watering interval in days"
@@ -592,11 +645,6 @@ export function PlantForm({
               placeholder="Let the top inch dry out first."
               rows={4}
             />
-            </div>
-          </FormSection>
-
-          <FormSection icon={<RoomIcon className="h-5 w-5" />} title="Notes">
-            <div className="grid gap-4">
             <FormField
               label="Notes"
               name="notes"
@@ -607,21 +655,31 @@ export function PlantForm({
             />
             </div>
           </FormSection>
+          ) : null}
 
           <div className="flex flex-col gap-3 sm:flex-row">
+            {!isFirstStep ? (
+              <button
+                type="button"
+                onClick={goToPreviousStep}
+                className="inline-flex min-h-[var(--tap-target)] items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-5 py-3 text-sm font-semibold text-[color:var(--foreground)] transition hover:bg-[color:var(--accent-soft)]"
+              >
+                Back
+              </button>
+            ) : null}
             <button
               type="button"
-              onClick={() => setStep("review")}
+              onClick={goToNextStep}
               className="inline-flex min-h-[var(--tap-target)] items-center justify-center rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-95"
             >
-              Review and save
+              {steps.indexOf(visibleStep) === steps.length - 2 ? "Review and save" : "Continue"}
             </button>
           </div>
         </div>
 
         <section
           className={`rounded-[1.5rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] p-5 sm:p-6 ${
-            step === "edit" || state.status === "error" ? "hidden" : ""
+            !isReviewStep || state.status === "error" ? "hidden" : ""
           }`}
         >
           <div className="grid gap-x-6 sm:grid-cols-2">
@@ -658,7 +716,7 @@ export function PlantForm({
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <button
               type="button"
-              onClick={() => setStep("edit")}
+              onClick={goToPreviousStep}
               className="inline-flex items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-5 py-3 text-sm font-semibold text-[color:var(--foreground)] transition hover:bg-[color:var(--accent-soft)]"
             >
               Back to editing

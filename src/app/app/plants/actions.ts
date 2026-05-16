@@ -706,10 +706,10 @@ export async function saveWateringReminderAction(
     };
   }
 
-  if (!plant.watering_interval_days) {
+  if (reminderMode === "after_watering" && !plant.watering_interval_days) {
     return {
       status: "error",
-      message: "Add a watering interval before choosing reminder timing.",
+      message: "Add a watering interval before using reminders that recalculate after watering.",
     };
   }
 
