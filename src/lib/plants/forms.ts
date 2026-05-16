@@ -59,9 +59,8 @@ export function parsePlantFormData(formData: FormData) {
   const notes = normalizeLongText(values.notes);
   const watering_guidance = normalizeLongText(values.wateringGuidance);
 
-  if (!nickname && !common_name) {
-    fieldErrors.nickname = "Add a nickname or a common name so this plant has a clear label.";
-    fieldErrors.commonName = "Add a common name or keep a nickname so this plant has a clear label.";
+  if (!nickname) {
+    fieldErrors.nickname = "Add a nickname so this plant has a clear label.";
   }
 
   let watering_interval_days: number | null = null;

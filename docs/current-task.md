@@ -43,20 +43,31 @@ Slice 8: Onboarding room/photo integration polish.
 
 Status: implemented on branch `campaign/onboarding-rooms-s8-onboarding-polish`; awaiting review/merge.
 
+Pre-merge QA patch status: implemented on the same branch.
+
 Completed work:
 
 - Added optional room collection to onboarding with suggested room chips and comma-separated custom room names.
 - Onboarding now routes to Today, manual Add Plant, or photo-first Add Plant after completion.
 - Room names submitted during onboarding are created as user-owned `plant_rooms`; duplicate active names are skipped.
 - Existing users remain protected from onboarding loops, and Settings can still revisit setup.
-- Settings now includes a state-derived setup checklist for first plant, room, reminder, photo, and Google Calendar connection.
+- Today now includes a state-derived setup checklist for first plant, room, reminder, photo, and Google Calendar connection when setup is incomplete.
 - Today's empty state offers manual and photo-first Add Plant paths.
+- Renamed room migrations so fresh applies run the room data model before the archive function.
+- Added immediate photo preview in photo-first Add Plant.
+- The selected photo is retained through pre-save identification and final plant save so the user does not upload the same file twice.
+- Raised the photo upload limit to 12 MB and configured Server Action/proxy body size for typical mobile photos.
+- Made nickname required in UI and server validation; common/scientific names remain optional.
+- Changed the review step CTA to `Review and save`.
+- Moved the full Getting Started checklist emphasis to Today; Settings now keeps a lightweight setup review entry.
 
 Room/photo behavior:
 
 - Room creation in onboarding derives `user_id` from the signed-in server session.
 - Onboarding room setup is optional and can be skipped without blocking Today or Add Plant.
 - Photo-first routing uses the existing `/app/plants/new?start=photo` path and does not require photo upload or AI identification.
+- Photo-first preview uses a browser-local object URL. The file is not uploaded until the signed-in server creates the owned plant record.
+- Pre-save Pl@ntNet still receives only transient file bytes server-side and does not persist raw provider responses.
 
 Non-goals preserved:
 
@@ -73,8 +84,9 @@ Non-goals preserved:
 - `npm run build`: passed.
 - `npm run typecheck`: not run; no script exists.
 - `npm test`: not run; no script exists.
+- `npx supabase migration list --linked`: attempted as a safe read-only check, but `SUPABASE_ACCESS_TOKEN` was missing in the environment.
 - Supabase migrations: product owner reported Slice 2 room migrations were run successfully before Slice 4 resumed.
-- Migration/RLS review: no schema changes in Slice 8. Onboarding room creation uses existing user-owned room helpers and RLS-backed `plant_rooms` behavior.
+- Migration/RLS review: no SQL behavior changes in the pre-merge patch. Room migration files were renamed to `20260512_01_slice_room_data_model.sql` and `20260512_02_slice_room_archive_function.sql` for deterministic fresh apply ordering. Onboarding room creation uses existing user-owned room helpers and RLS-backed `plant_rooms` behavior.
 
 ## Next Recommended Action
 

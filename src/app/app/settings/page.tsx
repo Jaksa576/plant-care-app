@@ -9,7 +9,6 @@ import { GoogleCalendarSettingsPanel } from "@/components/google-calendar-settin
 import {
   BellIcon,
   CameraIcon,
-  CheckCircleIcon,
   GearIcon,
   RoomIcon,
   SproutIcon,
@@ -25,7 +24,6 @@ import {
 import { listPlantsForUser } from "@/lib/plants/data";
 import type { GoogleCalendarEventLinkRecord } from "@/lib/plants/types";
 import { listPlantRoomsForUser } from "@/lib/rooms/data";
-import { listWateringRemindersForUser } from "@/lib/reminders/data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -82,33 +80,6 @@ function getLatestGoogleCalendarEventSync(links: GoogleCalendarEventLinkRecord[]
     : null;
 }
 
-function SetupChecklistItem({
-  complete,
-  label,
-  href,
-}: {
-  complete: boolean;
-  label: string;
-  href: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className="flex min-h-[var(--tap-target)] items-center gap-3 rounded-[1rem] border border-[color:var(--border-soft)] bg-white/70 px-4 py-3 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)]"
-    >
-      <CheckCircleIcon
-        className={`h-5 w-5 shrink-0 ${
-          complete ? "text-[color:var(--accent)]" : "text-[color:var(--muted)]"
-        }`}
-      />
-      <span className="min-w-0 flex-1">{label}</span>
-      <span className="text-xs font-semibold text-[color:var(--muted)]">
-        {complete ? "Done" : "Optional"}
-      </span>
-    </Link>
-  );
-}
-
 export default async function SettingsPage({ searchParams }: SettingsPageProps) {
   const [authState, params] = await Promise.all([getAuthState(), searchParams]);
 
@@ -129,14 +100,12 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
   const [
     roomsResult,
     plantsResult,
-    remindersResult,
     calendarConnectionResult,
     calendarEventLinksResult,
   ] =
     await Promise.all([
       listPlantRoomsForUser(supabase, authState.user.id),
       listPlantsForUser(supabase, authState.user.id),
-      listWateringRemindersForUser(supabase, authState.user.id),
       getGoogleCalendarConnection(supabase, authState.user.id),
       listGoogleCalendarEventLinksForUser(supabase, authState.user.id),
     ]);
@@ -153,10 +122,6 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
   const roomStatus = getRoomStatusMessage(params.rooms);
   const googleCalendarConfigured = Boolean(getGoogleCalendarConfig());
   const latestEventSync = getLatestGoogleCalendarEventSync(calendarEventLinks);
-  const reminders = remindersResult.data ?? [];
-  const hasPhoto = plants.some((plant) => Boolean(plant.primary_photo_path));
-  const hasEnabledReminder = reminders.some((reminder) => reminder.enabled);
-  const hasCalendarConnection = Boolean(calendarConnectionResult.data);
 
   return (
     <AppShell
@@ -293,36 +258,9 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
             <div>
               <h2 className="text-lg font-semibold">Setup</h2>
               <p className="mt-1 text-sm leading-6 text-[color:var(--muted)]">
-                Review the short onboarding path any time. It stays optional and never blocks
-                the watering dashboard.
+                Today now carries the Getting Started checklist when setup is incomplete.
+                Settings keeps the review path and app-level controls.
               </p>
-              <div className="mt-4 grid gap-2">
-                <SetupChecklistItem
-                  complete={plants.length > 0}
-                  label="Add your first plant"
-                  href="/app/plants/new"
-                />
-                <SetupChecklistItem
-                  complete={rooms.length > 0}
-                  label="Add a room"
-                  href="/app/onboarding?review=1"
-                />
-                <SetupChecklistItem
-                  complete={hasEnabledReminder}
-                  label="Set a watering reminder"
-                  href={plants[0] ? `/app/plants/${plants[0].id}` : "/app/plants/new"}
-                />
-                <SetupChecklistItem
-                  complete={hasPhoto}
-                  label="Add a photo"
-                  href={plants[0] ? `/app/plants/${plants[0].id}` : "/app/plants/new?start=photo"}
-                />
-                <SetupChecklistItem
-                  complete={hasCalendarConnection}
-                  label="Connect Google Calendar"
-                  href="/app/settings"
-                />
-              </div>
               <div className="mt-4 flex flex-wrap gap-3">
                 <Link
                   href="/app/onboarding?review=1"

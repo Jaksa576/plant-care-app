@@ -21,10 +21,10 @@ This document describes implemented technical shape and architectural boundaries
 - `/app/plants` is the protected redesigned Plants tab for browsing the full active collection by room.
 - `/app/plants/[plantId]` is the protected redesigned plant detail/profile inspector for a single user-owned plant.
 - `/app/plants/[plantId]/edit` is the protected plant edit route.
-- `/app/settings` is a protected settings route for account and app-level controls, including setup review, a state-derived setup checklist, room management, reminders, and Google Calendar connect/disconnect/status.
+- `/app/settings` is a protected settings route for account and app-level controls, including setup review, room management, reminders, and Google Calendar connect/disconnect/status.
 - The signed-in shell includes the Home / Plants / Settings bottom app bar, persistent Add Plant access, and sign-out where appropriate.
 - Manual plant create, profile, edit, list, and archive flows are implemented.
-- Add Plant supports manual entry and a photo-first entry path. Initial photos are optional and upload only after the owned plant record is created.
+- Add Plant supports manual entry and a photo-first entry path. Selected initial photos preview immediately, can be used for pre-save identification, and upload only after the owned plant record is created.
 - The Plants tab groups active plants by managed room name first, then legacy `location`, then `Unassigned`, and preserves user-owned collection scoping.
 - Managed room records are implemented in `plant_rooms`; `plants.room_id` is nullable and legacy `plants.location` is preserved for compatibility.
 - Settings room management can list, add, rename, and archive active rooms.
@@ -32,7 +32,7 @@ This document describes implemented technical shape and architectural boundaries
 - Plant-profile watering state and mark-watered behavior are implemented.
 - Plant-profile next watering status uses enabled app-owned reminder dates first, then falls back to watering interval calculations.
 - The signed-in dashboard groups active plants by watering status: overdue, due today, upcoming, and recently watered.
-- The signed-in Home route presents the redesigned Today surface with Needs water, By room, and Recent care sections.
+- The signed-in Home route presents the redesigned Today surface with Needs water, By room, Recent care, and an optional state-derived Getting Started checklist when setup is incomplete.
 - Dashboard urgency uses enabled app-owned reminder dates first, then falls back to watering interval calculations.
 - Plant profiles show watering history from watering events.
 - Plant profiles present a photo/identity hero, primary Water now action, secondary Snooze/Reminder actions, care basics rows, watering history, photo/identification, app reminder, lightweight Google Calendar status when relevant, edit, and archive surfaces.
@@ -110,7 +110,7 @@ The implemented `plants` model stores:
 - `created_at`
 - `updated_at`
 
-Application validation plus a database check require at least one user-friendly label through `nickname` or `common_name`.
+Application validation requires `nickname` for Add/Edit Plant. `common_name` and `scientific_name` remain optional editable fields. The existing database check still accepts `nickname` or `common_name` for backward compatibility with older data.
 
 Watering interval and watering guidance are user-entered guidance only. The interval drives app date calculations, but it must not be treated as botanical truth.
 
@@ -226,7 +226,7 @@ Photo object paths use `{user_id}/{plant_id}/primary-{uuid}.{extension}`. Storag
 
 The bucket is private. Server-rendered app surfaces create short-lived signed URLs for display on plant profiles and dashboard cards. Missing or unavailable photos fall back to calm local UI; photos are optional and user-owned.
 
-Photo-first Add Plant does not use public storage or staged photo records. The user may choose a photo before save, but the server first creates an owned plant record, then uploads the optional photo to the existing owner-scoped `{user_id}/{plant_id}/...` private Storage path and stores it as the primary photo. If the optional photo upload fails, the plant remains saved and the user can add the photo from the plant profile. Abandoning Add Plant before save leaves no staged object to clean up.
+Photo-first Add Plant does not use public storage or staged photo records. The user may choose a photo before save and sees an immediate browser-local preview. The same selected file can be sent to Pl@ntNet for optional pre-save identification and is reattached to the final plant save, avoiding a second upload. The server first creates an owned plant record, then uploads the optional photo to the existing owner-scoped `{user_id}/{plant_id}/...` private Storage path and stores it as the primary photo. If the optional photo upload fails, the plant remains saved and the user can add the photo from the plant profile. Abandoning Add Plant before save leaves no staged object to clean up.
 
 AI-assisted identification uses Pl@ntNet for optional plant name suggestions. Required server-only environment:
 

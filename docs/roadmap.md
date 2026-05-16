@@ -48,6 +48,7 @@ This document tracks product sequencing and slice status. Stable product directi
 - Photo-first Add Plant foundation with optional pre-save photo selection, post-create owner-scoped upload, and preserved manual entry path.
 - Pre-save Pl@ntNet identification from the selected Add Plant photo with transient names-only suggestions, uncertainty labels, explicit user review, and no AI care guidance.
 - Onboarding room/photo integration polish with optional room collection, manual/photo-first Add Plant routing, Settings setup checklist, and calm empty-state entry points.
+- Pre-merge campaign QA patch with deterministic room migration ordering, required plant nicknames, mobile-friendlier photo limit/body size, immediate photo preview, one-photo identify/save persistence, clearer Add Plant review copy, and Today-centered setup checklist.
 
 ### Active
 

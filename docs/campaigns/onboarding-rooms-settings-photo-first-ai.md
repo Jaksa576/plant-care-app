@@ -4,6 +4,8 @@ Status: **active**.
 
 Slice 8 is implemented on branch `campaign/onboarding-rooms-s8-onboarding-polish`; awaiting review/merge.
 
+Pre-merge QA patch is implemented on the same branch.
+
 Product-owner selected implementation sequence for this autonomous campaign run:
 
 ```txt
@@ -80,6 +82,9 @@ By the end of this campaign:
 - Plant detail keeps plant-level reminder controls but no longer carries heavy Google Calendar setup.
 - Add Plant can begin with photo capture/upload, but manual creation remains equally available.
 - Pre-save Pl@ntNet support is identity-only and conservative.
+- Photo-first Add Plant previews the selected image immediately and uses the same selected file for optional identification and final primary-photo save.
+- The Getting Started checklist is primarily on Today when setup is incomplete; Settings keeps a lightweight setup review entry.
+- Add/Edit Plant requires a nickname. Common and scientific names remain optional.
 - No AI care guidance or suggested watering cadence is introduced in this campaign.
 
 ## Current state and source-of-truth notes
@@ -795,6 +800,7 @@ Acceptance criteria:
 Completed notes:
 
 - Added additive `plant_rooms` migration with owner-scoped RLS.
+- Pre-merge QA renamed the room migrations to `20260512_01_slice_room_data_model.sql` and `20260512_02_slice_room_archive_function.sql` so fresh applies create `plant_rooms` before the archive RPC that returns `public.plant_rooms`.
 - Added nullable `plants.room_id` with a foreign key to `plant_rooms`.
 - Backfilled rooms from distinct non-empty trimmed `plants.location` values per user.
 - Backfilled `plants.room_id` where legacy location matched an active room name.
@@ -1192,8 +1198,10 @@ Completed notes:
 
 - Add Plant now offers Add manually and Start with a photo entry choices.
 - Manual Add Plant remains fully available and does not require photo, rooms, AI, reminders, or calendar setup.
-- Photo-first users can choose an optional photo before final save.
+- Photo-first users can choose an optional photo before final save and see an immediate browser-local preview.
 - The server creates the signed-in user's plant first, then uploads the optional photo to the existing private owner/plant-scoped Storage path and saves it as the primary photo.
+- The same selected photo is retained through optional pre-save identification and final save, so users do not need to upload it twice.
+- The photo limit is 12 MB and Server Action/proxy body size is configured to support typical mobile camera photos.
 - If photo upload fails after plant creation, the plant remains saved and the profile shows a recoverable message.
 - No public storage, draft plant records, staged photo table, or pre-save Pl@ntNet call was introduced.
 - Abandoning Add Plant before save leaves no staged photo object to clean up.
@@ -1212,6 +1220,8 @@ Acceptance criteria:
 - User can start with a photo.
 - User can save plant with photo.
 - User can abandon photo-first flow safely.
+- Selecting a photo previews immediately.
+- Identifying a photo keeps the preview and same selected file for final save.
 - Required fields are clear.
 - Storage remains private.
 - Ownership checks remain server-side.
@@ -1353,7 +1363,8 @@ Scope:
 Completed notes:
 
 - Onboarding finish actions route to Today, manual Add Plant, or photo-first Add Plant.
-- Settings includes a state-derived setup checklist for first plant, rooms, reminders, photos, and Google Calendar connection.
+- Today includes a state-derived setup checklist for first plant, rooms, reminders, photos, and Google Calendar connection when setup is incomplete.
+- Settings keeps a lightweight setup review entry instead of being the primary checklist surface.
 - Today's no-plants empty state links to manual and photo-first Add Plant paths.
 - Account privacy copy in Settings now reassures users that plants, rooms, photos, and reminders are private to their account.
 - Existing-user onboarding protections remain in place: users with plants are not redirected into onboarding, and Settings review does not create a loop.

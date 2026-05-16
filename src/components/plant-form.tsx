@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useMemo, useState, useTransition } from "react";
 
 import { CameraIcon, DropletIcon, LeafIcon, RoomIcon } from "@/components/icons";
 import { StatusPill } from "@/components/status-pill";
@@ -11,6 +11,7 @@ import {
   type PlantFormState,
   type PlantFormValues,
 } from "@/lib/plants/types";
+import { getPlantPhotoValidationError, PLANT_PHOTO_MAX_MB } from "@/lib/plants/photos";
 import type { PlantRoomRecord } from "@/lib/rooms/types";
 
 type PlantFormProps = {
@@ -75,7 +76,7 @@ function FormField({
       </span>
       {requiredHint ? (
         <span id={hintId} className="text-xs leading-5 text-[color:var(--muted)]">
-          Required as part of the plant name.
+          Required before saving.
         </span>
       ) : null}
       {rows ? (
@@ -204,21 +205,50 @@ function getConfidenceText(label: PlantIdentificationCandidate["confidenceLabel"
 
 function InitialPhotoIdentificationControls({
   identifyAction,
+  selectedPhoto,
+  photoError,
   onAcceptCandidate,
 }: {
   identifyAction: (
     state: PlantIdentificationState,
     formData: FormData,
   ) => Promise<PlantIdentificationState>;
+  selectedPhoto: File | null;
+  photoError: string | null;
   onAcceptCandidate: (candidate: PlantIdentificationCandidate) => void;
 }) {
   const [state, identifyFormAction, isPending] = useActionState(
     identifyAction,
     emptyIdentificationState,
   );
+  const [isIdentifyTransitionPending, startIdentifyTransition] = useTransition();
   const [showCandidates, setShowCandidates] = useState(true);
   const [reviewMessage, setReviewMessage] = useState<string | null>(null);
+  const [localMessage, setLocalMessage] = useState<string | null>(null);
   const hasCandidates = state.candidates.length > 0 && showCandidates;
+  const identifyPending = isPending || isIdentifyTransitionPending;
+
+  function handleIdentifyClick() {
+    setShowCandidates(true);
+    setReviewMessage(null);
+
+    if (!selectedPhoto) {
+      setLocalMessage("Choose a photo before asking for identification help.");
+      return;
+    }
+
+    if (photoError) {
+      setLocalMessage(photoError);
+      return;
+    }
+
+    const formData = new FormData();
+    formData.set("initialPhoto", selectedPhoto, selectedPhoto.name);
+    setLocalMessage(null);
+    startIdentifyTransition(() => {
+      identifyFormAction(formData);
+    });
+  }
 
   return (
     <div className="mt-4 rounded-[1.25rem] border border-[color:var(--border-soft)] bg-white/75 p-4">
@@ -236,19 +266,21 @@ function InitialPhotoIdentificationControls({
           </p>
         </div>
         <button
-          type="submit"
-          formAction={identifyFormAction}
-          disabled={isPending}
-          onClick={() => {
-            setShowCandidates(true);
-            setReviewMessage(null);
-          }}
+          type="button"
+          disabled={identifyPending}
+          onClick={handleIdentifyClick}
           className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center gap-2 rounded-full bg-[color:var(--accent)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
         >
           <CameraIcon className="h-4 w-4" />
-          {isPending ? "Checking..." : "Identify from photo"}
+          {identifyPending ? "Checking..." : "Identify from photo"}
         </button>
       </div>
+
+      {localMessage ? (
+        <div className="mt-4 rounded-[1rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950">
+          {localMessage}
+        </div>
+      ) : null}
 
       {state.message ? (
         <div
@@ -332,8 +364,25 @@ export function PlantForm({
   const [state, formAction, isPending] = useActionState(action, startingState);
   const [step, setStep] = useState<"edit" | "review">("edit");
   const [values, setValues] = useState<PlantFormValues>(startingState.values);
+  const [selectedInitialPhoto, setSelectedInitialPhoto] = useState<File | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [isSubmitTransitionPending, startSubmitTransition] = useTransition();
 
   const fieldErrors = state.fieldErrors;
+  const submitPending = isPending || isSubmitTransitionPending;
+
+  const photoPreviewUrl = useMemo(
+    () => (selectedInitialPhoto ? URL.createObjectURL(selectedInitialPhoto) : null),
+    [selectedInitialPhoto],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (photoPreviewUrl) {
+        URL.revokeObjectURL(photoPreviewUrl);
+      }
+    };
+  }, [photoPreviewUrl]);
 
   function updateField(name: keyof PlantFormValues, value: string) {
     setValues((current) => ({
@@ -348,6 +397,35 @@ export function PlantForm({
       commonName: candidate.commonName ?? current.commonName,
       scientificName: candidate.scientificName,
     }));
+  }
+
+  function handleInitialPhotoChange(fileList: FileList | null) {
+    const file = fileList?.[0] ?? null;
+    setSelectedInitialPhoto(file);
+    setPhotoError(file ? getPlantPhotoValidationError(file) : null);
+  }
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    if (!allowInitialPhoto) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (photoError) {
+      setStep("edit");
+      return;
+    }
+
+    const formData = new FormData(event.currentTarget);
+
+    if (selectedInitialPhoto) {
+      formData.set("initialPhoto", selectedInitialPhoto, selectedInitialPhoto.name);
+    }
+
+    startSubmitTransition(() => {
+      formAction(formData);
+    });
   }
 
   const selectedRoomLabel =
@@ -387,6 +465,7 @@ export function PlantForm({
 
       <form
         action={formAction}
+        onSubmit={handleSubmit}
         encType={allowInitialPhoto ? "multipart/form-data" : undefined}
         className="flex flex-col gap-6"
       >
@@ -405,16 +484,39 @@ export function PlantForm({
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
                     capture="environment"
+                    onChange={(event) => handleInitialPhotoChange(event.target.files)}
                     className="w-full rounded-[1rem] border border-[color:var(--border)] bg-white/85 px-4 py-3 text-sm font-normal text-[color:var(--foreground)] outline-none transition file:mr-4 file:rounded-full file:border-0 file:bg-[color:var(--accent-soft)] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[color:var(--foreground)] focus:border-[color:var(--accent)] focus:ring-2 focus:ring-[color:var(--accent-soft)]"
                   />
                 </label>
+                {photoPreviewUrl ? (
+                  <div className="overflow-hidden rounded-[1.25rem] border border-[color:var(--border-soft)] bg-[color:var(--stone)]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={photoPreviewUrl}
+                      alt="Selected plant photo preview"
+                      className="h-64 w-full object-cover sm:h-80"
+                    />
+                    <div className="border-t border-[color:var(--border-soft)] px-4 py-3 text-sm leading-6 text-[color:var(--muted)]">
+                      {selectedInitialPhoto?.name ?? "Selected photo"} will be used for
+                      identification and saved as this plant&apos;s primary photo.
+                    </div>
+                  </div>
+                ) : null}
+                {photoError ? (
+                  <div className="rounded-[1rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950">
+                    {photoError}
+                  </div>
+                ) : null}
                 <p className="text-sm leading-6 text-[color:var(--muted)]">
                   A photo helps you recognize this plant. Identification suggestions stay optional,
-                  names-only, and editable before saving.
+                  names-only, and editable before saving. Use a JPG, PNG, or WebP image under{" "}
+                  {PLANT_PHOTO_MAX_MB} MB.
                 </p>
                 {identifyInitialPhotoAction ? (
                   <InitialPhotoIdentificationControls
                     identifyAction={identifyInitialPhotoAction}
+                    selectedPhoto={selectedInitialPhoto}
+                    photoError={photoError}
                     onAcceptCandidate={acceptIdentificationCandidate}
                   />
                 ) : null}
@@ -431,7 +533,7 @@ export function PlantForm({
                 onChange={(value) => updateField("nickname", value)}
                 error={fieldErrors.nickname}
                 placeholder="Kitchen pothos"
-                requiredHint="Required if no common name"
+                requiredHint="Required"
               />
               <FormField
                 label="Common name"
@@ -440,7 +542,6 @@ export function PlantForm({
                 onChange={(value) => updateField("commonName", value)}
                 error={fieldErrors.commonName}
                 placeholder="Pothos"
-                requiredHint="Required if no nickname"
               />
               <FormField
                 label="Scientific name"
@@ -513,7 +614,7 @@ export function PlantForm({
               onClick={() => setStep("review")}
               className="inline-flex min-h-[var(--tap-target)] items-center justify-center rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-95"
             >
-              Review what will be saved
+              Review and save
             </button>
           </div>
         </div>
@@ -564,10 +665,10 @@ export function PlantForm({
             </button>
             <button
               type="submit"
-              disabled={isPending}
+              disabled={submitPending}
               className="inline-flex min-h-[var(--tap-target)] items-center justify-center rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isPending ? "Saving..." : submitLabel}
+              {submitPending ? "Saving..." : submitLabel}
             </button>
           </div>
         </section>

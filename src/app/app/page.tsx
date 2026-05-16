@@ -5,7 +5,9 @@ import {
 } from "@/app/app/plants/actions";
 import { TodaySnoozeButton, TodayWaterButton } from "@/components/home-today-actions";
 import {
+  BellIcon,
   CalendarIcon,
+  CameraIcon,
   CheckCircleIcon,
   ChevronRightIcon,
   ClockIcon,
@@ -16,6 +18,7 @@ import { PlantPhotoFrame } from "@/components/plant-photo";
 import { SignOutButton } from "@/components/sign-out-button";
 import { StatusPill } from "@/components/status-pill";
 import { getAuthState } from "@/lib/auth";
+import { getGoogleCalendarConnection } from "@/lib/google-calendar/data";
 import { listPlantsForUser } from "@/lib/plants/data";
 import { createPlantPhotoUrlMap } from "@/lib/plants/photos";
 import {
@@ -44,6 +47,13 @@ type AppPageProps = {
   searchParams: Promise<{
     archived?: string;
   }>;
+};
+
+type SetupChecklistItem = {
+  complete: boolean;
+  label: string;
+  href: string;
+  icon: React.ReactNode;
 };
 
 function formatTodayDate() {
@@ -120,6 +130,55 @@ function getRecentCareEvents(events: WateringEventRecord[], plants: PlantRecord[
       Boolean(item.plant),
     )
     .slice(0, 5);
+}
+
+function GettingStartedChecklist({ items }: { items: SetupChecklistItem[] }) {
+  const incompleteItems = items.filter((item) => !item.complete);
+
+  if (incompleteItems.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className="rounded-[1.5rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] p-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <StatusPill>Getting started</StatusPill>
+          <h2 className="mt-3 text-lg font-semibold">Finish setup at your pace</h2>
+          <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">
+            These are optional next steps. Today stays usable while you build out the app.
+          </p>
+        </div>
+        <Link
+          href="/app/onboarding?review=1"
+          className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)]"
+        >
+          Review setup
+        </Link>
+      </div>
+      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+        {items.map((item) => (
+          <Link
+            key={item.label}
+            href={item.href}
+            className={`flex min-h-[var(--tap-target)] items-center gap-3 rounded-[1rem] border px-4 py-3 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)] ${
+              item.complete
+                ? "border-[color:var(--border-soft)] bg-[color:var(--stone)] text-[color:var(--muted)]"
+                : "border-[color:var(--border)] bg-white/80 text-[color:var(--foreground)]"
+            }`}
+          >
+            <span className={item.complete ? "text-[color:var(--accent)]" : "text-[color:var(--muted)]"}>
+              {item.complete ? <CheckCircleIcon className="h-5 w-5" /> : item.icon}
+            </span>
+            <span className="min-w-0 flex-1">{item.label}</span>
+            <span className="text-xs text-[color:var(--muted)]">
+              {item.complete ? "Done" : "Optional"}
+            </span>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
 }
 
 function TodayPlantRow({
@@ -209,12 +268,14 @@ export default async function AppPage({ searchParams }: AppPageProps) {
     wateringEventsResult,
     remindersResult,
     roomsResult,
+    calendarConnectionResult,
   ] = await Promise.all([
     getUserAppPreferencesForUser(supabase, authState.user.id),
     listPlantsForUser(supabase, authState.user.id),
     listWateringEventsForUser(supabase, authState.user.id),
     listWateringRemindersForUser(supabase, authState.user.id),
     listPlantRoomsForUser(supabase, authState.user.id),
+    getGoogleCalendarConnection(supabase, authState.user.id),
   ]);
   const plants = plantsResult.data ?? [];
 
@@ -239,6 +300,40 @@ export default async function AppPage({ searchParams }: AppPageProps) {
   const roomNames = createRoomNameMap(roomsResult.data ?? []);
   const roomGroups = groupDashboardPlantsByRoom(dashboardPlants, roomNames);
   const recentCare = getRecentCareEvents(wateringEventsResult.data ?? [], plants);
+  const reminders = remindersResult.data ?? [];
+  const firstPlantHref = plants[0] ? `/app/plants/${plants[0].id}` : "/app/plants/new";
+  const setupChecklistItems: SetupChecklistItem[] = [
+    {
+      complete: plants.length > 0,
+      label: "Add your first plant",
+      href: "/app/plants/new",
+      icon: <PlusIcon className="h-5 w-5" />,
+    },
+    {
+      complete: (roomsResult.data ?? []).length > 0,
+      label: "Add a room",
+      href: "/app/onboarding?review=1",
+      icon: <RoomIcon className="h-5 w-5" />,
+    },
+    {
+      complete: reminders.some((reminder) => reminder.enabled),
+      label: "Set a watering reminder",
+      href: firstPlantHref,
+      icon: <BellIcon className="h-5 w-5" />,
+    },
+    {
+      complete: plants.some((plant) => Boolean(plant.primary_photo_path)),
+      label: "Add a photo",
+      href: plants[0] ? `/app/plants/${plants[0].id}` : "/app/plants/new?start=photo",
+      icon: <CameraIcon className="h-5 w-5" />,
+    },
+    {
+      complete: Boolean(calendarConnectionResult.data),
+      label: "Connect Google Calendar",
+      href: "/app/settings",
+      icon: <CalendarIcon className="h-5 w-5" />,
+    },
+  ];
 
   return (
     <AppShell
@@ -305,6 +400,10 @@ export default async function AppPage({ searchParams }: AppPageProps) {
               The dashboard is using watering history and intervals for now. {remindersResult.error}
             </p>
           </section>
+        ) : null}
+
+        {!plantsResult.error ? (
+          <GettingStartedChecklist items={setupChecklistItems} />
         ) : null}
 
         {!plantsResult.error && plants.length === 0 ? (
