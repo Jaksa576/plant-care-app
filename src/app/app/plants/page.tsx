@@ -8,8 +8,14 @@ import { StatusPill } from "@/components/status-pill";
 import { getAuthState } from "@/lib/auth";
 import { listPlantsForUser } from "@/lib/plants/data";
 import { createPlantPhotoUrlMap } from "@/lib/plants/photos";
-import { getPlantPrimaryLabel, getPlantSecondaryLabel } from "@/lib/plants/presenters";
+import {
+  createRoomNameMap,
+  getPlantPrimaryLabel,
+  getPlantRoomLabel,
+  getPlantSecondaryLabel,
+} from "@/lib/plants/presenters";
 import { listWateringRemindersForUser } from "@/lib/reminders/data";
+import { listPlantRoomsForUser } from "@/lib/rooms/data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getDashboardPlants, type DashboardPlant } from "@/lib/watering/dashboard";
 import { listWateringEventsForUser } from "@/lib/watering/data";
@@ -30,11 +36,11 @@ function getStatusClass(status: DashboardPlant["schedule"]["status"]) {
   return "text-[color:var(--muted)]";
 }
 
-function groupDashboardPlantsByRoom(items: DashboardPlant[]) {
+function groupDashboardPlantsByRoom(items: DashboardPlant[], roomNames: Map<string, string>) {
   const groups = new Map<string, DashboardPlant[]>();
 
   for (const item of items) {
-    const room = item.plant.location?.trim() || "Unassigned";
+    const room = getPlantRoomLabel(item.plant, roomNames);
     const roomItems = groups.get(room) ?? [];
     roomItems.push(item);
     groups.set(room, roomItems);
@@ -56,13 +62,14 @@ function groupDashboardPlantsByRoom(items: DashboardPlant[]) {
 function PlantCollectionRow({
   item,
   photoUrl,
+  roomLabel,
 }: {
   item: DashboardPlant;
   photoUrl?: string;
+  roomLabel: string;
 }) {
   const primaryLabel = getPlantPrimaryLabel(item.plant);
   const secondaryLabel = getPlantSecondaryLabel(item.plant);
-  const roomLabel = item.plant.location?.trim() || "Unassigned";
   const statusClass = getStatusClass(item.schedule.status);
 
   return (
@@ -109,10 +116,11 @@ export default async function PlantsPage() {
     redirect("/login?missingEnv=1");
   }
 
-  const [plantsResult, wateringEventsResult, remindersResult] = await Promise.all([
+  const [plantsResult, wateringEventsResult, remindersResult, roomsResult] = await Promise.all([
     listPlantsForUser(supabase, authState.user.id),
     listWateringEventsForUser(supabase, authState.user.id),
     listWateringRemindersForUser(supabase, authState.user.id),
+    listPlantRoomsForUser(supabase, authState.user.id),
   ]);
   const plants = plantsResult.data ?? [];
   const photoUrls = await createPlantPhotoUrlMap(supabase, plants);
@@ -121,7 +129,8 @@ export default async function PlantsPage() {
     wateringEventsResult.data ?? [],
     remindersResult.data ?? [],
   );
-  const roomGroups = groupDashboardPlantsByRoom(dashboardPlants);
+  const roomNames = createRoomNameMap(roomsResult.data ?? []);
+  const roomGroups = groupDashboardPlantsByRoom(dashboardPlants, roomNames);
   const unassignedCount = roomGroups.find(([room]) => room === "Unassigned")?.[1].length ?? 0;
 
   return (
@@ -218,6 +227,7 @@ export default async function PlantsPage() {
                     key={item.plant.id}
                     item={item}
                     photoUrl={photoUrls[item.plant.id]}
+                    roomLabel={room}
                   />
                 ))}
               </div>

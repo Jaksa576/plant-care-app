@@ -9,7 +9,7 @@ import { GOOGLE_OAUTH_STATE_COOKIE } from "@/lib/google-calendar/oauth";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 function redirectToApp(request: Request, status: string) {
-  return NextResponse.redirect(new URL(`/app?googleCalendar=${status}`, request.url));
+  return NextResponse.redirect(new URL(`/app/settings?googleCalendar=${status}`, request.url));
 }
 
 export async function GET(request: Request) {

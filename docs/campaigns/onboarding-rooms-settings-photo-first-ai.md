@@ -1,8 +1,23 @@
 # Plant Care Campaign — Onboarding, Rooms, Settings, and Photo-First Add Plant Foundation
 
-Status: **draft / planned / not started**.
+Status: **active**.
 
-No implementation slice is active yet.
+Slice 8 is implemented on branch `campaign/onboarding-rooms-s8-onboarding-polish`; awaiting review/merge.
+
+Pre-merge QA patches are implemented on the same branch.
+
+Product-owner selected implementation sequence for this autonomous campaign run:
+
+```txt
+1. Onboarding shell and first-run routing
+2. Room data model and migration
+3. Room management in Settings
+4. Room dropdown in Add/Edit Plant
+5. Settings-managed Google Calendar integration
+6. Photo-first Add Plant foundation
+7. Pre-save Pl@ntNet identification
+8. Onboarding room/photo integration polish
+```
 
 ## Recommendation
 
@@ -67,6 +82,13 @@ By the end of this campaign:
 - Plant detail keeps plant-level reminder controls but no longer carries heavy Google Calendar setup.
 - Add Plant can begin with photo capture/upload, but manual creation remains equally available.
 - Pre-save Pl@ntNet support is identity-only and conservative.
+- Photo-first Add Plant previews the selected image immediately and uses the same selected file for optional identification and final primary-photo save.
+- Add Plant now uses one sequential, skippable photo-first setup flow instead of separate manual/photo choice cards.
+- The Add Plant review step submits all controlled plant fields from earlier steps, and the first step combines photo, identification, nickname, common name, and scientific name.
+- The Add/Edit room step now asks for one room path at a time: Unassigned, existing room, or add new room. The legacy location note is no longer user-facing but existing `plants.location` values are preserved while editing.
+- The Getting Started checklist is primarily on Today when setup is incomplete; Settings keeps a lightweight setup review entry.
+- Add/Edit Plant requires a nickname. Common and scientific names remain optional.
+- Fixed schedule watering reminders can be saved without a watering interval; after-watering reminders still require an interval so they can recalculate from watering history.
 - No AI care guidance or suggested watering cadence is introduced in this campaign.
 
 ## Current state and source-of-truth notes
@@ -112,11 +134,11 @@ The app already has:
 
 ### Current active status
 
-No implementation slice is active. The current-task doc says the next recommended action is to review and evolve this campaign, then choose the first slice before implementation begins.
+The product owner selected this campaign for implementation. Slice 8 is implemented on `campaign/onboarding-rooms-s8-onboarding-polish` and awaits review/merge.
 
 ### Roadmap status
 
-The roadmap lists this campaign as draft/candidate, planned/not started, with no selected first slice. It also says no v1 feature campaign is currently active.
+The roadmap lists this campaign as active, with Slice 8 onboarding room/photo integration polish implemented and product-owner QA planned next.
 
 ### AI Care Setup alignment note
 
@@ -588,7 +610,7 @@ Validation:
 
 ### Slice 1 — Onboarding State and Skippable First-Run Shell
 
-Status: planned.
+Status: implemented on `campaign/onboarding-rooms-s1-onboarding`; awaiting review/merge.
 
 Goal:
 
@@ -617,14 +639,32 @@ Non-goals:
 
 Acceptance criteria:
 
-- New signed-in user sees onboarding once.
+- New signed-in user with no plants and no completed onboarding state sees onboarding once.
 - User can skip onboarding.
 - User can complete onboarding.
-- Completion persists per user.
-- Existing users are not trapped or redirected unexpectedly.
-- User can revisit setup from Settings or a safe placeholder.
+- Completion persists per user in `user_app_preferences`.
+- Existing users with plants are not trapped or redirected unexpectedly.
+- User can revisit setup from Settings without creating an onboarding loop.
 - Route protection and server-side user checks remain intact.
 - Missing environment values degrade to guided setup state rather than crash.
+
+Completed notes:
+
+- Added additive `user_app_preferences` migration with owner-scoped RLS.
+- Added `/app/onboarding` protected route.
+- Added skip/complete server action that derives `user_id` from the signed-in session.
+- Added Today redirect only for signed-in users with zero plants and no completed onboarding state.
+- Added Settings "Review setup" entry point.
+- Did not add room setup, photo-first Add Plant, AI, or calendar changes.
+
+Validation:
+
+- `npm run lint`: passed.
+- `npm run build`: passed.
+- `npm run typecheck`: not present.
+- `npm test`: not present.
+- Supabase CLI migration apply was not run because `supabase` CLI is not installed in this environment.
+- Migration/RLS reviewed for additive safety and `auth.uid() = user_id` ownership boundaries.
 
 Validation:
 
@@ -719,7 +759,7 @@ Stop conditions:
 
 ### Slice 3 — Room Data Model and Safe Backfill
 
-Status: planned.
+Status: implemented on `campaign/onboarding-rooms-s2-room-model`; awaiting review/merge.
 
 Goal:
 
@@ -755,20 +795,33 @@ Acceptance criteria:
 
 - Existing plant location data is preserved.
 - Rooms are user-owned.
-- Users cannot read/write other users’ rooms.
+- Users cannot read/write other users' rooms.
 - Plants can remain Unassigned.
 - Room backfill is migration-safe.
 - Existing Home/Plants grouping still works after migration.
-- Build and migration validation pass.
+- Build validation passes.
+
+Completed notes:
+
+- Added additive `plant_rooms` migration with owner-scoped RLS.
+- Pre-merge QA renamed the room migrations to `20260512_01_slice_room_data_model.sql` and `20260512_02_slice_room_archive_function.sql` so fresh applies create `plant_rooms` before the archive RPC that returns `public.plant_rooms`.
+- Added nullable `plants.room_id` with a foreign key to `plant_rooms`.
+- Backfilled rooms from distinct non-empty trimmed `plants.location` values per user.
+- Backfilled `plants.room_id` where legacy location matched an active room name.
+- Preserved `plants.location` unchanged for compatibility and rollback safety.
+- Added database trigger preventing plants from referencing cross-user or archived rooms.
+- Added typed room data helpers for list/create operations.
+- Updated plant record typing with nullable `room_id`.
+- Did not add Settings room management, Add/Edit room dropdowns, Home/Plants grouping changes, or destructive location cleanup.
 
 Validation:
 
-- `npm run typecheck` if present.
-- `npm test` if present.
-- `npm run build`.
-- `npm run lint` if present.
-- Migration review for additive safety.
-- RLS sanity checks.
+- `npm run lint`: passed.
+- `npm run build`: passed.
+- `npm run typecheck`: not present.
+- `npm test`: not present.
+- Supabase CLI migration apply was not run because `supabase` CLI is not installed in this environment.
+- Migration/RLS reviewed for additive safety, location preservation, owner-scoped room access, and same-user active room assignment enforcement.
 
 Manual QA:
 
@@ -786,7 +839,7 @@ Stop conditions:
 
 ### Slice 4 — Settings Room Management and Backfilled Room Review
 
-Status: planned.
+Status: implemented on `campaign/onboarding-rooms-s3-room-settings`; awaiting review/merge.
 
 Goal:
 
@@ -841,10 +894,20 @@ Acceptance criteria:
 
 Validation:
 
-- `npm run typecheck` if present.
-- `npm test` if present.
-- `npm run build`.
-- `npm run lint` if present.
+- `npm run lint`: passed.
+- `npm run build`: passed.
+- `npm run typecheck`: not present.
+- `npm test`: not present.
+- Supabase CLI migration apply was not run because `supabase` CLI is not installed in this environment.
+- Room archive behavior reviewed: archive is a soft archive, assigned plants are moved to Unassigned by clearing `room_id`, and plant records plus legacy `plants.location` are preserved.
+
+Completed notes:
+
+- Added Settings Rooms section with active room list and assigned plant counts.
+- Added room create, rename, and archive actions scoped to the signed-in user.
+- Duplicate/blank/error outcomes surface as calm Settings messages.
+- Added database `archive_plant_room` function to keep room archiving and plant unassignment together.
+- Did not add room restore, sorting/reordering, onboarding room setup, Add/Edit dropdown, or Home/Plants grouping changes.
 
 Manual QA:
 
@@ -865,7 +928,7 @@ Stop conditions:
 
 ### Slice 5 — Room Dropdown in Add/Edit Plant and Room-Aware Grouping
 
-Status: planned.
+Status: implemented on `campaign/onboarding-rooms-s4-room-plant-forms`; awaiting review/merge.
 
 Goal:
 
@@ -893,6 +956,14 @@ else:
 ```
 
 After room migration is stable, later cleanup may deprecate `location`, but not in this slice.
+
+Completed notes:
+
+- Add Plant and Edit Plant load active user-owned rooms.
+- Plant forms include a managed room dropdown, Unassigned, inline Add room, and legacy location note.
+- Plant create/update verifies selected rooms through user-scoped server checks and creates inline rooms under the signed-in user.
+- Home, Plants, and plant profile display use managed room name first, then legacy `plants.location`, then Unassigned.
+- Accepted Pl@ntNet name updates preserve existing room assignments.
 
 Non-goals:
 
@@ -938,7 +1009,7 @@ Stop conditions:
 
 ### Slice 6 — Settings-Managed Google Calendar Integration
 
-Status: planned.
+Status: implemented on `campaign/onboarding-rooms-s5-calendar-settings`; awaiting review/merge.
 
 Goal:
 
@@ -965,6 +1036,15 @@ Recommended copy:
 ```txt
 Plant Care reminders stay in Plant Care. Google Calendar is a one-way reflection.
 ```
+
+Completed notes:
+
+- Added Settings-level Google Calendar connect, disconnect, connection status, mirrored reminder count, last sync/status, and sync issue display.
+- Redirected Google OAuth status returns to Settings.
+- Removed the heavy plant-detail Google Calendar setup panel.
+- Added lightweight plant-detail calendar status when relevant, with integration management linked to Settings.
+- Kept reminder editing on plant detail and kept Google Calendar as a one-way reflection of app-owned reminders.
+- No schema, RLS, provider, or reminder model changes were introduced.
 
 Non-goals:
 
@@ -1013,7 +1093,7 @@ Stop conditions:
 
 ### Slice 7 — Onboarding Room Setup Integration
 
-Status: planned.
+Status: implemented on `campaign/onboarding-rooms-s8-onboarding-polish`; awaiting review/merge.
 
 Goal:
 
@@ -1034,6 +1114,14 @@ Scope:
 - Save selected rooms into `plant_rooms`.
 - Continue to first plant choice or Today.
 - Keep room setup skippable.
+
+Completed notes:
+
+- Onboarding now includes optional suggested room chips and comma-separated custom room entry.
+- Submitted room names are normalized, de-duplicated, checked against active rooms, and created under the signed-in user before onboarding completion is saved.
+- Duplicate active room names are skipped so setup can continue.
+- Room setup remains optional and can be skipped.
+- Created rooms are visible in Settings and Add/Edit Plant through the existing room helpers.
 
 Non-goals:
 
@@ -1077,7 +1165,7 @@ Stop conditions:
 
 ### Slice 8 — Photo-First Add Plant Foundation
 
-Status: planned.
+Status: implemented on `campaign/onboarding-rooms-s6-photo-first-add`; awaiting review/merge.
 
 Goal:
 
@@ -1110,9 +1198,21 @@ expires_at timestamptz not null
 consumed_at timestamptz null
 ```
 
+Completed notes:
+
+- Add Plant now starts in one sequential, skippable photo-first flow with progress through photo, identity, room, watering basics, and review.
+- Manual Add Plant remains fully available by skipping the optional photo and identification steps; it does not require rooms, AI, reminders, or calendar setup.
+- Photo-first users can choose an optional photo before final save and see an immediate browser-local preview.
+- The server creates the signed-in user's plant first, then uploads the optional photo to the existing private owner/plant-scoped Storage path and saves it as the primary photo.
+- The same selected photo is retained through optional pre-save identification and final save, so users do not need to upload it twice.
+- The photo limit is 12 MB and Server Action/proxy body size is configured to support typical mobile camera photos.
+- If photo upload fails after plant creation, the plant remains saved and the profile shows a recoverable message.
+- No public storage, draft plant records, staged photo table, or pre-save Pl@ntNet call was introduced.
+- Abandoning Add Plant before save leaves no staged photo object to clean up.
+
 Non-goals:
 
-- No Pl@ntNet pre-save call yet unless product owner combines with Slice 9.
+- No Pl@ntNet pre-save call was introduced in this photo-first foundation slice; it was added later in Slice 9.
 - No care suggestions.
 - No `care_profiles`.
 - No AI-generated watering fields.
@@ -1124,6 +1224,8 @@ Acceptance criteria:
 - User can start with a photo.
 - User can save plant with photo.
 - User can abandon photo-first flow safely.
+- Selecting a photo previews immediately.
+- Identifying a photo keeps the preview and same selected file for final save.
 - Required fields are clear.
 - Storage remains private.
 - Ownership checks remain server-side.
@@ -1156,7 +1258,7 @@ Stop conditions:
 
 ### Slice 9 — Pre-Save Identity-Only Pl@ntNet Assistance
 
-Status: planned.
+Status: implemented on `campaign/onboarding-rooms-s7-presave-plantnet`; awaiting review/merge.
 
 Goal:
 
@@ -1172,6 +1274,16 @@ Scope:
 - Reuse existing conservative uncertainty labels unless a separate AI Care Setup slice changes recommendation UX later.
 - Do not persist raw provider response by default.
 - Do not show care suggestions.
+
+Completed notes:
+
+- Add Plant can identify from the selected initial photo before final plant save.
+- The server validates the signed-in session and submitted image, then sends transient file bytes directly to Pl@ntNet.
+- No staged photo object, draft plant, public URL, signed Supabase URL, or raw provider response is stored.
+- The UI shows up to three names-only suggestions with existing uncertainty labels.
+- Suggestions only fill editable common/scientific name fields after the user chooses one.
+- Users can reject suggestions and continue manual setup.
+- AI does not modify watering interval, watering guidance, reminders, rooms, notes, diagnosis, or care guidance.
 
 AI boundary:
 
@@ -1236,7 +1348,7 @@ Stop conditions:
 
 ### Slice 10 — Onboarding First Plant Integration Polish
 
-Status: planned.
+Status: implemented on `campaign/onboarding-rooms-s8-onboarding-polish`; awaiting review/merge.
 
 Goal:
 
@@ -1251,6 +1363,15 @@ Scope:
 - Getting Started checklist reflects first plant/photo/room state.
 - Returning users can manage everything from Settings.
 - Polish mobile flow and loading/error states.
+
+Completed notes:
+
+- Onboarding finish actions route to Today, manual Add Plant, or photo-first Add Plant.
+- Today includes a state-derived setup checklist for first plant, rooms, reminders, photos, and Google Calendar connection when setup is incomplete.
+- Settings keeps a lightweight setup review entry instead of being the primary checklist surface.
+- Today's no-plants empty state links to manual and photo-first Add Plant paths.
+- Account privacy copy in Settings now reassures users that plants, rooms, photos, and reminders are private to their account.
+- Existing-user onboarding protections remain in place: users with plants are not redirected into onboarding, and Settings review does not create a loop.
 
 Non-goals:
 

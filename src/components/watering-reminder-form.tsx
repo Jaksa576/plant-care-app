@@ -73,6 +73,8 @@ export function WateringReminderPanel({
   disableAction,
   snoozeAction,
 }: WateringReminderPanelProps) {
+  const initialMode =
+    mode === "after_watering" && !canUseReminderTiming ? "fixed_schedule" : mode;
   const [saveState, saveFormAction, savePending] = useActionState(
     saveAction,
     emptyReminderState,
@@ -86,6 +88,9 @@ export function WateringReminderPanel({
     emptyReminderState,
   );
   const [latestAction, setLatestAction] = useState<ReminderActionName | null>(null);
+  const [selectedMode, setSelectedMode] = useState<"after_watering" | "fixed_schedule">(
+    initialMode,
+  );
 
   return (
     <section className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-6 shadow-[var(--shadow)] sm:p-8">
@@ -131,14 +136,17 @@ export function WateringReminderPanel({
                 type="radio"
                 name="reminderMode"
                 value="after_watering"
-                defaultChecked={mode === "after_watering"}
+                checked={selectedMode === "after_watering"}
+                onChange={() => setSelectedMode("after_watering")}
                 disabled={!canUseReminderTiming}
                 className="mt-1"
               />
               <span>
                 <span className="block font-semibold">After I water</span>
                 <span className="text-[color:var(--muted)]">
-                  Recalculate from the latest watering date.
+                  {canUseReminderTiming
+                    ? "Recalculate from the latest watering date."
+                    : "Add a watering interval in plant details to use this mode."}
                 </span>
               </span>
             </label>
@@ -147,8 +155,8 @@ export function WateringReminderPanel({
                 type="radio"
                 name="reminderMode"
                 value="fixed_schedule"
-                defaultChecked={mode === "fixed_schedule"}
-                disabled={!canUseReminderTiming}
+                checked={selectedMode === "fixed_schedule"}
+                onChange={() => setSelectedMode("fixed_schedule")}
                 className="mt-1"
               />
               <span>
@@ -170,14 +178,15 @@ export function WateringReminderPanel({
           </label>
           <button
             type="submit"
-            disabled={savePending || !canUseReminderTiming}
+            disabled={savePending}
             className="inline-flex w-fit items-center justify-center rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {savePending ? "Saving..." : enabled ? "Update reminder" : "Turn reminder on"}
           </button>
           {!canUseReminderTiming ? (
             <p className="text-sm leading-7 text-[color:var(--muted)]">
-              Add a watering interval before choosing reminder timing.
+              Fixed schedule only needs a next reminder date. Add a watering interval later
+              if you want reminders to recalculate after watering.
             </p>
           ) : null}
         </form>

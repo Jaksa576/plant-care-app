@@ -2,10 +2,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import {
-  disconnectGoogleCalendarAction,
-  syncGoogleCalendarReminderAction,
-} from "@/app/app/integrations/google-calendar/actions";
-import {
   archivePlantAction,
   disableWateringReminderAction,
   identifyPlantPhotoAction,
@@ -25,7 +21,7 @@ import {
   LeafIcon,
   RoomIcon,
 } from "@/components/icons";
-import { GoogleCalendarSyncPanel } from "@/components/google-calendar-sync-panel";
+import { GoogleCalendarPlantStatus } from "@/components/google-calendar-plant-status";
 import { PlantIdentificationPanel } from "@/components/plant-identification-form";
 import { PlantDetailActions } from "@/components/plant-detail-actions";
 import { PlantPhotoForm } from "@/components/plant-photo-form";
@@ -42,7 +38,9 @@ import {
 import { getPlantForUser } from "@/lib/plants/data";
 import { createPlantPhotoUrlMap } from "@/lib/plants/photos";
 import {
+  createRoomNameMap,
   getPlantPrimaryLabel,
+  getPlantRoomLabel,
   getPlantSecondaryLabel,
   getWateringIntervalLabel,
 } from "@/lib/plants/presenters";
@@ -55,6 +53,7 @@ import type {
 } from "@/lib/plants/types";
 import { getWateringReminderForPlant } from "@/lib/reminders/data";
 import { getReminderSummary } from "@/lib/reminders/schedule";
+import { listPlantRoomsForUser } from "@/lib/rooms/data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { listWateringEventsForPlant } from "@/lib/watering/data";
 import {
@@ -70,6 +69,7 @@ type PlantProfilePageProps = {
   searchParams: Promise<{
     created?: string;
     updated?: string;
+    photo?: string;
     archiveError?: string;
   }>;
 };
@@ -158,6 +158,7 @@ function PlantProfile({
   googleCalendarConfigured,
   googleCalendarConnection,
   googleCalendarEventLink,
+  roomLabel,
 }: {
   plant: PlantRecord;
   schedule: WateringScheduleState;
@@ -169,6 +170,7 @@ function PlantProfile({
   googleCalendarConfigured: boolean;
   googleCalendarConnection: GoogleCalendarConnectionRecord | null;
   googleCalendarEventLink: GoogleCalendarEventLinkRecord | null;
+  roomLabel: string;
 }) {
   const primaryLabel = getPlantPrimaryLabel(plant);
   const secondaryLabel = getPlantSecondaryLabel(plant);
@@ -209,7 +211,7 @@ function PlantProfile({
                 ) : null}
                 <p className="mt-4 inline-flex items-center gap-2 text-sm leading-7 text-[color:var(--muted)]">
                   <RoomIcon className="h-4 w-4 text-[color:var(--accent)]" />
-                  {plant.location ?? "Unassigned"}
+                  {roomLabel}
                 </p>
               </div>
 
@@ -256,7 +258,7 @@ function PlantProfile({
         />
         <ProfileField
           label="Room"
-          value={plant.location ?? <MissingField>Unassigned</MissingField>}
+          value={roomLabel}
         />
         <ProfileField
           label="Notes"
@@ -320,20 +322,18 @@ function PlantProfile({
         />
       </div>
 
-      <GoogleCalendarSyncPanel
+      <GoogleCalendarPlantStatus
         configured={googleCalendarConfigured}
         connection={googleCalendarConnection}
         eventLink={googleCalendarEventLink}
         reminderEnabled={Boolean(reminder?.enabled && reminder.next_reminder_date)}
-        syncAction={syncGoogleCalendarReminderAction.bind(null, plant.id)}
-        disconnectAction={disconnectGoogleCalendarAction}
       />
     </div>
   );
 }
 
 export default async function PlantProfilePage({ params, searchParams }: PlantProfilePageProps) {
-  const [{ plantId }, { created, updated, archiveError }, authState] = await Promise.all([
+  const [{ plantId }, { created, updated, photo, archiveError }, authState] = await Promise.all([
     params,
     searchParams,
     getAuthState(),
@@ -355,6 +355,9 @@ export default async function PlantProfilePage({ params, searchParams }: PlantPr
 
   const result = await getPlantForUser(supabase, authState.user.id, plantId);
   const plant = result.data;
+  const roomsResult = await listPlantRoomsForUser(supabase, authState.user.id);
+  const roomNames = createRoomNameMap(roomsResult.data ?? []);
+  const roomLabel = plant ? getPlantRoomLabel(plant, roomNames) : "Unassigned";
   const plantTitle = plant ? getPlantPrimaryLabel(plant) : "Plant not available";
   const wateringResult = plant
     ? await listWateringEventsForPlant(supabase, authState.user.id, plant.id)
@@ -401,7 +404,19 @@ export default async function PlantProfilePage({ params, searchParams }: PlantPr
           <div className="rounded-[1.75rem] border border-emerald-200 bg-emerald-50 px-5 py-4">
             <StatusPill tone="success">Plant saved</StatusPill>
             <p className="mt-3 text-sm leading-7 text-emerald-950/80">
-              Your plant profile is ready. You can refine the details any time.
+              {photo === "saved"
+                ? "Your plant profile and photo are ready. You can refine the details any time."
+                : "Your plant profile is ready. You can refine the details any time."}
+            </p>
+          </div>
+        ) : null}
+
+        {photo === "failed" ? (
+          <div className="rounded-[1.75rem] border border-amber-200 bg-amber-50 px-5 py-4">
+            <StatusPill tone="warning">Photo not saved</StatusPill>
+            <p className="mt-3 text-sm leading-7 text-amber-950/80">
+              The plant was saved, but the optional photo did not upload. You can add it from
+              the Photo section below.
             </p>
           </div>
         ) : null}
@@ -450,6 +465,7 @@ export default async function PlantProfilePage({ params, searchParams }: PlantPr
               googleCalendarConfigured={Boolean(getGoogleCalendarConfig())}
               googleCalendarConnection={googleCalendarConnectionResult?.data ?? null}
               googleCalendarEventLink={googleCalendarEventLinkResult?.data ?? null}
+              roomLabel={roomLabel}
             />
             <ArchivePlantForm
               action={archivePlantAction.bind(

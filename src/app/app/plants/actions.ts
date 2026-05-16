@@ -1,5 +1,6 @@
 "use server";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -39,6 +40,10 @@ import {
   updateWateringReminderAfterWatered,
   upsertWateringReminderForPlant,
 } from "@/lib/reminders/data";
+import {
+  createPlantRoomForUser,
+  getPlantRoomForUser,
+} from "@/lib/rooms/data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createWateringEventForPlant } from "@/lib/watering/data";
 
@@ -86,19 +91,130 @@ async function getSignedInPlantContext() {
   };
 }
 
+async function resolvePlantRoomFromForm(
+  supabase: SupabaseClient,
+  userId: string,
+  parsed: ReturnType<typeof parsePlantFormData> & { success: true },
+) {
+  const inlineRoomName = parsed.values.newRoomName.trim();
+
+  if (inlineRoomName && parsed.plantInput.room_id) {
+    return {
+      error: "Choose an existing room or add a new room, not both.",
+      roomId: null,
+    };
+  }
+
+  if (inlineRoomName) {
+    const roomResult = await createPlantRoomForUser(supabase, userId, {
+      name: inlineRoomName,
+    });
+
+    if (roomResult.error || !roomResult.data) {
+      return {
+        error:
+          "We couldn't add that room. Use an existing room or choose a different room name.",
+        roomId: null,
+      };
+    }
+
+    return {
+      error: null,
+      roomId: roomResult.data.id,
+    };
+  }
+
+  if (!parsed.plantInput.room_id) {
+    return {
+      error: null,
+      roomId: null,
+    };
+  }
+
+  const roomResult = await getPlantRoomForUser(supabase, userId, parsed.plantInput.room_id);
+
+  if (roomResult.error || !roomResult.data) {
+    return {
+      error: "Choose one of your active rooms, add a new room, or leave this plant Unassigned.",
+      roomId: null,
+    };
+  }
+
+  return {
+    error: null,
+    roomId: roomResult.data.id,
+  };
+}
+
+function getOptionalInitialPhoto(formData: FormData) {
+  const file = formData.get("initialPhoto");
+
+  if (!(file instanceof File) || file.size === 0) {
+    return null;
+  }
+
+  return file;
+}
+
+async function saveInitialPlantPhoto(
+  supabase: SupabaseClient,
+  userId: string,
+  plantId: string,
+  file: File,
+) {
+  const photoPath = getPlantPhotoPath(userId, plantId, file.type);
+  const uploadResult = await supabase.storage.from(PLANT_PHOTO_BUCKET).upload(photoPath, file, {
+    cacheControl: "3600",
+    contentType: file.type,
+  });
+
+  if (uploadResult.error) {
+    return false;
+  }
+
+  const updateResult = await updatePlantPrimaryPhotoForUser(supabase, userId, plantId, photoPath);
+
+  if (updateResult.error || !updateResult.data) {
+    await supabase.storage.from(PLANT_PHOTO_BUCKET).remove([photoPath]);
+    return false;
+  }
+
+  return true;
+}
+
 export async function createPlantAction(
   previousState: PlantFormState = emptyPlantFormState,
   formData: FormData,
 ): Promise<PlantFormState> {
   void previousState;
   const parsed = parsePlantFormData(formData);
+  const initialPhoto = getOptionalInitialPhoto(formData);
 
   if (!parsed.success) {
     return parsed.state;
   }
 
+  if (initialPhoto) {
+    const photoValidationError = getPlantPhotoValidationError(initialPhoto);
+
+    if (photoValidationError) {
+      return createPlantFormErrorState(parsed.values, photoValidationError);
+    }
+  }
+
   const { supabase, user } = await getSignedInPlantContext();
-  const result = await createPlantForUser(supabase, user.id, parsed.plantInput);
+  const roomResult = await resolvePlantRoomFromForm(supabase, user.id, parsed);
+
+  if (roomResult.error) {
+    return createPlantFormErrorState(parsed.values, roomResult.error, {
+      roomId: roomResult.error,
+    });
+  }
+
+  const result = await createPlantForUser(supabase, user.id, {
+    ...parsed.plantInput,
+    room_id: roomResult.roomId,
+  });
 
   if (result.error || !result.data) {
     return createPlantFormErrorState(
@@ -108,6 +224,14 @@ export async function createPlantAction(
   }
 
   revalidatePath("/app");
+
+  if (initialPhoto) {
+    const photoSaved = await saveInitialPlantPhoto(supabase, user.id, result.data.id, initialPhoto);
+
+    revalidatePath(`/app/plants/${result.data.id}`);
+    redirect(`/app/plants/${result.data.id}?created=1&photo=${photoSaved ? "saved" : "failed"}`);
+  }
+
   redirect(`/app/plants/${result.data.id}?created=1`);
 }
 
@@ -124,7 +248,18 @@ export async function updatePlantAction(
   }
 
   const { supabase, user } = await getSignedInPlantContext();
-  const result = await updatePlantForUser(supabase, user.id, plantId, parsed.plantInput);
+  const roomResult = await resolvePlantRoomFromForm(supabase, user.id, parsed);
+
+  if (roomResult.error) {
+    return createPlantFormErrorState(parsed.values, roomResult.error, {
+      roomId: roomResult.error,
+    });
+  }
+
+  const result = await updatePlantForUser(supabase, user.id, plantId, {
+    ...parsed.plantInput,
+    room_id: roomResult.roomId,
+  });
 
   if (result.error || !result.data) {
     return createPlantFormErrorState(
@@ -411,6 +546,71 @@ export async function identifyPlantPhotoAction(
   };
 }
 
+export async function identifyInitialPlantPhotoAction(
+  previousState: PlantIdentificationState,
+  formData: FormData,
+): Promise<PlantIdentificationState> {
+  void previousState;
+  const file = getOptionalInitialPhoto(formData);
+
+  if (!file) {
+    return {
+      status: "error",
+      message: "Choose a photo before asking for identification help.",
+      candidates: [],
+    };
+  }
+
+  const validationError = getPlantPhotoValidationError(file);
+
+  if (validationError) {
+    return {
+      status: "error",
+      message: validationError,
+      candidates: [],
+    };
+  }
+
+  await getSignedInPlantContext();
+
+  const plantNetConfig = getPlantNetConfig();
+
+  if (!plantNetConfig) {
+    return {
+      status: "error",
+      message:
+        "Plant identification is not configured. Add PLANTNET_API_KEY on the server to enable this helper.",
+      candidates: [],
+    };
+  }
+
+  const identifyResult = await identifyPlantWithPlantNet(plantNetConfig, file);
+
+  if (identifyResult.error || !identifyResult.data) {
+    return {
+      status: "error",
+      message:
+        identifyResult.error ??
+        "Identification is unavailable right now. Your plant details are still editable.",
+      candidates: [],
+    };
+  }
+
+  if (identifyResult.data.length === 0) {
+    return {
+      status: "no-candidates",
+      message: "We are not sure about this one. You can keep editing manually.",
+      candidates: [],
+    };
+  }
+
+  return {
+    status: "success",
+    message: "These are suggestions, not certainties. Review and edit names before saving.",
+    candidates: identifyResult.data,
+  };
+}
+
 export async function savePlantIdentificationSuggestionAction(
   plantId: string,
   previousState: SavePlantIdentificationState,
@@ -453,6 +653,7 @@ export async function savePlantIdentificationSuggestionAction(
     common_name: commonName || null,
     scientific_name: scientificName || null,
     location: plant.location,
+    room_id: plant.room_id,
     notes: plant.notes,
     watering_interval_days: plant.watering_interval_days,
     watering_guidance: plant.watering_guidance,
@@ -512,10 +713,10 @@ export async function saveWateringReminderAction(
     };
   }
 
-  if (!plant.watering_interval_days) {
+  if (reminderMode === "after_watering" && !plant.watering_interval_days) {
     return {
       status: "error",
-      message: "Add a watering interval before choosing reminder timing.",
+      message: "Add a watering interval before using reminders that recalculate after watering.",
     };
   }
 

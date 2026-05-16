@@ -40,15 +40,24 @@ This document tracks product sequencing and slice status. Stable product directi
 - UI redesign Plant Detail inspector with large photo/fallback, identity/status, Water now, Snooze, Reminder, care basics rows, care history, photo/identification, reminder, Google Calendar, edit, and archive access.
 - UI redesign Add/Edit Plant form polish with grouped identity, room, watering guidance, notes, photo-after-save affordance, and softened review step.
 - UI redesign supporting feature polish for reminders, Google Calendar sync, photo upload, identification helper, loading states, tap targets, and conservative AI/calendar copy.
+- Skippable first-run onboarding shell with per-user completion state and a Settings revisit entry point.
+- User-owned room data model with nullable plant room assignments and safe legacy location backfill.
+- Settings room management with list, add, rename, and safe archive behavior.
+- Room dropdown in Add/Edit Plant with Unassigned, inline Add room, legacy location fallback, and room-aware Home/Plants grouping.
+- Settings-managed Google Calendar integration with connect/disconnect/status controls and lightweight plant-detail calendar status.
+- Photo-first Add Plant foundation with optional pre-save photo selection, post-create owner-scoped upload, and preserved manual entry path.
+- Pre-save Pl@ntNet identification from the selected Add Plant photo with transient names-only suggestions, uncertainty labels, explicit user review, and no AI care guidance.
+- Onboarding room/photo integration polish with optional room collection, manual/photo-first Add Plant routing, Settings setup checklist, and calm empty-state entry points.
+- Pre-merge campaign QA patch with deterministic room migration ordering, required plant nicknames, mobile-friendlier photo limit/body size, immediate photo preview, one-photo identify/save persistence, clearer Add Plant review copy, and Today-centered setup checklist.
 
 ### Active
 
-- No implementation slice or v1 feature campaign is currently active.
+- Onboarding, Rooms, Settings, and Photo-First Add Plant Foundation campaign.
+- Slice 8: Onboarding room/photo integration polish is implemented on branch `campaign/onboarding-rooms-s8-onboarding-polish`; awaiting review/merge.
 
 ### Planned
 
-- No additional v1 feature slice is active.
-- The onboarding, rooms, settings, and photo-first Add Plant campaign is drafted, but no first slice has been selected.
+- Product-owner QA of the completed campaign branch stack.
 
 ### Deferred
 
@@ -61,7 +70,7 @@ This document tracks product sequencing and slice status. Stable product directi
 
 Active campaign:
 
-- None.
+- [Onboarding, Rooms, Settings, and Photo-First Add Plant](campaigns/onboarding-rooms-settings-photo-first-ai.md)
 
 Completed campaigns:
 
@@ -71,7 +80,7 @@ Completed campaigns:
 
 Draft / candidate campaigns:
 
-- [Onboarding, Rooms, Settings, and Photo-First Add Plant](campaigns/onboarding-rooms-settings-photo-first-ai.md) — planned / not started; no selected first slice.
+- AI Care Setup remains a later candidate and must not overlap this campaign's identity-only pre-save Pl@ntNet scope.
 
 ## Phase 0: Foundation
 

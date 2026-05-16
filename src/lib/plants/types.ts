@@ -5,6 +5,7 @@ export type PlantRecord = {
   common_name: string | null;
   scientific_name: string | null;
   location: string | null;
+  room_id: string | null;
   notes: string | null;
   watering_interval_days: number | null;
   watering_guidance: string | null;
@@ -70,6 +71,7 @@ export type PlantInput = {
   common_name: string | null;
   scientific_name: string | null;
   location: string | null;
+  room_id: string | null;
   notes: string | null;
   watering_interval_days: number | null;
   watering_guidance: string | null;
@@ -80,6 +82,8 @@ export type PlantFormValues = {
   commonName: string;
   scientificName: string;
   location: string;
+  roomId: string;
+  newRoomName: string;
   notes: string;
   wateringIntervalDays: string;
   wateringGuidance: string;
@@ -97,6 +101,8 @@ export const emptyPlantFormValues: PlantFormValues = {
   commonName: "",
   scientificName: "",
   location: "",
+  roomId: "",
+  newRoomName: "",
   notes: "",
   wateringIntervalDays: "",
   wateringGuidance: "",

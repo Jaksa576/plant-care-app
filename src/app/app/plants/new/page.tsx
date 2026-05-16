@@ -1,14 +1,25 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { createPlantAction } from "@/app/app/plants/actions";
+import {
+  createPlantAction,
+  identifyInitialPlantPhotoAction,
+} from "@/app/app/plants/actions";
 import { AppShell } from "@/components/app-shell";
 import { PlantForm } from "@/components/plant-form";
 import { SignOutButton } from "@/components/sign-out-button";
 import { getAuthState } from "@/lib/auth";
+import { listPlantRoomsForUser } from "@/lib/rooms/data";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-export default async function NewPlantPage() {
-  const authState = await getAuthState();
+type NewPlantPageProps = {
+  searchParams: Promise<{
+    start?: string;
+  }>;
+};
+
+export default async function NewPlantPage({ searchParams }: NewPlantPageProps) {
+  const [authState] = await Promise.all([getAuthState(), searchParams]);
 
   if (!authState.supabaseConfigured) {
     redirect("/login?missingEnv=1");
@@ -17,6 +28,14 @@ export default async function NewPlantPage() {
   if (!authState.user) {
     redirect("/login");
   }
+
+  const supabase = await createSupabaseServerClient();
+
+  if (!supabase) {
+    redirect("/login?missingEnv=1");
+  }
+
+  const roomsResult = await listPlantRoomsForUser(supabase, authState.user.id);
 
   return (
     <AppShell
@@ -36,8 +55,12 @@ export default async function NewPlantPage() {
         <PlantForm
           action={createPlantAction}
           submitLabel="Save plant"
-          title="Start with the basics"
-          description="This first plant record is intentionally simple: manual details first, with an optional photo after save and no AI identification or reminders yet."
+          title="Add a plant"
+          description="Add a plant in a few short steps. You can skip identification and save a manual plant record."
+          rooms={roomsResult.data ?? []}
+          allowInitialPhoto
+          startsWithPhoto
+          identifyInitialPhotoAction={identifyInitialPlantPhotoAction}
         />
       </div>
     </AppShell>

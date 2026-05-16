@@ -3,7 +3,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { PlantRecord } from "@/lib/plants/types";
 
 export const PLANT_PHOTO_BUCKET = "plant-photos";
-export const PLANT_PHOTO_MAX_BYTES = 5 * 1024 * 1024;
+export const PLANT_PHOTO_MAX_MB = 12;
+export const PLANT_PHOTO_MAX_BYTES = PLANT_PHOTO_MAX_MB * 1024 * 1024;
 export const PLANT_PHOTO_ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 
 const SIGNED_PHOTO_URL_SECONDS = 60 * 60;
@@ -38,7 +39,7 @@ export function getPlantPhotoValidationError(file: File | null) {
   }
 
   if (file.size > PLANT_PHOTO_MAX_BYTES) {
-    return "Use an image under 5 MB.";
+    return `Use an image under ${PLANT_PHOTO_MAX_MB} MB. Most phone photos should work; if this one is larger, crop it or choose a smaller version.`;
   }
 
   return null;

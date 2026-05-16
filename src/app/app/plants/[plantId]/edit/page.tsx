@@ -11,6 +11,7 @@ import { getAuthState } from "@/lib/auth";
 import { getPlantForUser } from "@/lib/plants/data";
 import { getPlantPrimaryLabel } from "@/lib/plants/presenters";
 import { toPlantFormValues } from "@/lib/plants/forms";
+import { listPlantRoomsForUser } from "@/lib/rooms/data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 type EditPlantPageProps = {
@@ -45,7 +46,10 @@ export default async function EditPlantPage({ params, searchParams }: EditPlantP
     redirect("/login?missingEnv=1");
   }
 
-  const result = await getPlantForUser(supabase, authState.user.id, plantId);
+  const [result, roomsResult] = await Promise.all([
+    getPlantForUser(supabase, authState.user.id, plantId),
+    listPlantRoomsForUser(supabase, authState.user.id),
+  ]);
   const plant = result.data;
 
   return (
@@ -109,6 +113,7 @@ export default async function EditPlantPage({ params, searchParams }: EditPlantP
               title="Keep this record beginner-friendly"
               description="You can update names, location, notes, and user-editable watering guidance here without turning this slice into watering workflow logic."
               initialValues={toPlantFormValues(plant)}
+              rooms={roomsResult.data ?? []}
             />
 
             <ArchivePlantForm

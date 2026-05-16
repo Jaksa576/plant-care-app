@@ -5,7 +5,9 @@ import {
 } from "@/app/app/plants/actions";
 import { TodaySnoozeButton, TodayWaterButton } from "@/components/home-today-actions";
 import {
+  BellIcon,
   CalendarIcon,
+  CameraIcon,
   CheckCircleIcon,
   ChevronRightIcon,
   ClockIcon,
@@ -16,12 +18,20 @@ import { PlantPhotoFrame } from "@/components/plant-photo";
 import { SignOutButton } from "@/components/sign-out-button";
 import { StatusPill } from "@/components/status-pill";
 import { getAuthState } from "@/lib/auth";
+import { getGoogleCalendarConnection } from "@/lib/google-calendar/data";
 import { listPlantsForUser } from "@/lib/plants/data";
 import { createPlantPhotoUrlMap } from "@/lib/plants/photos";
-import { getPlantPrimaryLabel, getPlantSecondaryLabel } from "@/lib/plants/presenters";
+import {
+  createRoomNameMap,
+  getPlantPrimaryLabel,
+  getPlantRoomLabel,
+  getPlantSecondaryLabel,
+} from "@/lib/plants/presenters";
 import type { PlantRecord, WateringEventRecord } from "@/lib/plants/types";
 import { listWateringRemindersForUser } from "@/lib/reminders/data";
+import { listPlantRoomsForUser } from "@/lib/rooms/data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getUserAppPreferencesForUser } from "@/lib/user-preferences/data";
 import {
   getDashboardAttentionCount,
   getDashboardPlants,
@@ -36,8 +46,14 @@ import { redirect } from "next/navigation";
 type AppPageProps = {
   searchParams: Promise<{
     archived?: string;
-    googleCalendar?: string;
   }>;
+};
+
+type SetupChecklistItem = {
+  complete: boolean;
+  label: string;
+  href: string;
+  icon: React.ReactNode;
 };
 
 function formatTodayDate() {
@@ -79,11 +95,11 @@ function getStatusTone(status: DashboardPlant["schedule"]["status"]) {
   return "text-[color:var(--muted)]";
 }
 
-function groupDashboardPlantsByRoom(items: DashboardPlant[]) {
+function groupDashboardPlantsByRoom(items: DashboardPlant[], roomNames: Map<string, string>) {
   const groups = new Map<string, DashboardPlant[]>();
 
   for (const item of items) {
-    const room = item.plant.location?.trim() || "Unassigned";
+    const room = getPlantRoomLabel(item.plant, roomNames);
     const roomPlants = groups.get(room) ?? [];
     roomPlants.push(item);
     groups.set(room, roomPlants);
@@ -116,16 +132,66 @@ function getRecentCareEvents(events: WateringEventRecord[], plants: PlantRecord[
     .slice(0, 5);
 }
 
+function GettingStartedChecklist({ items }: { items: SetupChecklistItem[] }) {
+  const incompleteItems = items.filter((item) => !item.complete);
+
+  if (incompleteItems.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className="rounded-[1.5rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] p-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <StatusPill>Getting started</StatusPill>
+          <h2 className="mt-3 text-lg font-semibold">Finish setup at your pace</h2>
+          <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">
+            These are optional next steps. Today stays usable while you build out the app.
+          </p>
+        </div>
+        <Link
+          href="/app/onboarding?review=1"
+          className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)]"
+        >
+          Review setup
+        </Link>
+      </div>
+      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+        {items.map((item) => (
+          <Link
+            key={item.label}
+            href={item.href}
+            className={`flex min-h-[var(--tap-target)] items-center gap-3 rounded-[1rem] border px-4 py-3 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)] ${
+              item.complete
+                ? "border-[color:var(--border-soft)] bg-[color:var(--stone)] text-[color:var(--muted)]"
+                : "border-[color:var(--border)] bg-white/80 text-[color:var(--foreground)]"
+            }`}
+          >
+            <span className={item.complete ? "text-[color:var(--accent)]" : "text-[color:var(--muted)]"}>
+              {item.complete ? <CheckCircleIcon className="h-5 w-5" /> : item.icon}
+            </span>
+            <span className="min-w-0 flex-1">{item.label}</span>
+            <span className="text-xs text-[color:var(--muted)]">
+              {item.complete ? "Done" : "Optional"}
+            </span>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function TodayPlantRow({
   item,
   photoUrl,
+  roomLabel,
 }: {
   item: DashboardPlant;
   photoUrl?: string;
+  roomLabel: string;
 }) {
   const primaryLabel = getPlantPrimaryLabel(item.plant);
   const secondaryLabel = getPlantSecondaryLabel(item.plant);
-  const roomLabel = item.plant.location?.trim() || "Unassigned";
   const statusClass = getStatusTone(item.schedule.status);
 
   return (
@@ -177,7 +243,7 @@ function TodayPlantRow({
 }
 
 export default async function AppPage({ searchParams }: AppPageProps) {
-  const [authState, { archived, googleCalendar }] = await Promise.all([
+  const [authState, { archived }] = await Promise.all([
     getAuthState(),
     searchParams,
   ]);
@@ -196,12 +262,32 @@ export default async function AppPage({ searchParams }: AppPageProps) {
     redirect("/login?missingEnv=1");
   }
 
-  const [plantsResult, wateringEventsResult, remindersResult] = await Promise.all([
+  const [
+    preferencesResult,
+    plantsResult,
+    wateringEventsResult,
+    remindersResult,
+    roomsResult,
+    calendarConnectionResult,
+  ] = await Promise.all([
+    getUserAppPreferencesForUser(supabase, authState.user.id),
     listPlantsForUser(supabase, authState.user.id),
     listWateringEventsForUser(supabase, authState.user.id),
     listWateringRemindersForUser(supabase, authState.user.id),
+    listPlantRoomsForUser(supabase, authState.user.id),
+    getGoogleCalendarConnection(supabase, authState.user.id),
   ]);
   const plants = plantsResult.data ?? [];
+
+  if (
+    !preferencesResult.error &&
+    !preferencesResult.data?.onboarding_completed_at &&
+    !plantsResult.error &&
+    plants.length === 0
+  ) {
+    redirect("/app/onboarding");
+  }
+
   const photoUrls = await createPlantPhotoUrlMap(supabase, plants);
   const dashboardPlants = getDashboardPlants(
     plants,
@@ -211,8 +297,43 @@ export default async function AppPage({ searchParams }: AppPageProps) {
   const dashboardGroups = getWateringDashboardGroups(dashboardPlants);
   const attentionCount = getDashboardAttentionCount(dashboardGroups);
   const needsWaterPlants = [...dashboardGroups.overdue, ...dashboardGroups.dueToday];
-  const roomGroups = groupDashboardPlantsByRoom(dashboardPlants);
+  const roomNames = createRoomNameMap(roomsResult.data ?? []);
+  const roomGroups = groupDashboardPlantsByRoom(dashboardPlants, roomNames);
   const recentCare = getRecentCareEvents(wateringEventsResult.data ?? [], plants);
+  const reminders = remindersResult.data ?? [];
+  const firstPlantHref = plants[0] ? `/app/plants/${plants[0].id}` : "/app/plants/new";
+  const setupChecklistItems: SetupChecklistItem[] = [
+    {
+      complete: plants.length > 0,
+      label: "Add your first plant",
+      href: "/app/plants/new",
+      icon: <PlusIcon className="h-5 w-5" />,
+    },
+    {
+      complete: (roomsResult.data ?? []).length > 0,
+      label: "Add a room",
+      href: "/app/onboarding?review=1",
+      icon: <RoomIcon className="h-5 w-5" />,
+    },
+    {
+      complete: reminders.some((reminder) => reminder.enabled),
+      label: "Set a watering reminder",
+      href: firstPlantHref,
+      icon: <BellIcon className="h-5 w-5" />,
+    },
+    {
+      complete: plants.some((plant) => Boolean(plant.primary_photo_path)),
+      label: "Add a photo",
+      href: plants[0] ? `/app/plants/${plants[0].id}` : "/app/plants/new?start=photo",
+      icon: <CameraIcon className="h-5 w-5" />,
+    },
+    {
+      complete: Boolean(calendarConnectionResult.data),
+      label: "Connect Google Calendar",
+      href: "/app/settings",
+      icon: <CalendarIcon className="h-5 w-5" />,
+    },
+  ];
 
   return (
     <AppShell
@@ -261,29 +382,6 @@ export default async function AppPage({ searchParams }: AppPageProps) {
           </section>
         ) : null}
 
-        {googleCalendar ? (
-          <div
-            className={`rounded-[1.75rem] border px-5 py-4 ${
-              googleCalendar === "connected"
-                ? "border-emerald-200 bg-emerald-50"
-                : "border-amber-200 bg-amber-50"
-            }`}
-          >
-            <StatusPill tone={googleCalendar === "connected" ? "success" : "warning"}>
-              Google Calendar
-            </StatusPill>
-            <p
-              className={`mt-3 text-sm leading-7 ${
-                googleCalendar === "connected" ? "text-emerald-950/80" : "text-amber-950/80"
-              }`}
-            >
-              {googleCalendar === "connected"
-                ? "Google Calendar connected. Open a plant reminder to update its calendar event."
-                : "Google Calendar could not be connected. Plant Care reminders are unchanged."}
-            </p>
-          </div>
-        ) : null}
-
         {!plantsResult.error && wateringEventsResult.error ? (
           <section className="rounded-[2rem] border border-amber-200 bg-amber-50 px-6 py-6 shadow-[var(--shadow)] sm:p-8">
             <StatusPill tone="warning">Watering state unavailable</StatusPill>
@@ -304,6 +402,10 @@ export default async function AppPage({ searchParams }: AppPageProps) {
           </section>
         ) : null}
 
+        {!plantsResult.error ? (
+          <GettingStartedChecklist items={setupChecklistItems} />
+        ) : null}
+
         {!plantsResult.error && plants.length === 0 ? (
           <section className="rounded-[1.5rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] p-6">
             <span className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-[color:var(--surface-strong)] ring-1 ring-[color:var(--border-soft)]">
@@ -319,13 +421,19 @@ export default async function AppPage({ searchParams }: AppPageProps) {
               Add your first plant to start a calm watering-first collection. Photos and
               identification can come later.
             </p>
-            <div className="mt-6">
+            <div className="mt-6 flex flex-wrap gap-3">
               <Link
                 href="/app/plants/new"
                 className="inline-flex min-h-[var(--tap-target)] items-center justify-center gap-2 rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-95"
               >
                 <PlusIcon className="h-4 w-4" />
-                Add plant
+                Add manually
+              </Link>
+              <Link
+                href="/app/plants/new?start=photo"
+                className="inline-flex min-h-[var(--tap-target)] items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-5 py-3 text-sm font-semibold text-[color:var(--foreground)] transition hover:bg-[color:var(--accent-soft)]"
+              >
+                Start with a photo
               </Link>
             </div>
           </section>
@@ -347,6 +455,7 @@ export default async function AppPage({ searchParams }: AppPageProps) {
                       key={item.plant.id}
                       item={item}
                       photoUrl={photoUrls[item.plant.id]}
+                      roomLabel={getPlantRoomLabel(item.plant, roomNames)}
                     />
                   ))
                 ) : (
@@ -388,6 +497,7 @@ export default async function AppPage({ searchParams }: AppPageProps) {
                         key={item.plant.id}
                         item={item}
                         photoUrl={photoUrls[item.plant.id]}
+                        roomLabel={room}
                       />
                     ))}
                   </div>
