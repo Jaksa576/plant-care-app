@@ -1,10 +1,10 @@
 # Plant Care Campaign — Onboarding, Rooms, Settings, and Photo-First Add Plant Foundation
 
-Status: **active**.
+Status: **completed and merged to `main`**.
 
-Slice 8 is implemented on branch `campaign/onboarding-rooms-s8-onboarding-polish`; awaiting review/merge.
+Slice 8 is implemented and merged to `main`.
 
-Pre-merge QA patches are implemented on the same branch.
+Pre-merge QA patches are implemented and merged to `main`.
 
 Product-owner selected implementation sequence for this autonomous campaign run:
 
@@ -134,11 +134,11 @@ The app already has:
 
 ### Current active status
 
-The product owner selected this campaign for implementation. Slice 8 is implemented on `campaign/onboarding-rooms-s8-onboarding-polish` and awaits review/merge.
+The product owner selected this campaign for implementation. Slice 8 is implemented and merged to `main`.
 
 ### Roadmap status
 
-The roadmap lists this campaign as active, with Slice 8 onboarding room/photo integration polish implemented and product-owner QA planned next.
+The roadmap lists this campaign as completed and merged, with manual production verification planned next.
 
 ### AI Care Setup alignment note
 
@@ -610,7 +610,7 @@ Validation:
 
 ### Slice 1 — Onboarding State and Skippable First-Run Shell
 
-Status: implemented on `campaign/onboarding-rooms-s1-onboarding`; awaiting review/merge.
+Status: implemented and merged to `main`.
 
 Goal:
 
@@ -759,7 +759,7 @@ Stop conditions:
 
 ### Slice 3 — Room Data Model and Safe Backfill
 
-Status: implemented on `campaign/onboarding-rooms-s2-room-model`; awaiting review/merge.
+Status: implemented and merged to `main`.
 
 Goal:
 
@@ -839,7 +839,7 @@ Stop conditions:
 
 ### Slice 4 — Settings Room Management and Backfilled Room Review
 
-Status: implemented on `campaign/onboarding-rooms-s3-room-settings`; awaiting review/merge.
+Status: implemented and merged to `main`.
 
 Goal:
 
@@ -928,7 +928,7 @@ Stop conditions:
 
 ### Slice 5 — Room Dropdown in Add/Edit Plant and Room-Aware Grouping
 
-Status: implemented on `campaign/onboarding-rooms-s4-room-plant-forms`; awaiting review/merge.
+Status: implemented and merged to `main`.
 
 Goal:
 
@@ -1009,7 +1009,7 @@ Stop conditions:
 
 ### Slice 6 — Settings-Managed Google Calendar Integration
 
-Status: implemented on `campaign/onboarding-rooms-s5-calendar-settings`; awaiting review/merge.
+Status: implemented and merged to `main`.
 
 Goal:
 
@@ -1093,7 +1093,7 @@ Stop conditions:
 
 ### Slice 7 — Onboarding Room Setup Integration
 
-Status: implemented on `campaign/onboarding-rooms-s8-onboarding-polish`; awaiting review/merge.
+Status: implemented and merged to `main`.
 
 Goal:
 
@@ -1165,7 +1165,7 @@ Stop conditions:
 
 ### Slice 8 — Photo-First Add Plant Foundation
 
-Status: implemented on `campaign/onboarding-rooms-s6-photo-first-add`; awaiting review/merge.
+Status: implemented and merged to `main`.
 
 Goal:
 
@@ -1258,7 +1258,7 @@ Stop conditions:
 
 ### Slice 9 — Pre-Save Identity-Only Pl@ntNet Assistance
 
-Status: implemented on `campaign/onboarding-rooms-s7-presave-plantnet`; awaiting review/merge.
+Status: implemented and merged to `main`.
 
 Goal:
 
@@ -1348,7 +1348,7 @@ Stop conditions:
 
 ### Slice 10 — Onboarding First Plant Integration Polish
 
-Status: implemented on `campaign/onboarding-rooms-s8-onboarding-polish`; awaiting review/merge.
+Status: implemented and merged to `main`.
 
 Goal:
 

@@ -49,15 +49,15 @@ This document tracks product sequencing and slice status. Stable product directi
 - Pre-save Pl@ntNet identification from the selected Add Plant photo with transient names-only suggestions, uncertainty labels, explicit user review, and no AI care guidance.
 - Onboarding room/photo integration polish with optional room collection, manual/photo-first Add Plant routing, Settings setup checklist, and calm empty-state entry points.
 - Pre-merge campaign QA patch with deterministic room migration ordering, required plant nicknames, mobile-friendlier photo limit/body size, immediate photo preview, one-photo identify/save persistence, clearer Add Plant review copy, and Today-centered setup checklist.
+- Onboarding, Rooms, Settings, and Photo-First Add Plant Foundation campaign merged to `main`.
 
 ### Active
 
-- Onboarding, Rooms, Settings, and Photo-First Add Plant Foundation campaign.
-- Slice 8: Onboarding room/photo integration polish is implemented on branch `campaign/onboarding-rooms-s8-onboarding-polish`; awaiting review/merge.
+- Manual production verification of the merged `main` experience.
 
 ### Planned
 
-- Product-owner QA of the completed campaign branch stack.
+- Select the next campaign after production verification.
 
 ### Deferred
 
@@ -68,7 +68,7 @@ This document tracks product sequencing and slice status. Stable product directi
 
 ## Campaigns
 
-Active campaign:
+Merged campaign:
 
 - [Onboarding, Rooms, Settings, and Photo-First Add Plant](campaigns/onboarding-rooms-settings-photo-first-ai.md)
 

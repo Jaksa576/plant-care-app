@@ -19,6 +19,7 @@
 - Photo-first Add Plant foundation is implemented on Slice 6.
 - Pre-save Pl@ntNet identification is implemented on Slice 7.
 - Onboarding room/photo integration polish is implemented on Slice 8.
+- The Onboarding, Rooms, Settings, and Photo-First Add Plant Foundation campaign is completed and merged to `main`.
 - The UI Redesign UX Overhaul campaign is completed, merged to `main`, and archived.
 - The public landing page redesign, concise login-page UX refresh, and installable app icon support are merged to `main`.
 
@@ -41,9 +42,9 @@ Product-owner selected implementation sequence:
 
 Slice 8: Onboarding room/photo integration polish.
 
-Status: implemented on branch `campaign/onboarding-rooms-s8-onboarding-polish`; awaiting review/merge.
+Status: completed and merged to `main`.
 
-Pre-merge QA patch status: implemented on the same branch.
+Pre-merge QA patch status: implemented and merged to `main`.
 
 Completed work:
 
@@ -98,7 +99,7 @@ Non-goals preserved:
 
 ## Next Recommended Action
 
-Product-owner QA should review the completed campaign branch stack in slice order, then merge when satisfied.
+Run manual production verification of the merged `main` experience, then select the next planned campaign when ready.
 
 ## Validation Expectations
 
