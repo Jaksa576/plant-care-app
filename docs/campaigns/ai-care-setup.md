@@ -128,6 +128,7 @@ The app already has:
 - app-owned care profile reference tables and ambiguity-safe lookup helpers
 - validated Wave 1 care profile fixtures with generated seed SQL
 - clearer Pl@ntNet confidence labels, percentages, and grouped same-common-name recommendations
+- preview-only care profile matching after reviewed identity save
 
 ### Existing AI behavior
 
@@ -1017,7 +1018,7 @@ Stop conditions:
 
 ### Slice 4 — Care Profile Match After Accepted Identity
 
-Status: active.
+Status: completed.
 
 Goal:
 
@@ -1058,13 +1059,12 @@ Validation:
 
 Manual QA:
 
-- Snake plant synonym match.
-- Pothos common-name match.
-- Monstera exact match.
-- Philodendron genus match.
-- Succulent care-group fallback.
-- Ambiguous alias.
-- No match.
+- Snake plant synonym match: covered by lookup helper path; manual browser QA still needed.
+- Pothos common-name match: covered by lookup helper path; manual browser QA still needed.
+- Monstera exact match: covered by lookup helper path; manual browser QA still needed.
+- Philodendron genus match: covered by lookup helper path; manual browser QA still needed.
+- Care-group fallback is representable in helpers, but identity-to-care-group inference remains for later fallback/question slices.
+- Ambiguous alias and no-match states are represented in preview UI; manual browser QA still needed.
 
 Stop conditions:
 
@@ -1074,7 +1074,7 @@ Stop conditions:
 
 ### Slice 5 — Reviewable Watering Starting Point UI
 
-Status: planned.
+Status: active.
 
 Goal:
 

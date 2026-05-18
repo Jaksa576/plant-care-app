@@ -9,6 +9,7 @@ import type {
 } from "@/app/app/plants/actions";
 import { CameraIcon, LeafIcon } from "@/components/icons";
 import { StatusPill } from "@/components/status-pill";
+import type { CareProfileMatchType } from "@/lib/care-profiles/types";
 import type { PlantIdentificationCandidate } from "@/lib/plant-identification/types";
 
 const emptyIdentificationState: PlantIdentificationState = {
@@ -20,6 +21,7 @@ const emptyIdentificationState: PlantIdentificationState = {
 const emptySaveState: SavePlantIdentificationState = {
   status: "idle",
   message: null,
+  careProfilePreview: null,
 };
 
 type PlantIdentificationPanelProps = {
@@ -58,6 +60,81 @@ function getConfidenceText(label: PlantIdentificationCandidate["confidenceLabel"
 
 function getConfidencePercent(candidate: PlantIdentificationCandidate) {
   return `${Math.round(Math.max(0, Math.min(candidate.confidenceScore, 1)) * 100)}%`;
+}
+
+function getMatchTypeLabel(matchType: CareProfileMatchType) {
+  if (matchType === "scientific") {
+    return "Exact care profile match";
+  }
+
+  if (matchType === "synonym") {
+    return "Synonym care profile match";
+  }
+
+  if (matchType === "common") {
+    return "Common-name care profile match";
+  }
+
+  if (matchType === "genus") {
+    return "Genus care profile match";
+  }
+
+  return "Care-group profile match";
+}
+
+function CareProfilePreviewCard({
+  preview,
+}: {
+  preview: SavePlantIdentificationState["careProfilePreview"];
+}) {
+  if (!preview) {
+    return null;
+  }
+
+  if (preview.status === "matched") {
+    const cadenceRange =
+      preview.cadenceDaysMin && preview.cadenceDaysMax
+        ? `Range: ${preview.cadenceDaysMin}-${preview.cadenceDaysMax} days.`
+        : null;
+
+    return (
+      <div className="mt-4 rounded-[1.25rem] border border-[color:var(--border-soft)] bg-[color:var(--stone)] p-4 text-sm leading-6">
+        <StatusPill>{getMatchTypeLabel(preview.matchType)}</StatusPill>
+        <p className="mt-3 font-semibold text-[color:var(--foreground)]">{preview.displayName}</p>
+        <p className="mt-2 text-[color:var(--muted)]">
+          Preview only: start by checking every {preview.cadenceDays} days. {cadenceRange}
+        </p>
+        <p className="mt-2 text-[color:var(--muted)]">{preview.wateringGuidance}</p>
+        <p className="mt-2 text-xs font-semibold text-[color:var(--muted)]">
+          Nothing was applied to watering basics.
+        </p>
+      </div>
+    );
+  }
+
+  if (preview.status === "ambiguous") {
+    return (
+      <div className="mt-4 rounded-[1.25rem] border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
+        <p className="font-semibold">A few care profiles could match.</p>
+        <p className="mt-2">
+          Choose manually for now, or keep setup manual until the plant identity is clearer.
+        </p>
+        <ul className="mt-2 list-disc space-y-1 pl-5">
+          {preview.options.map((option) => (
+            <li key={`${option.displayName}-${option.drynessPreference}`}>
+              {option.displayName}
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-4 rounded-[1.25rem] border border-[color:var(--border-soft)] bg-[color:var(--stone)] p-4 text-sm leading-6 text-[color:var(--muted)]">
+      No internal care profile matched yet. You can keep setup manual for now.
+    </div>
+  );
 }
 
 function CandidateReviewForm({ candidate, editHref, saveSuggestionAction }: CandidateReviewFormProps) {
@@ -126,6 +203,8 @@ function CandidateReviewForm({ candidate, editHref, saveSuggestionAction }: Cand
           {state.message}
         </div>
       ) : null}
+
+      <CareProfilePreviewCard preview={state.careProfilePreview} />
 
       <div className="mt-4 flex flex-col gap-3 sm:flex-row">
         <button

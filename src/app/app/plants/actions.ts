@@ -6,6 +6,12 @@ import { redirect } from "next/navigation";
 
 import { getAuthState } from "@/lib/auth";
 import type { MarkWateredState } from "@/components/mark-watered-form";
+import { findCareProfileMatch, MINIMAL_CARE_PROFILES } from "@/lib/care-profiles";
+import { listCareProfiles } from "@/lib/care-profiles/data";
+import type {
+  CareProfileMatchType,
+  CareProfileWithAliases,
+} from "@/lib/care-profiles/types";
 import { getPlantNetConfig } from "@/lib/env";
 import {
   removeWateringReminderFromGoogleCalendar,
@@ -61,7 +67,32 @@ export type PlantIdentificationState = {
 export type SavePlantIdentificationState = {
   status: "idle" | "success" | "error";
   message: string | null;
+  careProfilePreview?: CareProfilePreview | null;
 };
+
+export type CareProfilePreview =
+  | {
+      status: "matched";
+      matchType: CareProfileMatchType;
+      displayName: string;
+      cadenceDays: number;
+      cadenceDaysMin: number | null;
+      cadenceDaysMax: number | null;
+      drynessPreference: string;
+      wateringGuidance: string;
+    }
+  | {
+      status: "ambiguous";
+      matchType: CareProfileMatchType;
+      matchedAlias: string;
+      options: Array<{
+        displayName: string;
+        drynessPreference: string;
+      }>;
+    }
+  | {
+      status: "no_match";
+    };
 
 export type WateringReminderState = {
   status: "idle" | "success" | "error";
@@ -88,6 +119,51 @@ async function getSignedInPlantContext() {
   return {
     supabase,
     user: authState.user,
+  };
+}
+
+async function getCareProfilePreview(
+  supabase: SupabaseClient,
+  scientificName: string,
+  commonName: string,
+): Promise<CareProfilePreview> {
+  const profileResult = await listCareProfiles(supabase);
+  const profiles = profileResult.data ?? MINIMAL_CARE_PROFILES;
+  const match = findCareProfileMatch(
+    {
+      scientificName,
+      commonName,
+    },
+    profiles as CareProfileWithAliases[],
+  );
+
+  if (match.status === "matched") {
+    return {
+      status: "matched",
+      matchType: match.matchType,
+      displayName: match.profile.display_name,
+      cadenceDays: match.profile.watering_interval_days_default,
+      cadenceDaysMin: match.profile.watering_interval_days_min,
+      cadenceDaysMax: match.profile.watering_interval_days_max,
+      drynessPreference: match.profile.dryness_preference,
+      wateringGuidance: match.profile.watering_guidance,
+    };
+  }
+
+  if (match.status === "ambiguous") {
+    return {
+      status: "ambiguous",
+      matchType: match.matchType,
+      matchedAlias: match.matchedAlias,
+      options: match.profiles.map((profile) => ({
+        displayName: profile.display_name,
+        drynessPreference: profile.dryness_preference,
+      })),
+    };
+  }
+
+  return {
+    status: "no_match",
   };
 }
 
@@ -675,6 +751,7 @@ export async function savePlantIdentificationSuggestionAction(
   return {
     status: "success",
     message: "Suggested names saved. You can keep editing this plant any time.",
+    careProfilePreview: await getCareProfilePreview(supabase, scientificName, commonName),
   };
 }
 
