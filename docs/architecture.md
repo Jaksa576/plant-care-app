@@ -158,7 +158,9 @@ Aliases are unique per profile, normalized alias, and alias type. The same norma
 
 Care profile helpers live in `src/lib/care-profiles`. They normalize names, derive genus fallback keys, load profile records with aliases, and match accepted identity in a conservative order: exact scientific name, scientific alias, synonym, common-name alias, genus profile, and explicit care-group alias. Ambiguous aliases return an `ambiguous` result and no plant fields are changed.
 
-Slice 1 adds only foundation data and helpers. It does not change `plants`, expose care suggestions in the UI, apply watering fields, create reminders, or call a live care provider in the setup path.
+Wave 1 seed coverage is represented as typed fixtures in `src/lib/care-profiles/fixtures.ts`. `npm run validate:care-profiles` validates required fields, cadence ranges, duplicate aliases, and intentionally ambiguous aliases. `npm run generate:care-profile-seed` regenerates `supabase/seed_care_profiles.sql` from those fixtures.
+
+The care profile foundation and Wave 1 seed workflow do not change `plants`, expose care suggestions in the UI, apply watering fields, create reminders, or call a live care provider in the setup path.
 
 ### Rooms
 

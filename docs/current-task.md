@@ -10,9 +10,9 @@
 - AI-assisted plant identification is implemented as an optional Pl@ntNet-backed helper from an owned primary photo.
 - Skippable first-run onboarding, user-owned rooms, Settings room management, room-aware Add/Edit Plant, Settings-managed Google Calendar integration, and photo-first Add Plant are implemented.
 - Pre-save Pl@ntNet identification from the selected Add Plant photo is implemented as transient names-only suggestions with explicit review.
-- The Onboarding, Rooms, Settings, and Photo-First Add Plant Foundation campaign is completed and merged to `main`.
 - AI Care Setup Slice 0 is complete: campaign docs are normalized and hot-path docs identify AI Care Setup as active.
 - AI Care Setup Slice 1 is complete: `care_profiles` and `care_profile_aliases` are added as app-owned reference tables with minimal seed data and conservative lookup helpers.
+- AI Care Setup Slice 2 is complete: Wave 1 care profile fixtures, validation, duplicate/ambiguous alias detection, and generated Supabase seed SQL are implemented.
 
 ## Active Campaign
 
@@ -36,68 +36,68 @@ Product-owner selected implementation sequence:
 
 ## Active Slice
 
-Slice 2: Seed Workflow and Coverage Wave 1.
+Slice 3: Identification Confidence and Grouped Recommendations.
 
 Status: ready to start.
 
-Slice 1 status: completed.
+Slice 2 status: completed.
 
 Completed work:
 
-- Added additive migration `20260518_slice_ai_care_setup_1_care_profiles.sql`.
-- Added app-owned `care_profiles` reference table with profile levels `species`, `genus`, `care_group`, and `fallback`.
-- Added app-owned `care_profile_aliases` reference table with scientific, synonym, common, normalized common, genus, and group alias types.
-- Enabled RLS on care profile tables with authenticated read policies only; no browser insert/update/delete policies were added.
-- Seeded a minimal foundation set for snake plant, pothos, Chinese money plant, Philodendron genus, succulent-like care group, moderate tropical care group, and unknown conservative fallback.
-- Added `src/lib/care-profiles` helpers for normalization, genus extraction, DB record loading, in-repo seed fixtures, and ambiguity-safe matching.
-- Preserved `plants` without schema changes and did not expose care suggestions in the UI.
+- Added typed Wave 1 fixtures in `src/lib/care-profiles/fixtures.ts`.
+- Expanded practical starter coverage to 29 profiles and 60 aliases across species, genus, care-group, and fallback profile levels.
+- Added `npm run validate:care-profiles` for required fields, cadence ranges, duplicate aliases, and intentionally ambiguous aliases.
+- Added `npm run generate:care-profile-seed` to regenerate `supabase/seed_care_profiles.sql` from the fixture source.
+- Refactored in-app seed records to derive from the same Wave 1 fixture source.
+- Generated `supabase/seed_care_profiles.sql` for repeatable Supabase seed application.
+- Preserved no-UI/no-apply scope: care suggestions are still not shown to users and no plant watering fields are changed.
 
-## Slice 2 Scope
+## Slice 3 Scope
 
 Goal:
 
-Create repeatable seed tooling and add the first meaningful coverage wave.
+Make identification suggestions easier for beginners to understand and choose from.
 
 Scope:
 
-- Add structured seed source or equivalent repeatable seed workflow.
-- Add seed validation for required profile fields.
-- Add duplicate alias detection.
-- Add Coverage Wave 1 profiles, genus profiles, and care groups.
-- Include source/review metadata.
-- Keep care copy concise and beginner-friendly.
-- Do not add admin UI.
+- Display Pl@ntNet match scores as percentages.
+- Use conservative match labels: `Strong match`, `Possible match`, and `Low-confidence match`.
+- Group duplicate/similar candidates with the same normalized common name when safe.
+- Show alternate scientific names in compact details.
+- Improve retry/manual copy for low-confidence and no-result cases.
+- Preserve edit/reject/manual flows.
+- Keep raw provider responses transient by default.
 
 Non-goals:
 
-- No user-facing care suggestion UI yet.
+- No care profile matching UI yet.
+- No watering suggestion UI.
 - No automatic care application.
 - No reminders created or changed.
 - No diagnosis, pest, disease, treatment, or encyclopedia browsing.
 
 ## Validation Results
 
-Slice 1:
+Slice 2:
 
+- `npm run validate:care-profiles`: passed with 29 profiles and 60 aliases; reported intentional `money plant` ambiguity.
 - `npm run lint`: passed.
 - `npm run build`: passed.
 - `npm run typecheck`: not run; no script exists.
 - `npm test`: not run; no script exists.
-- Targeted lookup smoke check: passed for scientific, synonym, common-name, genus, care-group, ambiguous, and fallback paths.
-- Migration/RLS review: additive tables only; no `plants` changes; RLS enabled; authenticated users can read reference data; browser clients have no write policies.
-- Seed review: minimal draft starter data only; intended as foundation data before Slice 2 coverage validation.
+- Seed workflow review: fixtures are the source for in-app records and generated Supabase seed SQL.
+- Duplicate alias detection: passed; intentional ambiguous aliases must be marked with `allowAmbiguous`.
 
 ## Next Recommended Action
 
-Start Slice 2 on a dedicated branch/worktree from this Slice 1 branch: add repeatable seed fixtures/workflow, seed validation, duplicate alias detection, and Coverage Wave 1 profiles/aliases.
+Start Slice 3 on a dedicated branch/worktree from this Slice 2 branch: improve Pl@ntNet confidence display, conservative labels, safe candidate grouping, alternate scientific details, and low-confidence/no-result copy without changing care profile application.
 
 ## Validation Expectations
 
 For future implementation slices, run the scripts that exist in `package.json`:
 
+- `npm run validate:care-profiles` when care profile fixtures change.
 - `npm run typecheck` if present.
 - `npm test` if present.
 - `npm run build`.
-- `npm run lint` if present.
-
-For migration/RLS slices, also validate migrations and owner-scoped access wherever local tooling is available.
+- `npm run lint`.

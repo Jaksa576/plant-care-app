@@ -7,7 +7,9 @@
     "dev:clean": "rm -rf .next && next dev -p 3000",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "validate:care-profiles": "node scripts/validate-care-profiles.mjs",
+    "generate:care-profile-seed": "node scripts/generate-care-profile-seed-sql.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.10.2",

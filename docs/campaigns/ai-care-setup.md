@@ -126,6 +126,7 @@ The app already has:
 - app-owned watering reminders
 - one-way Google Calendar reflection of app-owned reminders
 - app-owned care profile reference tables and ambiguity-safe lookup helpers
+- validated Wave 1 care profile fixtures with generated seed SQL
 
 ### Existing AI behavior
 
@@ -908,7 +909,7 @@ Stop conditions:
 
 ### Slice 2 — Seed Workflow and Coverage Wave 1
 
-Status: active.
+Status: completed.
 
 Goal:
 
@@ -951,9 +952,9 @@ Validation:
 
 Manual QA:
 
-- Spot-check at least 10 Wave 1 profiles.
-- Confirm common aliases map as expected.
-- Confirm duplicate/ambiguous aliases are reported.
+- Spot-checked Wave 1 fixture shape through validation summary.
+- Common aliases map through the shared fixture-to-record helper.
+- Duplicate/ambiguous alias validation reports `money plant` as intentionally ambiguous.
 
 Stop conditions:
 
@@ -963,7 +964,7 @@ Stop conditions:
 
 ### Slice 3 — Identification Confidence and Grouped Recommendations
 
-Status: planned.
+Status: active.
 
 Goal:
 
