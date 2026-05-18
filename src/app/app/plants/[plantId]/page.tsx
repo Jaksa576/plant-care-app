@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import {
+  applyCareSuggestionAction,
   archivePlantAction,
   disableWateringReminderAction,
   identifyPlantPhotoAction,
@@ -298,8 +299,12 @@ function PlantProfile({
         <PlantIdentificationPanel
           hasPhoto={Boolean(plant.primary_photo_path)}
           editHref={`/app/plants/${plant.id}/edit`}
+          hasExistingWateringBasics={Boolean(
+            plant.watering_interval_days || plant.watering_guidance,
+          )}
           identifyAction={identifyPlantPhotoAction.bind(null, plant.id)}
           saveSuggestionAction={savePlantIdentificationSuggestionAction.bind(null, plant.id)}
+          applyCareSuggestionAction={applyCareSuggestionAction.bind(null, plant.id)}
         />
       </section>
 

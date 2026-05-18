@@ -158,11 +158,13 @@ Aliases are unique per profile, normalized alias, and alias type. The same norma
 
 Care profile helpers live in `src/lib/care-profiles`. They normalize names, derive genus fallback keys, load profile records with aliases, and match accepted identity in a conservative order: exact scientific name, scientific alias, synonym, common-name alias, genus profile, and explicit care-group alias. Ambiguous aliases return an `ambiguous` result and no plant fields are changed.
 
-After a user saves a reviewed identification suggestion from the plant profile, the server attempts a care profile lookup using the saved scientific and common names. The plant profile identification panel can show a read-only care preview for matched, ambiguous, or no-match states. The preview may show the profile name, check cadence, range, dryness preference, and watering guidance, but Slice 4 does not apply those values to `plants`.
+After a user saves a reviewed identification suggestion from the plant profile, the server attempts a care profile lookup using the saved scientific and common names. The plant profile identification panel can show matched, ambiguous, or no-match care states. Matched care suggestions show the profile name, check cadence, optional range, dryness preference, watering guidance, and a home-conditions caveat. Users can explicitly use the suggested care basics, edit first, or skip for now.
+
+Applying a care suggestion updates only `plants.watering_interval_days` and `plants.watering_guidance`. Existing user-entered watering basics are protected by a required confirmation before replacement. Applying care basics does not create reminders, calendar events, or new plant truth outside the editable plant fields.
 
 Wave 1 seed coverage is represented as typed fixtures in `src/lib/care-profiles/fixtures.ts`. `npm run validate:care-profiles` validates required fields, cadence ranges, duplicate aliases, and intentionally ambiguous aliases. `npm run generate:care-profile-seed` regenerates `supabase/seed_care_profiles.sql` from those fixtures.
 
-The care profile foundation, Wave 1 seed workflow, and Slice 4 preview matching do not change `plants`, apply watering fields, create reminders, or call a live care provider in the setup path.
+The care profile foundation, Wave 1 seed workflow, and matched care suggestion flow do not call a live care provider in the setup path. Ambiguous and no-match states do not change `plants`.
 
 ### Rooms
 

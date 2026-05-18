@@ -121,6 +121,34 @@ export async function updatePlantForUser(
   };
 }
 
+export async function updatePlantWateringBasicsForUser(
+  supabase: PlantClient,
+  userId: string,
+  plantId: string,
+  wateringBasics: Pick<PlantInput, "watering_interval_days" | "watering_guidance">,
+): Promise<PlantQueryResult<PlantRecord>> {
+  const { data, error } = await supabase
+    .from("plants")
+    .update(wateringBasics)
+    .eq("id", plantId)
+    .eq("user_id", userId)
+    .is("archived_at", null)
+    .select("*")
+    .maybeSingle();
+
+  if (error || !data) {
+    return {
+      data: null,
+      error: getPlantErrorMessage("We couldn't update this plant's watering basics right now.", error),
+    };
+  }
+
+  return {
+    data: data as PlantRecord,
+    error: null,
+  };
+}
+
 export async function archivePlantForUser(
   supabase: PlantClient,
   userId: string,

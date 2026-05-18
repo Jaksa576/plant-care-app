@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 import type {
+  ApplyCareSuggestionState,
   PlantIdentificationState,
   SavePlantIdentificationState,
 } from "@/app/app/plants/actions";
@@ -24,9 +25,15 @@ const emptySaveState: SavePlantIdentificationState = {
   careProfilePreview: null,
 };
 
+const emptyApplyCareSuggestionState: ApplyCareSuggestionState = {
+  status: "idle",
+  message: null,
+};
+
 type PlantIdentificationPanelProps = {
   hasPhoto: boolean;
   editHref: string;
+  hasExistingWateringBasics: boolean;
   identifyAction: (
     state: PlantIdentificationState,
     formData: FormData,
@@ -35,15 +42,24 @@ type PlantIdentificationPanelProps = {
     state: SavePlantIdentificationState,
     formData: FormData,
   ) => Promise<SavePlantIdentificationState>;
+  applyCareSuggestionAction: (
+    state: ApplyCareSuggestionState,
+    formData: FormData,
+  ) => Promise<ApplyCareSuggestionState>;
 };
 
 type CandidateReviewFormProps = {
   candidate: PlantIdentificationCandidate;
   editHref: string;
+  hasExistingWateringBasics: boolean;
   saveSuggestionAction: (
     state: SavePlantIdentificationState,
     formData: FormData,
   ) => Promise<SavePlantIdentificationState>;
+  applyCareSuggestionAction: (
+    state: ApplyCareSuggestionState,
+    formData: FormData,
+  ) => Promise<ApplyCareSuggestionState>;
 };
 
 function getConfidenceText(label: PlantIdentificationCandidate["confidenceLabel"]) {
@@ -82,10 +98,138 @@ function getMatchTypeLabel(matchType: CareProfileMatchType) {
   return "Care-group profile match";
 }
 
+function getDrynessPreferenceLabel(preference: string) {
+  if (preference === "dry_fully") {
+    return "Let the soil dry fully before watering.";
+  }
+
+  if (preference === "dry_mostly") {
+    return "Let most of the soil dry before watering.";
+  }
+
+  if (preference === "dry_top_half") {
+    return "Let the top half of the soil dry before watering.";
+  }
+
+  if (preference === "dry_top_inch") {
+    return "Let the top inch of soil dry before watering.";
+  }
+
+  if (preference === "lightly_moist") {
+    return "Keep lightly moist, but not soggy.";
+  }
+
+  if (preference === "evenly_moist") {
+    return "Keep evenly moist and check often.";
+  }
+
+  if (preference === "special_medium") {
+    return "Follow medium-specific guidance, such as bark mix.";
+  }
+
+  return "Start conservatively and adjust based on how this plant dries in your home.";
+}
+
+function CareSuggestionActions({
+  preview,
+  editHref,
+  hasExistingWateringBasics,
+  applyCareSuggestionAction,
+}: {
+  preview: Extract<SavePlantIdentificationState["careProfilePreview"], { status: "matched" }>;
+  editHref: string;
+  hasExistingWateringBasics: boolean;
+  applyCareSuggestionAction: (
+    state: ApplyCareSuggestionState,
+    formData: FormData,
+  ) => Promise<ApplyCareSuggestionState>;
+}) {
+  const [state, formAction, isPending] = useActionState(
+    applyCareSuggestionAction,
+    emptyApplyCareSuggestionState,
+  );
+  const [skipped, setSkipped] = useState(false);
+
+  if (skipped) {
+    return (
+      <p className="mt-4 rounded-[1rem] border border-[color:var(--border-soft)] bg-white/75 px-4 py-3 text-sm leading-6 text-[color:var(--muted)]">
+        Care suggestion skipped. Manual care basics remain available from Edit.
+      </p>
+    );
+  }
+
+  return (
+    <div className="mt-4">
+      {state.message ? (
+        <div
+          className={`mb-3 rounded-[1rem] border px-4 py-3 text-sm leading-6 ${
+            state.status === "success"
+              ? "border-emerald-200 bg-emerald-50 text-emerald-950"
+              : "border-amber-200 bg-amber-50 text-amber-950"
+          }`}
+        >
+          {state.message}
+        </div>
+      ) : null}
+
+      <form action={formAction} className="flex flex-col gap-3">
+        <input type="hidden" name="cadenceDays" value={preview.cadenceDays} />
+        <input type="hidden" name="wateringGuidance" value={preview.wateringGuidance} />
+
+        {hasExistingWateringBasics ? (
+          <label className="flex items-start gap-3 rounded-[1rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950">
+            <input
+              type="checkbox"
+              name="confirmOverwrite"
+              className="mt-1 h-4 w-4 rounded border-amber-300"
+            />
+            <span>
+              Replace the watering basics already saved for this plant. Existing notes and
+              identity fields will not change.
+            </span>
+          </label>
+        ) : null}
+
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <button
+            type="submit"
+            disabled={isPending || state.status === "success"}
+            className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full bg-[color:var(--accent)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isPending ? "Applying..." : "Use these care basics"}
+          </button>
+          <Link
+            href={editHref}
+            className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white px-4 py-2 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)]"
+          >
+            Edit first
+          </Link>
+          <button
+            type="button"
+            onClick={() => setSkipped(true)}
+            className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)]"
+          >
+            Skip for now
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
 function CareProfilePreviewCard({
   preview,
+  editHref,
+  hasExistingWateringBasics,
+  applyCareSuggestionAction,
 }: {
   preview: SavePlantIdentificationState["careProfilePreview"];
+  editHref: string;
+  hasExistingWateringBasics: boolean;
+  applyCareSuggestionAction: (
+    state: ApplyCareSuggestionState,
+    formData: FormData,
+  ) => Promise<ApplyCareSuggestionState>;
 }) {
   if (!preview) {
     return null;
@@ -97,17 +241,44 @@ function CareProfilePreviewCard({
         ? `Range: ${preview.cadenceDaysMin}-${preview.cadenceDaysMax} days.`
         : null;
 
+    const rangeLabel =
+      preview.cadenceDaysMin && preview.cadenceDaysMax
+        ? `${preview.cadenceDaysMin}-${preview.cadenceDaysMax} day range`
+        : "No range needed";
+
     return (
       <div className="mt-4 rounded-[1.25rem] border border-[color:var(--border-soft)] bg-[color:var(--stone)] p-4 text-sm leading-6">
         <StatusPill>{getMatchTypeLabel(preview.matchType)}</StatusPill>
-        <p className="mt-3 font-semibold text-[color:var(--foreground)]">{preview.displayName}</p>
-        <p className="mt-2 text-[color:var(--muted)]">
-          Preview only: start by checking every {preview.cadenceDays} days. {cadenceRange}
+        <p className="mt-3 text-base font-semibold text-[color:var(--foreground)]">
+          Suggested watering starting point
         </p>
-        <p className="mt-2 text-[color:var(--muted)]">{preview.wateringGuidance}</p>
+        <p className="mt-1 font-semibold text-[color:var(--foreground)]">{preview.displayName}</p>
+        <dl className="mt-3 grid gap-2 text-[color:var(--muted)]">
+          <div>
+            <dt className="font-semibold text-[color:var(--foreground)]">Check cadence</dt>
+            <dd>
+              Start by checking every {preview.cadenceDays} days. {cadenceRange}
+            </dd>
+          </div>
+          <div>
+            <dt className="font-semibold text-[color:var(--foreground)]">Dryness preference</dt>
+            <dd>{getDrynessPreferenceLabel(preview.drynessPreference)}</dd>
+          </div>
+          <div>
+            <dt className="font-semibold text-[color:var(--foreground)]">Watering guidance</dt>
+            <dd>{preview.wateringGuidance}</dd>
+          </div>
+        </dl>
         <p className="mt-2 text-xs font-semibold text-[color:var(--muted)]">
-          Nothing was applied to watering basics.
+          {rangeLabel}. This is a starting point for your home conditions, not a guaranteed
+          watering schedule.
         </p>
+        <CareSuggestionActions
+          preview={preview}
+          editHref={editHref}
+          hasExistingWateringBasics={hasExistingWateringBasics}
+          applyCareSuggestionAction={applyCareSuggestionAction}
+        />
       </div>
     );
   }
@@ -137,101 +308,114 @@ function CareProfilePreviewCard({
   );
 }
 
-function CandidateReviewForm({ candidate, editHref, saveSuggestionAction }: CandidateReviewFormProps) {
+function CandidateReviewForm({
+  candidate,
+  editHref,
+  hasExistingWateringBasics,
+  saveSuggestionAction,
+  applyCareSuggestionAction,
+}: CandidateReviewFormProps) {
   const [state, formAction, isPending] = useActionState(
     saveSuggestionAction,
     emptySaveState,
   );
 
   return (
-    <form
-      action={formAction}
-      className="rounded-[1.25rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] p-4"
-    >
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <StatusPill>
-            {getConfidenceText(candidate.confidenceLabel)} · {getConfidencePercent(candidate)}
-          </StatusPill>
-          <h4 className="mt-3 text-lg font-semibold">{candidate.scientificName}</h4>
-          <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">
-            {candidate.commonName ?? "No common name returned"}
-          </p>
-          {candidate.alternateScientificNames.length > 0 ? (
-            <details className="mt-3 text-sm leading-6 text-[color:var(--muted)]">
-              <summary className="cursor-pointer font-semibold text-[color:var(--foreground)]">
-                {candidate.alternateScientificNames.length} similar scientific match
-                {candidate.alternateScientificNames.length === 1 ? "" : "es"} considered
-              </summary>
-              <ul className="mt-2 list-disc space-y-1 pl-5 italic">
-                {candidate.alternateScientificNames.map((scientificName) => (
-                  <li key={scientificName}>{scientificName}</li>
-                ))}
-              </ul>
-            </details>
+    <div className="rounded-[1.25rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] p-4">
+      <form action={formAction}>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <StatusPill>
+              {getConfidenceText(candidate.confidenceLabel)} · {getConfidencePercent(candidate)}
+            </StatusPill>
+            <h4 className="mt-3 text-lg font-semibold">{candidate.scientificName}</h4>
+            <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">
+              {candidate.commonName ?? "No common name returned"}
+            </p>
+            {candidate.alternateScientificNames.length > 0 ? (
+              <details className="mt-3 text-sm leading-6 text-[color:var(--muted)]">
+                <summary className="cursor-pointer font-semibold text-[color:var(--foreground)]">
+                  {candidate.alternateScientificNames.length} similar scientific match
+                  {candidate.alternateScientificNames.length === 1 ? "" : "es"} considered
+                </summary>
+                <ul className="mt-2 list-disc space-y-1 pl-5 italic">
+                  {candidate.alternateScientificNames.map((scientificName) => (
+                    <li key={scientificName}>{scientificName}</li>
+                  ))}
+                </ul>
+              </details>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <label className="flex flex-col gap-2 text-sm font-semibold">
+            Common name
+            <input
+              name="commonName"
+              defaultValue={candidate.commonName ?? ""}
+              className="min-h-[var(--tap-target)] rounded-[1rem] border border-[color:var(--border)] bg-white px-4 py-3 text-base font-normal outline-none transition focus:border-[color:var(--accent)] focus:ring-2 focus:ring-[color:var(--accent-soft)]"
+            />
+          </label>
+          <label className="flex flex-col gap-2 text-sm font-semibold">
+            Scientific name
+            <input
+              name="scientificName"
+              defaultValue={candidate.scientificName}
+              className="min-h-[var(--tap-target)] rounded-[1rem] border border-[color:var(--border)] bg-white px-4 py-3 text-base font-normal italic outline-none transition focus:border-[color:var(--accent)] focus:ring-2 focus:ring-[color:var(--accent-soft)]"
+            />
+          </label>
+        </div>
+
+        {state.message ? (
+          <div
+            className={`mt-4 rounded-[1.25rem] border px-4 py-3 text-sm leading-6 ${
+              state.status === "error"
+                ? "border-amber-200 bg-amber-50 text-amber-950"
+                : "border-emerald-200 bg-emerald-50 text-emerald-950"
+            }`}
+          >
+            {state.message}
+          </div>
+        ) : null}
+
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+          <button
+            type="submit"
+            disabled={isPending}
+            className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full bg-[color:var(--accent)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isPending ? "Saving..." : "Save reviewed names"}
+          </button>
+          {state.status === "success" ? (
+            <Link
+              href={editHref}
+              className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white px-4 py-2 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)]"
+            >
+              Edit full plant details
+            </Link>
           ) : null}
         </div>
-      </div>
+      </form>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <label className="flex flex-col gap-2 text-sm font-semibold">
-          Common name
-          <input
-            name="commonName"
-            defaultValue={candidate.commonName ?? ""}
-            className="min-h-[var(--tap-target)] rounded-[1rem] border border-[color:var(--border)] bg-white px-4 py-3 text-base font-normal outline-none transition focus:border-[color:var(--accent)] focus:ring-2 focus:ring-[color:var(--accent-soft)]"
-          />
-        </label>
-        <label className="flex flex-col gap-2 text-sm font-semibold">
-          Scientific name
-          <input
-            name="scientificName"
-            defaultValue={candidate.scientificName}
-            className="min-h-[var(--tap-target)] rounded-[1rem] border border-[color:var(--border)] bg-white px-4 py-3 text-base font-normal italic outline-none transition focus:border-[color:var(--accent)] focus:ring-2 focus:ring-[color:var(--accent-soft)]"
-          />
-        </label>
-      </div>
+      <CareProfilePreviewCard
+        preview={state.careProfilePreview}
+        editHref={editHref}
+        hasExistingWateringBasics={hasExistingWateringBasics}
+        applyCareSuggestionAction={applyCareSuggestionAction}
+      />
 
-      {state.message ? (
-        <div
-          className={`mt-4 rounded-[1.25rem] border px-4 py-3 text-sm leading-6 ${
-            state.status === "error"
-              ? "border-amber-200 bg-amber-50 text-amber-950"
-              : "border-emerald-200 bg-emerald-50 text-emerald-950"
-          }`}
-        >
-          {state.message}
-        </div>
-      ) : null}
-
-      <CareProfilePreviewCard preview={state.careProfilePreview} />
-
-      <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-        <button
-          type="submit"
-          disabled={isPending}
-          className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full bg-[color:var(--accent)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isPending ? "Saving..." : "Save reviewed names"}
-        </button>
-        {state.status === "success" ? (
-          <Link
-            href={editHref}
-            className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white px-4 py-2 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)]"
-          >
-            Edit full plant details
-          </Link>
-        ) : null}
-      </div>
-    </form>
+    </div>
   );
 }
 
 export function PlantIdentificationPanel({
   hasPhoto,
   editHref,
+  hasExistingWateringBasics,
   identifyAction,
   saveSuggestionAction,
+  applyCareSuggestionAction,
 }: PlantIdentificationPanelProps) {
   const [state, formAction, isPending] = useActionState(
     identifyAction,
@@ -248,8 +432,8 @@ export function PlantIdentificationPanel({
             <h3 className="text-xl font-semibold">Help identify this plant</h3>
           </div>
           <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
-            These are suggestions, not certainties. Accepted names stay editable and care
-            guidance will not be changed.
+            These are suggestions, not certainties. Accepted names stay editable, and care basics
+            are only applied if you review and choose them.
           </p>
           <p className="mt-2 text-sm leading-7 text-[color:var(--muted)]">
             Low-confidence results may need a clearer leaf photo in natural light, or you can keep
@@ -297,7 +481,9 @@ export function PlantIdentificationPanel({
               key={`${candidate.scientificName}-${candidate.commonName ?? "no-common"}`}
               candidate={candidate}
               editHref={editHref}
+              hasExistingWateringBasics={hasExistingWateringBasics}
               saveSuggestionAction={saveSuggestionAction}
+              applyCareSuggestionAction={applyCareSuggestionAction}
             />
           ))}
         </div>

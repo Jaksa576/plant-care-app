@@ -28,6 +28,7 @@ import {
   getPlantForUser,
   updatePlantPrimaryPhotoForUser,
   updatePlantForUser,
+  updatePlantWateringBasicsForUser,
 } from "@/lib/plants/data";
 import { createPlantFormErrorState, parsePlantFormData } from "@/lib/plants/forms";
 import {
@@ -68,6 +69,11 @@ export type SavePlantIdentificationState = {
   status: "idle" | "success" | "error";
   message: string | null;
   careProfilePreview?: CareProfilePreview | null;
+};
+
+export type ApplyCareSuggestionState = {
+  status: "idle" | "success" | "error" | "needs_confirmation";
+  message: string | null;
 };
 
 export type CareProfilePreview =
@@ -752,6 +758,78 @@ export async function savePlantIdentificationSuggestionAction(
     status: "success",
     message: "Suggested names saved. You can keep editing this plant any time.",
     careProfilePreview: await getCareProfilePreview(supabase, scientificName, commonName),
+  };
+}
+
+export async function applyCareSuggestionAction(
+  plantId: string,
+  previousState: ApplyCareSuggestionState,
+  formData: FormData,
+): Promise<ApplyCareSuggestionState> {
+  void previousState;
+  const cadenceValue = formData.get("cadenceDays");
+  const guidanceValue = formData.get("wateringGuidance");
+  const confirmOverwrite = formData.get("confirmOverwrite") === "on";
+  const cadenceDays =
+    typeof cadenceValue === "string" ? Number.parseInt(cadenceValue, 10) : Number.NaN;
+  const wateringGuidance = typeof guidanceValue === "string" ? guidanceValue.trim() : "";
+
+  if (!Number.isInteger(cadenceDays) || cadenceDays <= 0 || cadenceDays > 365) {
+    return {
+      status: "error",
+      message: "This care suggestion is missing a valid check cadence.",
+    };
+  }
+
+  if (!wateringGuidance) {
+    return {
+      status: "error",
+      message: "This care suggestion is missing watering guidance.",
+    };
+  }
+
+  const { supabase, user } = await getSignedInPlantContext();
+  const plantResult = await getPlantForUser(supabase, user.id, plantId);
+  const plant = plantResult.data;
+
+  if (plantResult.error || !plant || plant.archived_at) {
+    return {
+      status: "error",
+      message: "Could not apply these care basics. Please refresh and try again.",
+    };
+  }
+
+  const hasExistingWateringBasics = Boolean(
+    plant.watering_interval_days || plant.watering_guidance,
+  );
+
+  if (hasExistingWateringBasics && !confirmOverwrite) {
+    return {
+      status: "needs_confirmation",
+      message:
+        "This plant already has watering basics. Confirm before replacing them with this starting point.",
+    };
+  }
+
+  const updateResult = await updatePlantWateringBasicsForUser(supabase, user.id, plant.id, {
+    watering_interval_days: cadenceDays,
+    watering_guidance: wateringGuidance,
+  });
+
+  if (updateResult.error || !updateResult.data) {
+    return {
+      status: "error",
+      message: updateResult.error ?? "Could not apply these care basics right now.",
+    };
+  }
+
+  revalidatePath("/app");
+  revalidatePath(`/app/plants/${plant.id}`);
+  revalidatePath(`/app/plants/${plant.id}/edit`);
+
+  return {
+    status: "success",
+    message: "Care basics applied. You can edit this check cadence and guidance any time.",
   };
 }
 

@@ -54,15 +54,15 @@ This document tracks product sequencing and slice status. Stable product directi
 - AI Care Setup Slice 1 care profile data foundation with app-owned `care_profiles`, `care_profile_aliases`, minimal seed data, and ambiguity-safe lookup helpers.
 - AI Care Setup Slice 2 seed workflow and Coverage Wave 1 with validated typed fixtures, generated Supabase seed SQL, 29 practical profiles, 60 aliases, and duplicate/ambiguous alias detection.
 - AI Care Setup Slice 3 identification confidence and grouped recommendations with Pl@ntNet percentages, conservative labels, same-common-name grouping, alternate scientific details, and clearer retry/manual copy.
-- AI Care Setup Slice 4 care profile matching after reviewed identity save with exact/synonym/common/genus/ambiguous/no-match preview states and no watering-field application.
+- AI Care Setup Slice 4 care profile matching after reviewed identity save with exact/synonym/common/genus/ambiguous/no-match preview states.
+- AI Care Setup Slice 5 reviewable watering starting point UI with explicit apply/edit/skip actions, overwrite confirmation for existing watering basics, and updates limited to editable plant watering fields.
 
 ### Active
 
-- AI Care Setup campaign, Slice 4 complete and Slice 5 next.
+- AI Care Setup campaign, Slice 5 complete and Slice 6 next.
 
 ### Planned
 
-- AI Care Setup Slice 5: Reviewable Watering Starting Point UI.
 - AI Care Setup Slice 6: Fallback Watering Setup Questions.
 - AI Care Setup Slice 7: Optional Reminder Handoff.
 - AI Care Setup Slice 8: Add Plant / Photo-First Integration.

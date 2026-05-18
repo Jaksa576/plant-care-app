@@ -1074,7 +1074,7 @@ Stop conditions:
 
 ### Slice 5 — Reviewable Watering Starting Point UI
 
-Status: active.
+Status: completed.
 
 Goal:
 
@@ -1118,14 +1118,14 @@ Validation:
 
 Manual QA:
 
-- Empty watering fields.
-- Existing watering fields.
-- Apply suggestion.
-- Skip suggestion.
-- Edit after applying.
-- Mark watered after applying.
-- Dashboard next-date behavior.
-- Mobile layout.
+- Empty watering fields: implementation supports direct apply; manual browser QA still needed.
+- Existing watering fields: server requires overwrite confirmation; manual browser QA still needed.
+- Apply suggestion: implemented through explicit action; manual browser QA still needed.
+- Skip suggestion: implemented as a local UI choice; manual browser QA still needed.
+- Edit after applying: edit route remains available; manual browser QA still needed.
+- Mark watered after applying: uses existing interval logic; manual browser QA still needed.
+- Dashboard next-date behavior: uses existing interval logic after apply; manual browser QA still needed.
+- Mobile layout: manual browser QA still needed.
 
 Stop conditions:
 
