@@ -1293,7 +1293,7 @@ Stop conditions:
 
 ### Slice 9 — Coverage Wave 2 Expansion
 
-Status: planned.
+Status: completed.
 
 Goal:
 
@@ -1327,11 +1327,11 @@ Validation:
 
 Manual QA:
 
-- At least 25 Wave 2 plants/aliases.
-- At least 5 ambiguous aliases.
-- At least 5 genus fallback cases.
-- At least 5 no-match/fallback cases.
-- Mobile care suggestion UI.
+- At least 25 Wave 2 plants/aliases: implemented through 41 profiles and 101 aliases; manual spot QA still needed.
+- At least 5 ambiguous aliases: validation currently tracks `money plant` and `prayer plant`; additional ambiguity QA still needed.
+- At least 5 genus fallback cases: additional genus coverage added; manual QA still needed.
+- At least 5 no-match/fallback cases: fallback flow exists; manual QA still needed.
+- Mobile care suggestion UI: manual browser QA still needed.
 
 Stop conditions:
 

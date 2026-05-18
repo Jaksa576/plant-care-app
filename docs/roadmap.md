@@ -59,14 +59,14 @@ This document tracks product sequencing and slice status. Stable product directi
 - AI Care Setup Slice 6 fallback watering setup questions for no-match identity cases, mapped to reviewed care-group or conservative fallback profiles.
 - AI Care Setup Slice 7 optional reminder handoff after applying care basics, using the existing app-owned reminder panel without auto-creating reminders.
 - AI Care Setup Slice 8 Add Plant/photo-first integration that carries reviewed names into post-save care profile review without making AI, care suggestions, reminders, or photo upload required.
+- AI Care Setup Slice 9 Coverage Wave 2 expansion with 41 profiles, 101 aliases, additional common retail plants, messy aliases, genus fallbacks, and validated ambiguous aliases.
 
 ### Active
 
-- AI Care Setup campaign, Slice 8 complete and Slice 9 next.
+- AI Care Setup campaign, Slice 9 complete and Slice 10 next.
 
 ### Planned
 
-- AI Care Setup Slice 9: Coverage Wave 2 Expansion.
 - AI Care Setup Slice 10: Coverage Wave 3 Broad Coverage and QA Hardening.
 
 ### Deferred
