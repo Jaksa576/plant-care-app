@@ -1,4 +1,5 @@
 import type { PlantIdentificationCandidate } from "@/lib/plant-identification/types";
+import { normalizeCareProfileName } from "@/lib/care-profiles/normalize";
 
 const PLANTNET_BASE_URL = "https://my-api.plantnet.org/v2/identify";
 const PLANTNET_RESULT_LIMIT = 3;
@@ -14,14 +15,14 @@ type PlantNetIdentifyResult =
 
 function getConfidenceLabel(score: number): PlantIdentificationCandidate["confidenceLabel"] {
   if (score >= 0.75) {
-    return "likely";
+    return "strong";
   }
 
   if (score >= 0.45) {
     return "possible";
   }
 
-  return "not_sure";
+  return "low";
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -64,7 +65,48 @@ function normalizePlantNetCandidate(value: unknown): PlantIdentificationCandidat
     commonName,
     confidenceScore,
     confidenceLabel: getConfidenceLabel(confidenceScore),
+    alternateScientificNames: [],
   };
+}
+
+function groupSimilarCandidates(candidates: PlantIdentificationCandidate[]) {
+  const groupedCandidates = new Map<string, PlantIdentificationCandidate[]>();
+  const ungroupedCandidates: PlantIdentificationCandidate[] = [];
+
+  for (const candidate of candidates) {
+    const normalizedCommonName = normalizeCareProfileName(candidate.commonName);
+
+    if (!normalizedCommonName) {
+      ungroupedCandidates.push(candidate);
+      continue;
+    }
+
+    const group = groupedCandidates.get(normalizedCommonName) ?? [];
+    group.push(candidate);
+    groupedCandidates.set(normalizedCommonName, group);
+  }
+
+  const grouped = [...groupedCandidates.values()].map((group) => {
+    const [primary, ...alternates] = [...group].sort(
+      (candidateA, candidateB) => candidateB.confidenceScore - candidateA.confidenceScore,
+    );
+    const alternateScientificNames = [
+      ...new Set(
+        alternates
+          .map((candidate) => candidate.scientificName)
+          .filter((scientificName) => scientificName !== primary.scientificName),
+      ),
+    ];
+
+    return {
+      ...primary,
+      alternateScientificNames,
+    };
+  });
+
+  return [...grouped, ...ungroupedCandidates]
+    .sort((candidateA, candidateB) => candidateB.confidenceScore - candidateA.confidenceScore)
+    .slice(0, PLANTNET_RESULT_LIMIT);
 }
 
 export async function identifyPlantWithPlantNet(
@@ -98,10 +140,10 @@ export async function identifyPlantWithPlantNet(
     const candidates = results
       .map(normalizePlantNetCandidate)
       .filter((candidate): candidate is PlantIdentificationCandidate => Boolean(candidate))
-      .slice(0, PLANTNET_RESULT_LIMIT);
+      .slice(0, PLANTNET_RESULT_LIMIT * 2);
 
     return {
-      data: candidates,
+      data: groupSimilarCandidates(candidates),
       error: null,
     };
   } catch {

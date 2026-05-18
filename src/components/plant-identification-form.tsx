@@ -45,15 +45,19 @@ type CandidateReviewFormProps = {
 };
 
 function getConfidenceText(label: PlantIdentificationCandidate["confidenceLabel"]) {
-  if (label === "likely") {
-    return "likely";
+  if (label === "strong") {
+    return "Strong match";
   }
 
   if (label === "possible") {
-    return "possible";
+    return "Possible match";
   }
 
-  return "not sure";
+  return "Low-confidence match";
+}
+
+function getConfidencePercent(candidate: PlantIdentificationCandidate) {
+  return `${Math.round(Math.max(0, Math.min(candidate.confidenceScore, 1)) * 100)}%`;
 }
 
 function CandidateReviewForm({ candidate, editHref, saveSuggestionAction }: CandidateReviewFormProps) {
@@ -69,11 +73,26 @@ function CandidateReviewForm({ candidate, editHref, saveSuggestionAction }: Cand
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <StatusPill>{getConfidenceText(candidate.confidenceLabel)}</StatusPill>
+          <StatusPill>
+            {getConfidenceText(candidate.confidenceLabel)} · {getConfidencePercent(candidate)}
+          </StatusPill>
           <h4 className="mt-3 text-lg font-semibold">{candidate.scientificName}</h4>
           <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">
             {candidate.commonName ?? "No common name returned"}
           </p>
+          {candidate.alternateScientificNames.length > 0 ? (
+            <details className="mt-3 text-sm leading-6 text-[color:var(--muted)]">
+              <summary className="cursor-pointer font-semibold text-[color:var(--foreground)]">
+                {candidate.alternateScientificNames.length} similar scientific match
+                {candidate.alternateScientificNames.length === 1 ? "" : "es"} considered
+              </summary>
+              <ul className="mt-2 list-disc space-y-1 pl-5 italic">
+                {candidate.alternateScientificNames.map((scientificName) => (
+                  <li key={scientificName}>{scientificName}</li>
+                ))}
+              </ul>
+            </details>
+          ) : null}
         </div>
       </div>
 
@@ -152,6 +171,10 @@ export function PlantIdentificationPanel({
           <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
             These are suggestions, not certainties. Accepted names stay editable and care
             guidance will not be changed.
+          </p>
+          <p className="mt-2 text-sm leading-7 text-[color:var(--muted)]">
+            Low-confidence results may need a clearer leaf photo in natural light, or you can keep
+            setup manual.
           </p>
           <p className="mt-2 text-xs leading-6 text-[color:var(--muted)]">
             Plant suggestions powered by Pl@ntNet.

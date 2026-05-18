@@ -285,9 +285,10 @@ Pl@ntNet responses are normalized into transient candidates with:
 - scientific name
 - optional common name
 - confidence score
-- uncertainty label: `likely`, `possible`, or `not_sure`
+- conservative confidence label: `strong`, `possible`, or `low`
+- grouped alternate scientific names when candidates share a normalized common name
 
-The UI displays up to three names-only suggestions with the note `Plant suggestions powered by Pl@ntNet.` Raw provider responses are not persisted by default. Unreviewed suggestions are not plant truth. A user must review and save a candidate before accepted common/scientific names update the existing editable `plants` fields. Care basics, watering intervals, diagnosis, disease, pest, toxicity, and treatment suggestions are excluded from Slice 4.2.
+The UI displays up to three names-only suggestions with match percentages, labels of `Strong match`, `Possible match`, or `Low-confidence match`, and the note `Plant suggestions powered by Pl@ntNet.` Similar candidates with the same normalized common name are grouped under the highest-scoring scientific name with compact alternate scientific details. Raw provider responses are not persisted by default. Unreviewed suggestions are not plant truth. A user must review and save a candidate before accepted common/scientific names update the existing editable `plants` fields. Care basics, watering intervals, diagnosis, disease, pest, toxicity, and treatment suggestions remain excluded from this identification flow.
 
 ## Integration Boundaries
 

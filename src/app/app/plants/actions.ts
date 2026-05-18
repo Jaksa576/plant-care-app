@@ -534,14 +534,15 @@ export async function identifyPlantPhotoAction(
   if (identifyResult.data.length === 0) {
     return {
       status: "no-candidates",
-      message: "We are not sure about this one. You can keep editing manually.",
+      message:
+        "No clear plant match came back. Try a brighter leaf photo or keep editing manually.",
       candidates: [],
     };
   }
 
   return {
     status: "success",
-    message: "These are suggestions, not certainties. You can edit anything before saving.",
+    message: "Review these possible matches. Scores are match signals, not certainty.",
     candidates: identifyResult.data,
   };
 }
@@ -599,14 +600,15 @@ export async function identifyInitialPlantPhotoAction(
   if (identifyResult.data.length === 0) {
     return {
       status: "no-candidates",
-      message: "We are not sure about this one. You can keep editing manually.",
+      message:
+        "No clear plant match came back. Try a brighter leaf photo or keep editing manually.",
       candidates: [],
     };
   }
 
   return {
     status: "success",
-    message: "These are suggestions, not certainties. Review and edit names before saving.",
+    message: "Review these possible matches. Scores are match signals, not certainty.",
     candidates: identifyResult.data,
   };
 }

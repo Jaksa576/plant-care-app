@@ -53,14 +53,14 @@ This document tracks product sequencing and slice status. Stable product directi
 - AI Care Setup Slice 0 campaign source-of-truth alignment.
 - AI Care Setup Slice 1 care profile data foundation with app-owned `care_profiles`, `care_profile_aliases`, minimal seed data, and ambiguity-safe lookup helpers.
 - AI Care Setup Slice 2 seed workflow and Coverage Wave 1 with validated typed fixtures, generated Supabase seed SQL, 29 practical profiles, 60 aliases, and duplicate/ambiguous alias detection.
+- AI Care Setup Slice 3 identification confidence and grouped recommendations with Pl@ntNet percentages, conservative labels, same-common-name grouping, alternate scientific details, and clearer retry/manual copy.
 
 ### Active
 
-- AI Care Setup campaign, Slice 2 complete and Slice 3 next.
+- AI Care Setup campaign, Slice 3 complete and Slice 4 next.
 
 ### Planned
 
-- AI Care Setup Slice 3: Identification Confidence and Grouped Recommendations.
 - AI Care Setup Slice 4: Care Profile Match After Accepted Identity.
 - AI Care Setup Slice 5: Reviewable Watering Starting Point UI.
 - AI Care Setup Slice 6: Fallback Watering Setup Questions.
@@ -242,7 +242,7 @@ Automation can reduce friction after the app has reliable user behavior and care
 
 ## Recommended Implementation Order
 
-1. Continue AI Care Setup with Slice 3: Identification Confidence and Grouped Recommendations.
+1. Continue AI Care Setup with Slice 4: Care Profile Match After Accepted Identity.
 2. Expand validated coverage through Waves 1, 2, and 3 inside the same campaign.
 3. Later: health support, richer knowledge, smarter automation, and Outlook sync.
 

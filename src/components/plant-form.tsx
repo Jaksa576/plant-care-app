@@ -291,15 +291,19 @@ const emptyIdentificationState: PlantIdentificationState = {
 };
 
 function getConfidenceText(label: PlantIdentificationCandidate["confidenceLabel"]) {
-  if (label === "likely") {
-    return "likely";
+  if (label === "strong") {
+    return "Strong match";
   }
 
   if (label === "possible") {
-    return "possible";
+    return "Possible match";
   }
 
-  return "not sure";
+  return "Low-confidence match";
+}
+
+function getConfidencePercent(candidate: PlantIdentificationCandidate) {
+  return `${Math.round(Math.max(0, Math.min(candidate.confidenceScore, 1)) * 100)}%`;
 }
 
 function InitialPhotoIdentificationControls({
@@ -357,8 +361,8 @@ function InitialPhotoIdentificationControls({
             Optional identification help
           </p>
           <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">
-            Plant suggestions are names only. Choose one to fill editable fields, or continue
-            manually.
+            Plant suggestions are names only. Scores are match signals, not certainty. Choose one
+            to fill editable fields, retry with a clearer photo, or continue manually.
           </p>
           <p className="mt-1 text-xs leading-5 text-[color:var(--muted)]">
             Plant suggestions powered by Pl@ntNet.
@@ -402,11 +406,27 @@ function InitialPhotoIdentificationControls({
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <StatusPill>{getConfidenceText(candidate.confidenceLabel)}</StatusPill>
+                  <StatusPill>
+                    {getConfidenceText(candidate.confidenceLabel)} ·{" "}
+                    {getConfidencePercent(candidate)}
+                  </StatusPill>
                   <p className="mt-3 text-base font-semibold">{candidate.scientificName}</p>
                   <p className="mt-1 text-sm leading-6 text-[color:var(--muted)]">
                     {candidate.commonName ?? "No common name returned"}
                   </p>
+                  {candidate.alternateScientificNames.length > 0 ? (
+                    <details className="mt-3 text-sm leading-6 text-[color:var(--muted)]">
+                      <summary className="cursor-pointer font-semibold text-[color:var(--foreground)]">
+                        {candidate.alternateScientificNames.length} similar scientific match
+                        {candidate.alternateScientificNames.length === 1 ? "" : "es"} considered
+                      </summary>
+                      <ul className="mt-2 list-disc space-y-1 pl-5 italic">
+                        {candidate.alternateScientificNames.map((scientificName) => (
+                          <li key={scientificName}>{scientificName}</li>
+                        ))}
+                      </ul>
+                    </details>
+                  ) : null}
                 </div>
                 <button
                   type="button"

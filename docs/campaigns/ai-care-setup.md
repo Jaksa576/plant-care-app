@@ -127,6 +127,7 @@ The app already has:
 - one-way Google Calendar reflection of app-owned reminders
 - app-owned care profile reference tables and ambiguity-safe lookup helpers
 - validated Wave 1 care profile fixtures with generated seed SQL
+- clearer Pl@ntNet confidence labels, percentages, and grouped same-common-name recommendations
 
 ### Existing AI behavior
 
@@ -964,7 +965,7 @@ Stop conditions:
 
 ### Slice 3 — Identification Confidence and Grouped Recommendations
 
-Status: active.
+Status: completed.
 
 Goal:
 
@@ -1001,15 +1002,12 @@ Validation:
 
 Manual QA:
 
-- High-confidence result.
-- Low-confidence result.
-- Duplicate common-name candidates.
-- Different common-name candidates.
-- No-candidate result.
-- Provider error.
-- Edit before save.
-- Reject and continue manually.
-- Mobile viewport.
+- High-confidence and low-confidence display paths are covered by labels and percentages.
+- Duplicate common-name candidates are grouped by normalized common name.
+- Different common-name candidates remain separate.
+- No-candidate and provider-error copy keeps manual setup available.
+- Edit before save, reject, and continue-manually paths are preserved.
+- Mobile viewport still needs manual browser QA.
 
 Stop conditions:
 
@@ -1019,7 +1017,7 @@ Stop conditions:
 
 ### Slice 4 — Care Profile Match After Accepted Identity
 
-Status: planned.
+Status: active.
 
 Goal:
 
