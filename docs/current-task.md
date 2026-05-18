@@ -15,6 +15,7 @@
 - AI Care Setup Slice 7 is complete: after applying care basics, users can optionally jump to setup or review the existing app-owned watering reminder.
 - AI Care Setup Slice 8 is complete: Add Plant can carry reviewed names into optional post-save care profile review without requiring AI, care suggestions, reminders, or successful photo upload.
 - AI Care Setup Slice 9 is complete: Coverage Wave 2 expands validated care profile coverage to 41 profiles and 101 aliases.
+- AI Care Setup Slice 10 is complete: Coverage Wave 3 expands validated care profile coverage to 56 profiles and 146 aliases and finalizes campaign docs for manual QA.
 - Repo workflow helper optimization is complete as an infrastructure/docs patch and available on this branch.
 
 ## Active Campaign
@@ -25,11 +26,11 @@ Campaign source of truth: [AI Care Setup](campaigns/ai-care-setup.md).
 
 ## Active Slice
 
-Slice 10: Coverage Wave 3 Broad Coverage and QA Hardening.
+AI Care Setup campaign manual QA and merge review.
 
-Status: ready to start after Slice 9 branch review.
+Status: implementation complete; manual QA pending.
 
-Slice 9 status: completed.
+Slice 10 status: completed.
 
 Completed work:
 
@@ -52,26 +53,27 @@ Completed work:
 - Manual Add Plant, photo-optional setup, failed AI, and failed photo upload remain non-blocking.
 - Coverage Wave 2 adds common retail plants, messy aliases, additional species profiles, and genus fallbacks.
 - Seed validation now reports `money plant` and `prayer plant` as intentional ambiguous aliases.
+- Coverage Wave 3 adds broad retail coverage, additional genus fallbacks, common misidentification aliases, and `elephant ear` as an intentional ambiguous alias.
+- Generated seed SQL is current with fixtures.
 - No reminders are created.
 
-## Slice 10 Scope
+## Remaining Scope
 
 Goal:
 
-Expand to broad houseplant coverage and harden end-to-end campaign QA.
+Manually QA the full AI Care Setup branch stack and merge reviewed slices in order.
 
 Scope:
 
-- Expand to roughly 150-250 total practical profiles/aliases.
-- Focus on common retail plants, Pl@ntNet misidentifications, QA-discovered gaps, genus profiles, and fallback reliability.
-- Complete full campaign QA and docs finalization.
+- QA existing plant/profile identification, Add Plant integration, care matching, fallback questions, care apply/skip, overwrite protection, reminder handoff, dashboard date behavior, route protection, and mobile/desktop layouts.
+- Review and merge branches from `codex/workflow-helpers` and AI Care Setup slices in order.
 
 Non-goals:
 
 - No broad encyclopedia browsing.
 - No live third-party care API dependency in the user-critical setup path.
 - No LLM-generated production care data shown directly to users.
-- No schema or UI expansion beyond coverage data/tooling needed for Wave 3 and QA hardening.
+- No additional schema or UI expansion unless QA finds a blocking defect.
 - No diagnosis, pest, disease, treatment, or encyclopedia browsing.
 
 ## Validation Results
@@ -150,9 +152,21 @@ Slice 9:
 - `npm test`: not run; no script exists.
 - Manual browser QA: still needed for Wave 2 exact/common/genus/ambiguous/fallback examples.
 
+Slice 10:
+
+- `npm run validate:care-profiles`: passed with intentional `money plant`, `prayer plant`, and `elephant ear` ambiguity warnings.
+- `npm run generate:care-profile-seed`: passed.
+- `npm run typecheck`: passed.
+- `npm run lint`: passed.
+- `npm run build`: passed.
+- `npm run check`: passed.
+- `.\scripts\validate.ps1`: passed.
+- `npm test`: not run; no script exists.
+- Manual browser QA: still needed for the full campaign matrix.
+
 ## Next Recommended Action
 
-Validate, commit, push, and verify `codex/ai-care-setup-s9`, then start Slice 10 on a dedicated branch/worktree from this Slice 9 branch.
+Validate, commit, push, and verify `codex/ai-care-setup-s10`, then run manual campaign QA and merge reviewed branches in order.
 
 ## Validation Expectations
 

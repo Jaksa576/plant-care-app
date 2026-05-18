@@ -60,10 +60,11 @@ This document tracks product sequencing and slice status. Stable product directi
 - AI Care Setup Slice 7 optional reminder handoff after applying care basics, using the existing app-owned reminder panel without auto-creating reminders.
 - AI Care Setup Slice 8 Add Plant/photo-first integration that carries reviewed names into post-save care profile review without making AI, care suggestions, reminders, or photo upload required.
 - AI Care Setup Slice 9 Coverage Wave 2 expansion with 41 profiles, 101 aliases, additional common retail plants, messy aliases, genus fallbacks, and validated ambiguous aliases.
+- AI Care Setup Slice 10 Coverage Wave 3 expansion and QA hardening with 56 profiles, 146 aliases, additional common retail coverage, and campaign docs finalized for manual QA.
 
 ### Active
 
-- AI Care Setup campaign, Slice 9 complete and Slice 10 next.
+- AI Care Setup campaign implementation complete; manual campaign QA and merge review remain.
 
 ### Planned
 
@@ -242,8 +243,8 @@ Automation can reduce friction after the app has reliable user behavior and care
 
 ## Recommended Implementation Order
 
-1. Continue AI Care Setup with Slice 5: Reviewable Watering Starting Point UI.
-2. Expand validated coverage through Waves 1, 2, and 3 inside the same campaign.
+1. Run manual QA for the AI Care Setup branch stack.
+2. Merge validated AI Care Setup slices in order.
 3. Later: health support, richer knowledge, smarter automation, and Outlook sync.
 
 This order keeps future work grounded in the implemented watering-first loop instead of adding unapproved scope.

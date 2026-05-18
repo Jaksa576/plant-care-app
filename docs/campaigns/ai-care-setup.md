@@ -1,6 +1,6 @@
 # AI Care Setup Campaign
 
-Status: **active**.
+Status: **implementation complete; manual QA and merge review pending**.
 
 ## Recommendation
 
@@ -1341,7 +1341,7 @@ Stop conditions:
 
 ### Slice 10 — Coverage Wave 3 Broad Coverage and QA Hardening
 
-Status: planned.
+Status: completed.
 
 Goal:
 
@@ -1376,19 +1376,19 @@ Validation:
 
 Manual QA:
 
-- First 25 Wave 1 examples.
-- At least 25 Wave 2 examples.
-- At least 25 Wave 3 examples.
-- At least 10 exact species matches.
-- At least 10 genus matches.
-- At least 10 care-group fallback cases.
-- At least 10 no-match/manual paths.
-- High-confidence Pl@ntNet.
-- Low-confidence Pl@ntNet.
-- Duplicate candidate grouping.
-- Existing user-entered watering fields.
-- Reminder handoff.
-- Mobile and desktop.
+- First 25 Wave 1 examples: pending manual QA.
+- At least 25 Wave 2 examples: pending manual QA.
+- At least 25 Wave 3 examples: pending manual QA.
+- At least 10 exact species matches: pending manual QA.
+- At least 10 genus matches: pending manual QA.
+- At least 10 care-group fallback cases: pending manual QA.
+- At least 10 no-match/manual paths: pending manual QA.
+- High-confidence Pl@ntNet: pending manual QA.
+- Low-confidence Pl@ntNet: pending manual QA.
+- Duplicate candidate grouping: pending manual QA.
+- Existing user-entered watering fields: pending manual QA.
+- Reminder handoff: pending manual QA.
+- Mobile and desktop: pending manual QA.
 
 Stop conditions:
 
