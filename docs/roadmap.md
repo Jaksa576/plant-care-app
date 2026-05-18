@@ -56,14 +56,14 @@ This document tracks product sequencing and slice status. Stable product directi
 - AI Care Setup Slice 3 identification confidence and grouped recommendations with Pl@ntNet percentages, conservative labels, same-common-name grouping, alternate scientific details, and clearer retry/manual copy.
 - AI Care Setup Slice 4 care profile matching after reviewed identity save with exact/synonym/common/genus/ambiguous/no-match preview states.
 - AI Care Setup Slice 5 reviewable watering starting point UI with explicit apply/edit/skip actions, overwrite confirmation for existing watering basics, and updates limited to editable plant watering fields.
+- AI Care Setup Slice 6 fallback watering setup questions for no-match identity cases, mapped to reviewed care-group or conservative fallback profiles.
 
 ### Active
 
-- AI Care Setup campaign, Slice 5 complete and Slice 6 next.
+- AI Care Setup campaign, Slice 6 complete and Slice 7 next.
 
 ### Planned
 
-- AI Care Setup Slice 6: Fallback Watering Setup Questions.
 - AI Care Setup Slice 7: Optional Reminder Handoff.
 - AI Care Setup Slice 8: Add Plant / Photo-First Integration.
 - AI Care Setup Slice 9: Coverage Wave 2 Expansion.

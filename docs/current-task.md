@@ -11,6 +11,7 @@
 - AI Care Setup Slices 0-3 are complete: campaign docs, care profile foundation, Wave 1 seed workflow, and clearer Pl@ntNet recommendation UI are implemented.
 - AI Care Setup Slice 4 is complete: reviewed identity saves now attempt internal care profile matching and show read-only matched, ambiguous, or no-match preview states.
 - AI Care Setup Slice 5 is complete: matched care profiles can be reviewed, applied, edited first, or skipped without silent overwrite.
+- AI Care Setup Slice 6 is complete: no-match care states can offer lightweight fallback watering questions mapped to reviewed care-group or conservative fallback profiles.
 - Repo workflow helper optimization is complete as an infrastructure/docs patch and available on this branch.
 
 ## Active Campaign
@@ -21,11 +22,11 @@ Campaign source of truth: [AI Care Setup](campaigns/ai-care-setup.md).
 
 ## Active Slice
 
-Slice 6: Fallback Watering Setup Questions.
+Slice 7: Optional Reminder Handoff.
 
-Status: ready to start after Slice 5 branch review.
+Status: ready to start after Slice 6 branch review.
 
-Slice 5 status: completed.
+Slice 6 status: completed.
 
 Completed work:
 
@@ -39,26 +40,29 @@ Completed work:
 - Users can apply suggested care basics, edit first, or skip for now.
 - Applying updates only `plants.watering_interval_days` and `plants.watering_guidance`.
 - Existing watering basics require explicit overwrite confirmation before replacement.
+- No-match care states now offer a short fallback question form based on visible watering traits.
+- Fallback answers are mapped server-side to reviewed care-group or conservative fallback profiles.
+- Fallback suggestions use the same reviewable apply/edit/skip care suggestion UI and do not identify the plant.
 - No reminders are created.
 
-## Slice 6 Scope
+## Slice 7 Scope
 
 Goal:
 
-Add lightweight fallback questions when no exact, genus, or safe profile match is available.
+After a user applies a watering starting point, optionally offer reminder setup or review.
 
 Scope:
 
-- Ask simple watering-relevant questions.
-- Map answers to fallback care groups.
-- Suggest conservative editable check cadence.
-- Keep manual setup first-class.
+- If no reminder exists, offer to set one using the applied cadence.
+- If a reminder exists, offer to review it.
+- Use the existing app-owned reminder model.
+- Do not auto-create reminders.
 
 Non-goals:
 
-- No long fallback wizard.
-- No exact identity claims from fallback answers.
-- No reminder handoff yet.
+- No mandatory reminders.
+- No calendar-source-of-truth behavior.
+- No direct calendar event creation outside existing reminder sync.
 - No Add Plant care suggestion integration yet.
 - No diagnosis, pest, disease, treatment, or encyclopedia browsing.
 
@@ -93,9 +97,20 @@ Slice 5:
 - `npm test`: not run; no script exists.
 - Manual browser QA: still needed for empty fields, existing fields, apply, skip, edit after apply, mark watered, dashboard next date, and mobile layout.
 
+Slice 6:
+
+- `npm run validate:care-profiles`: passed with the existing intentional `money plant` ambiguity warning.
+- `npm run typecheck`: passed.
+- `npm run lint`: passed.
+- `npm run build`: passed.
+- `npm run check`: passed.
+- `.\scripts\validate.ps1`: passed.
+- `npm test`: not run; no script exists.
+- Manual browser QA: still needed for no-match fallback, low-confidence identity, succulent, tropical, fern/moisture-loving, orchid, skip fallback, and mobile layout.
+
 ## Next Recommended Action
 
-Validate, commit, push, and verify `codex/ai-care-setup-s5`, then start Slice 6 on a dedicated branch/worktree from this Slice 5 branch.
+Validate, commit, push, and verify `codex/ai-care-setup-s6`, then start Slice 7 on a dedicated branch/worktree from this Slice 6 branch.
 
 ## Validation Expectations
 

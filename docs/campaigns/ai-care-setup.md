@@ -1135,7 +1135,7 @@ Stop conditions:
 
 ### Slice 6 — Fallback Watering Setup Questions
 
-Status: planned.
+Status: completed.
 
 Goal:
 
@@ -1177,14 +1177,14 @@ Validation:
 
 Manual QA:
 
-- No profile match.
-- Low-confidence identity.
-- Succulent-like fallback.
-- Tropical fallback.
-- Fern/moisture-loving fallback.
-- Orchid fallback.
-- Skip fallback.
-- Mobile layout.
+- No profile match: fallback question form appears in no-match state; manual browser QA still needed.
+- Low-confidence identity: manual browser QA still needed.
+- Succulent-like fallback: implemented through care-group mapping; manual browser QA still needed.
+- Tropical fallback: implemented through care-group mapping; manual browser QA still needed.
+- Fern/moisture-loving fallback: implemented through care-group mapping; manual browser QA still needed.
+- Orchid fallback: implemented through care-group mapping; manual browser QA still needed.
+- Skip fallback: manual setup link and care suggestion skip path remain available; manual browser QA still needed.
+- Mobile layout: manual browser QA still needed.
 
 Stop conditions:
 

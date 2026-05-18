@@ -5,6 +5,7 @@ import {
   applyCareSuggestionAction,
   archivePlantAction,
   disableWateringReminderAction,
+  getFallbackCareSuggestionAction,
   identifyPlantPhotoAction,
   markWateredAction,
   removePlantPhotoAction,
@@ -304,6 +305,7 @@ function PlantProfile({
           )}
           identifyAction={identifyPlantPhotoAction.bind(null, plant.id)}
           saveSuggestionAction={savePlantIdentificationSuggestionAction.bind(null, plant.id)}
+          fallbackCareSuggestionAction={getFallbackCareSuggestionAction.bind(null, plant.id)}
           applyCareSuggestionAction={applyCareSuggestionAction.bind(null, plant.id)}
         />
       </section>

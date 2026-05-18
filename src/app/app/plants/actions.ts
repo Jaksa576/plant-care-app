@@ -6,7 +6,11 @@ import { redirect } from "next/navigation";
 
 import { getAuthState } from "@/lib/auth";
 import type { MarkWateredState } from "@/components/mark-watered-form";
-import { findCareProfileMatch, MINIMAL_CARE_PROFILES } from "@/lib/care-profiles";
+import {
+  findCareProfileMatch,
+  getFallbackCareProfile,
+  MINIMAL_CARE_PROFILES,
+} from "@/lib/care-profiles";
 import { listCareProfiles } from "@/lib/care-profiles/data";
 import type {
   CareProfileMatchType,
@@ -130,18 +134,16 @@ async function getSignedInPlantContext() {
 
 async function getCareProfilePreview(
   supabase: SupabaseClient,
-  scientificName: string,
-  commonName: string,
+  input: {
+    scientificName?: string;
+    commonName?: string;
+    careGroupAlias?: string;
+  },
 ): Promise<CareProfilePreview> {
   const profileResult = await listCareProfiles(supabase);
   const profiles = profileResult.data ?? MINIMAL_CARE_PROFILES;
-  const match = findCareProfileMatch(
-    {
-      scientificName,
-      commonName,
-    },
-    profiles as CareProfileWithAliases[],
-  );
+  const careProfiles = profiles as CareProfileWithAliases[];
+  const match = findCareProfileMatch(input, careProfiles);
 
   if (match.status === "matched") {
     return {
@@ -168,10 +170,38 @@ async function getCareProfilePreview(
     };
   }
 
+  if (input.careGroupAlias) {
+    const fallbackProfile = getFallbackCareProfile(careProfiles);
+
+    if (fallbackProfile) {
+      return {
+        status: "matched",
+        matchType: "fallback",
+        displayName: fallbackProfile.display_name,
+        cadenceDays: fallbackProfile.watering_interval_days_default,
+        cadenceDaysMin: fallbackProfile.watering_interval_days_min,
+        cadenceDaysMax: fallbackProfile.watering_interval_days_max,
+        drynessPreference: fallbackProfile.dryness_preference,
+        wateringGuidance: fallbackProfile.watering_guidance,
+      };
+    }
+  }
+
   return {
     status: "no_match",
   };
 }
+
+const fallbackCareGroupAliases: Record<string, string> = {
+  cactus: "Cactus",
+  succulent: "Succulent-like",
+  orchid: "Orchid in bark",
+  fern: "Fern",
+  moisture_loving: "Moisture-loving tropical",
+  tropical: "Tropical houseplant",
+  palm: "Palm",
+  unknown: "Unknown houseplant",
+};
 
 async function resolvePlantRoomFromForm(
   supabase: SupabaseClient,
@@ -757,7 +787,60 @@ export async function savePlantIdentificationSuggestionAction(
   return {
     status: "success",
     message: "Suggested names saved. You can keep editing this plant any time.",
-    careProfilePreview: await getCareProfilePreview(supabase, scientificName, commonName),
+    careProfilePreview: await getCareProfilePreview(supabase, {
+      scientificName,
+      commonName,
+    }),
+  };
+}
+
+export async function getFallbackCareSuggestionAction(
+  plantId: string,
+  previousState: SavePlantIdentificationState,
+  formData: FormData,
+): Promise<SavePlantIdentificationState> {
+  void previousState;
+  const fallbackAnswerValue = formData.get("fallbackCareAnswer");
+  const fallbackAnswer = typeof fallbackAnswerValue === "string" ? fallbackAnswerValue : "";
+  const careGroupAlias = fallbackCareGroupAliases[fallbackAnswer];
+
+  if (!careGroupAlias) {
+    return {
+      status: "error",
+      message: "Choose the closest watering pattern, or keep setup manual for now.",
+      careProfilePreview: null,
+    };
+  }
+
+  const { supabase, user } = await getSignedInPlantContext();
+  const plantResult = await getPlantForUser(supabase, user.id, plantId);
+  const plant = plantResult.data;
+
+  if (plantResult.error || !plant || plant.archived_at) {
+    return {
+      status: "error",
+      message: "Could not prepare a fallback watering suggestion. Please refresh and try again.",
+      careProfilePreview: null,
+    };
+  }
+
+  const careProfilePreview = await getCareProfilePreview(supabase, {
+    careGroupAlias,
+  });
+
+  if (careProfilePreview.status !== "matched") {
+    return {
+      status: "error",
+      message: "No fallback care profile is available right now. Manual setup still works.",
+      careProfilePreview: null,
+    };
+  }
+
+  return {
+    status: "success",
+    message:
+      "Fallback suggestion ready. This is based on visible watering traits, not exact identity.",
+    careProfilePreview,
   };
 }
 

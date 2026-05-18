@@ -42,6 +42,10 @@ type PlantIdentificationPanelProps = {
     state: SavePlantIdentificationState,
     formData: FormData,
   ) => Promise<SavePlantIdentificationState>;
+  fallbackCareSuggestionAction: (
+    state: SavePlantIdentificationState,
+    formData: FormData,
+  ) => Promise<SavePlantIdentificationState>;
   applyCareSuggestionAction: (
     state: ApplyCareSuggestionState,
     formData: FormData,
@@ -53,6 +57,10 @@ type CandidateReviewFormProps = {
   editHref: string;
   hasExistingWateringBasics: boolean;
   saveSuggestionAction: (
+    state: SavePlantIdentificationState,
+    formData: FormData,
+  ) => Promise<SavePlantIdentificationState>;
+  fallbackCareSuggestionAction: (
     state: SavePlantIdentificationState,
     formData: FormData,
   ) => Promise<SavePlantIdentificationState>;
@@ -221,11 +229,16 @@ function CareProfilePreviewCard({
   preview,
   editHref,
   hasExistingWateringBasics,
+  fallbackCareSuggestionAction,
   applyCareSuggestionAction,
 }: {
   preview: SavePlantIdentificationState["careProfilePreview"];
   editHref: string;
   hasExistingWateringBasics: boolean;
+  fallbackCareSuggestionAction: (
+    state: SavePlantIdentificationState,
+    formData: FormData,
+  ) => Promise<SavePlantIdentificationState>;
   applyCareSuggestionAction: (
     state: ApplyCareSuggestionState,
     formData: FormData,
@@ -303,7 +316,108 @@ function CareProfilePreviewCard({
 
   return (
     <div className="mt-4 rounded-[1.25rem] border border-[color:var(--border-soft)] bg-[color:var(--stone)] p-4 text-sm leading-6 text-[color:var(--muted)]">
-      No internal care profile matched yet. You can keep setup manual for now.
+      <p>No internal care profile matched yet. You can keep setup manual for now.</p>
+      <FallbackCareQuestionForm
+        editHref={editHref}
+        hasExistingWateringBasics={hasExistingWateringBasics}
+        fallbackCareSuggestionAction={fallbackCareSuggestionAction}
+        applyCareSuggestionAction={applyCareSuggestionAction}
+      />
+    </div>
+  );
+}
+
+function FallbackCareQuestionForm({
+  editHref,
+  hasExistingWateringBasics,
+  fallbackCareSuggestionAction,
+  applyCareSuggestionAction,
+}: {
+  editHref: string;
+  hasExistingWateringBasics: boolean;
+  fallbackCareSuggestionAction: (
+    state: SavePlantIdentificationState,
+    formData: FormData,
+  ) => Promise<SavePlantIdentificationState>;
+  applyCareSuggestionAction: (
+    state: ApplyCareSuggestionState,
+    formData: FormData,
+  ) => Promise<ApplyCareSuggestionState>;
+}) {
+  const [state, formAction, isPending] = useActionState(
+    fallbackCareSuggestionAction,
+    emptySaveState,
+  );
+
+  return (
+    <div className="mt-4 rounded-[1rem] border border-[color:var(--border-soft)] bg-white/80 p-4">
+      <p className="font-semibold text-[color:var(--foreground)]">
+        Try a conservative fallback instead
+      </p>
+      <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">
+        Choose the closest watering pattern. This will not identify the plant.
+      </p>
+
+      <form action={formAction} className="mt-4 flex flex-col gap-3">
+        <label className="flex flex-col gap-2 text-sm font-semibold text-[color:var(--foreground)]">
+          Closest visible trait
+          <select
+            name="fallbackCareAnswer"
+            defaultValue=""
+            className="min-h-[var(--tap-target)] rounded-[1rem] border border-[color:var(--border)] bg-white px-4 py-3 text-base font-normal outline-none transition focus:border-[color:var(--accent)] focus:ring-2 focus:ring-[color:var(--accent-soft)]"
+          >
+            <option value="" disabled>
+              Choose a fallback
+            </option>
+            <option value="cactus">Cactus or very dry plant</option>
+            <option value="succulent">Thick, fleshy leaves</option>
+            <option value="orchid">Orchid or bark mix</option>
+            <option value="fern">Fern-like, soft fronds</option>
+            <option value="moisture_loving">Seems to prefer staying lightly moist</option>
+            <option value="palm">Palm-like plant</option>
+            <option value="tropical">Leafy tropical plant</option>
+            <option value="unknown">Not sure; start cautiously</option>
+          </select>
+        </label>
+
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <button
+            type="submit"
+            disabled={isPending}
+            className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full bg-[color:var(--accent)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isPending ? "Preparing..." : "Suggest fallback cadence"}
+          </button>
+          <Link
+            href={editHref}
+            className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white px-4 py-2 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)]"
+          >
+            Set up manually
+          </Link>
+        </div>
+      </form>
+
+      {state.message ? (
+        <div
+          className={`mt-4 rounded-[1rem] border px-4 py-3 text-sm leading-6 ${
+            state.status === "error"
+              ? "border-amber-200 bg-amber-50 text-amber-950"
+              : "border-emerald-200 bg-emerald-50 text-emerald-950"
+          }`}
+        >
+          {state.message}
+        </div>
+      ) : null}
+
+      {state.careProfilePreview?.status === "matched" ? (
+        <CareProfilePreviewCard
+          preview={state.careProfilePreview}
+          editHref={editHref}
+          hasExistingWateringBasics={hasExistingWateringBasics}
+          fallbackCareSuggestionAction={fallbackCareSuggestionAction}
+          applyCareSuggestionAction={applyCareSuggestionAction}
+        />
+      ) : null}
     </div>
   );
 }
@@ -313,6 +427,7 @@ function CandidateReviewForm({
   editHref,
   hasExistingWateringBasics,
   saveSuggestionAction,
+  fallbackCareSuggestionAction,
   applyCareSuggestionAction,
 }: CandidateReviewFormProps) {
   const [state, formAction, isPending] = useActionState(
@@ -402,6 +517,7 @@ function CandidateReviewForm({
         preview={state.careProfilePreview}
         editHref={editHref}
         hasExistingWateringBasics={hasExistingWateringBasics}
+        fallbackCareSuggestionAction={fallbackCareSuggestionAction}
         applyCareSuggestionAction={applyCareSuggestionAction}
       />
 
@@ -415,6 +531,7 @@ export function PlantIdentificationPanel({
   hasExistingWateringBasics,
   identifyAction,
   saveSuggestionAction,
+  fallbackCareSuggestionAction,
   applyCareSuggestionAction,
 }: PlantIdentificationPanelProps) {
   const [state, formAction, isPending] = useActionState(
@@ -483,6 +600,7 @@ export function PlantIdentificationPanel({
               editHref={editHref}
               hasExistingWateringBasics={hasExistingWateringBasics}
               saveSuggestionAction={saveSuggestionAction}
+              fallbackCareSuggestionAction={fallbackCareSuggestionAction}
               applyCareSuggestionAction={applyCareSuggestionAction}
             />
           ))}
