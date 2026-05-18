@@ -125,6 +125,7 @@ The app already has:
 - Pl@ntNet-backed identification from an owned plant photo
 - app-owned watering reminders
 - one-way Google Calendar reflection of app-owned reminders
+- app-owned care profile reference tables and ambiguity-safe lookup helpers
 
 ### Existing AI behavior
 
@@ -852,7 +853,7 @@ Stop conditions:
 
 ### Slice 1 — Care Profile Data Foundation
 
-Status: planned.
+Status: completed.
 
 Goal:
 
@@ -894,10 +895,10 @@ Validation:
 
 Manual QA:
 
-- Existing plant profile renders.
-- Existing identification helper still renders.
-- Existing watering dashboard still renders.
-- Seed lookups can be exercised through helper tests or temporary targeted checks.
+- Existing plant profile render remains covered by successful production build.
+- Existing identification helper render remains covered by successful production build.
+- Existing watering dashboard render remains covered by successful production build.
+- Seed lookups were exercised with a targeted smoke check for scientific, synonym, common-name, genus, care-group, ambiguous, and fallback paths.
 
 Stop conditions:
 
@@ -907,7 +908,7 @@ Stop conditions:
 
 ### Slice 2 — Seed Workflow and Coverage Wave 1
 
-Status: planned.
+Status: active.
 
 Goal:
 

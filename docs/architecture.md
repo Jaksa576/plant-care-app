@@ -66,6 +66,7 @@ This document describes implemented technical shape and architectural boundaries
 - User app preference reads and mutations filter by the authenticated user's ID on the server and are backed by RLS policies.
 - Plant room reads and mutations filter by the authenticated user's ID on the server and are backed by RLS policies.
 - Plant room assignment is enforced in the database: a plant can only reference an active room with the same `user_id`.
+- Care profile reference data is app-owned, not user-owned. Authenticated users can read `care_profiles` and `care_profile_aliases`; browser clients do not have insert, update, or delete policies for these tables.
 - RLS must stay enabled on user-owned tables.
 - App queries and database policies should agree on ownership boundaries.
 - Cross-user access checks are required whenever routes, queries, mutations, or schema touch user-owned data.
@@ -119,6 +120,45 @@ Archived plants are soft-hidden from the default collection by filtering `archiv
 `plants.location` remains in place for compatibility. Room migration backfills managed rooms from distinct non-empty legacy location values per user, then assigns matching `plants.room_id` values without clearing or rewriting `plants.location`.
 
 Add/Edit Plant writes nullable `plants.room_id` from a room choice step after server-side ownership verification. The room step lets the user leave a plant Unassigned, choose an existing room, or add a new room without showing all room controls at once. Inline room creation derives `user_id` from the signed-in session and uses the newly created room id for the plant save. `plants.location` is not user-facing in Add/Edit Plant, but existing legacy values are submitted as hidden state so editing does not clear them accidentally. Display and grouping use this precedence during the transition: active managed room name, then non-empty legacy `plants.location`, then `Unassigned`.
+
+### Care Profiles
+
+Internal care profile reference data is implemented in `care_profiles` and `care_profile_aliases`.
+
+`care_profiles` stores app-owned watering starting-point metadata:
+
+- `id`
+- `profile_key`
+- `profile_level`, constrained to `species`, `genus`, `care_group`, or `fallback`
+- `display_name`
+- optional `accepted_scientific_name`
+- `accepted_common_name`
+- optional `taxon_rank`
+- default and optional min/max watering check cadence fields
+- controlled `dryness_preference`
+- concise `watering_guidance`
+- optional light, soil/pot/drainage, humidity, seasonal, beginner, and toxicity notes
+- `match_confidence`, constrained to `high`, `medium`, or `low`
+- `review_status`, constrained to `draft`, `reviewed`, or `needs_review`
+- optional source/review metadata
+- `created_at`
+- `updated_at`
+
+`care_profile_aliases` stores auditable names used for matching:
+
+- `id`
+- `care_profile_id`
+- `alias`
+- `normalized_alias`
+- `alias_type`, constrained to `scientific`, `synonym`, `common`, `normalized_common`, `genus`, or `group`
+- `priority`
+- `created_at`
+
+Aliases are unique per profile, normalized alias, and alias type. The same normalized alias may intentionally appear on multiple profiles so the app can return an ambiguous match instead of choosing an unsafe care profile.
+
+Care profile helpers live in `src/lib/care-profiles`. They normalize names, derive genus fallback keys, load profile records with aliases, and match accepted identity in a conservative order: exact scientific name, scientific alias, synonym, common-name alias, genus profile, and explicit care-group alias. Ambiguous aliases return an `ambiguous` result and no plant fields are changed.
+
+Slice 1 adds only foundation data and helpers. It does not change `plants`, expose care suggestions in the UI, apply watering fields, create reminders, or call a live care provider in the setup path.
 
 ### Rooms
 

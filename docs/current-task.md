@@ -11,9 +11,8 @@
 - Skippable first-run onboarding, user-owned rooms, Settings room management, room-aware Add/Edit Plant, Settings-managed Google Calendar integration, and photo-first Add Plant are implemented.
 - Pre-save Pl@ntNet identification from the selected Add Plant photo is implemented as transient names-only suggestions with explicit review.
 - The Onboarding, Rooms, Settings, and Photo-First Add Plant Foundation campaign is completed and merged to `main`.
-- The UI Redesign UX Overhaul campaign is completed, merged to `main`, and archived.
-- The public landing page redesign, concise login-page UX refresh, and installable app icon support are merged to `main`.
-- AI Care Setup is now the active autonomous campaign.
+- AI Care Setup Slice 0 is complete: campaign docs are normalized and hot-path docs identify AI Care Setup as active.
+- AI Care Setup Slice 1 is complete: `care_profiles` and `care_profile_aliases` are added as app-owned reference tables with minimal seed data and conservative lookup helpers.
 
 ## Active Campaign
 
@@ -37,62 +36,60 @@ Product-owner selected implementation sequence:
 
 ## Active Slice
 
-Slice 1: Care Profile Data Foundation.
+Slice 2: Seed Workflow and Coverage Wave 1.
 
 Status: ready to start.
 
-Slice 0 status: completed in docs only.
+Slice 1 status: completed.
 
 Completed work:
 
-- Created `docs/campaigns/ai-care-setup.md` as the normalized campaign source of truth from the enhanced AI Care Setup campaign draft.
-- Confirmed `main` includes completed onboarding, rooms, Settings, and photo-first Add Plant foundation work.
-- Aligned roadmap and current task docs so AI Care Setup is the active campaign instead of stale onboarding campaign work.
-- Preserved the campaign thesis, profile levels, matching behavior, coverage waves 1-3, validation expectations, stop conditions, and non-goals.
-- Kept Slice 0 docs-only with no app code changes.
+- Added additive migration `20260518_slice_ai_care_setup_1_care_profiles.sql`.
+- Added app-owned `care_profiles` reference table with profile levels `species`, `genus`, `care_group`, and `fallback`.
+- Added app-owned `care_profile_aliases` reference table with scientific, synonym, common, normalized common, genus, and group alias types.
+- Enabled RLS on care profile tables with authenticated read policies only; no browser insert/update/delete policies were added.
+- Seeded a minimal foundation set for snake plant, pothos, Chinese money plant, Philodendron genus, succulent-like care group, moderate tropical care group, and unknown conservative fallback.
+- Added `src/lib/care-profiles` helpers for normalization, genus extraction, DB record loading, in-repo seed fixtures, and ambiguity-safe matching.
+- Preserved `plants` without schema changes and did not expose care suggestions in the UI.
 
-## Slice 1 Scope
+## Slice 2 Scope
 
 Goal:
 
-Add the internal care profile reference data model and lookup helpers without changing user-facing flows.
+Create repeatable seed tooling and add the first meaningful coverage wave.
 
 Scope:
 
-- Add `care_profiles`.
-- Add `care_profile_aliases`.
-- Support profile levels: `species`, `genus`, `care_group`, and `fallback`.
-- Add normalization and lookup helpers.
-- Add ambiguity-safe matching behavior.
-- Add minimal reference seed data only.
-- Do not change `plants`.
-- Do not change Pl@ntNet UI.
-- Do not expose care suggestions yet.
+- Add structured seed source or equivalent repeatable seed workflow.
+- Add seed validation for required profile fields.
+- Add duplicate alias detection.
+- Add Coverage Wave 1 profiles, genus profiles, and care groups.
+- Include source/review metadata.
+- Keep care copy concise and beginner-friendly.
+- Do not add admin UI.
 
 Non-goals:
 
-- No AI-generated care data shown directly to users.
-- No watering fields applied from care profiles.
+- No user-facing care suggestion UI yet.
+- No automatic care application.
 - No reminders created or changed.
-- No Add Plant flow integration yet.
-- No diagnosis, pest, disease, toxicity decision support, or treatment guidance.
-- No encyclopedia-style plant browsing.
+- No diagnosis, pest, disease, treatment, or encyclopedia browsing.
 
 ## Validation Results
 
-Slice 0:
+Slice 1:
 
-- Targeted doc consistency searches: passed for hot-path active campaign status.
-- Targeted stale active campaign search: no hot-path docs list the completed onboarding campaign as active.
-- Targeted AI Care Setup source-of-truth search: normalized campaign doc exists at `docs/campaigns/ai-care-setup.md`.
-- `npm run build`: skipped because Slice 0 changed docs only.
-- `npm run lint`: skipped because Slice 0 changed docs only.
-- `npm run typecheck`: skipped because Slice 0 changed docs only.
-- `npm test`: skipped because Slice 0 changed docs only.
+- `npm run lint`: passed.
+- `npm run build`: passed.
+- `npm run typecheck`: not run; no script exists.
+- `npm test`: not run; no script exists.
+- Targeted lookup smoke check: passed for scientific, synonym, common-name, genus, care-group, ambiguous, and fallback paths.
+- Migration/RLS review: additive tables only; no `plants` changes; RLS enabled; authenticated users can read reference data; browser clients have no write policies.
+- Seed review: minimal draft starter data only; intended as foundation data before Slice 2 coverage validation.
 
 ## Next Recommended Action
 
-Start Slice 1 on a dedicated branch/worktree from updated `main`: add the additive care profile reference tables, normalization/lookup helpers, ambiguity-safe matching behavior, minimal seed data, and architecture/current-task/campaign doc updates.
+Start Slice 2 on a dedicated branch/worktree from this Slice 1 branch: add repeatable seed fixtures/workflow, seed validation, duplicate alias detection, and Coverage Wave 1 profiles/aliases.
 
 ## Validation Expectations
 

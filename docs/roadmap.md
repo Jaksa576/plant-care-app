@@ -50,14 +50,15 @@ This document tracks product sequencing and slice status. Stable product directi
 - Onboarding room/photo integration polish with optional room collection, manual/photo-first Add Plant routing, Settings setup checklist, and calm empty-state entry points.
 - Pre-merge campaign QA patch with deterministic room migration ordering, required plant nicknames, mobile-friendlier photo limit/body size, immediate photo preview, one-photo identify/save persistence, clearer Add Plant review copy, and Today-centered setup checklist.
 - Onboarding, Rooms, Settings, and Photo-First Add Plant Foundation campaign merged to `main`.
+- AI Care Setup Slice 0 campaign source-of-truth alignment.
+- AI Care Setup Slice 1 care profile data foundation with app-owned `care_profiles`, `care_profile_aliases`, minimal seed data, and ambiguity-safe lookup helpers.
 
 ### Active
 
-- AI Care Setup campaign, Slice 0 complete and Slice 1 next.
+- AI Care Setup campaign, Slice 1 complete and Slice 2 next.
 
 ### Planned
 
-- AI Care Setup Slice 1: Care Profile Data Foundation.
 - AI Care Setup Slice 2: Seed Workflow and Coverage Wave 1.
 - AI Care Setup Slice 3: Identification Confidence and Grouped Recommendations.
 - AI Care Setup Slice 4: Care Profile Match After Accepted Identity.
@@ -241,7 +242,7 @@ Automation can reduce friction after the app has reliable user behavior and care
 
 ## Recommended Implementation Order
 
-1. Continue AI Care Setup with Slice 1: Care Profile Data Foundation.
+1. Continue AI Care Setup with Slice 2: Seed Workflow and Coverage Wave 1.
 2. Expand validated coverage through Waves 1, 2, and 3 inside the same campaign.
 3. Later: health support, richer knowledge, smarter automation, and Outlook sync.
 
