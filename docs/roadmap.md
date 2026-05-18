@@ -53,11 +53,20 @@ This document tracks product sequencing and slice status. Stable product directi
 
 ### Active
 
-- Manual production verification of the merged `main` experience.
+- AI Care Setup campaign, Slice 0 complete and Slice 1 next.
 
 ### Planned
 
-- Select the next campaign after production verification.
+- AI Care Setup Slice 1: Care Profile Data Foundation.
+- AI Care Setup Slice 2: Seed Workflow and Coverage Wave 1.
+- AI Care Setup Slice 3: Identification Confidence and Grouped Recommendations.
+- AI Care Setup Slice 4: Care Profile Match After Accepted Identity.
+- AI Care Setup Slice 5: Reviewable Watering Starting Point UI.
+- AI Care Setup Slice 6: Fallback Watering Setup Questions.
+- AI Care Setup Slice 7: Optional Reminder Handoff.
+- AI Care Setup Slice 8: Add Plant / Photo-First Integration.
+- AI Care Setup Slice 9: Coverage Wave 2 Expansion.
+- AI Care Setup Slice 10: Coverage Wave 3 Broad Coverage and QA Hardening.
 
 ### Deferred
 
@@ -70,7 +79,7 @@ This document tracks product sequencing and slice status. Stable product directi
 
 Merged campaign:
 
-- [Onboarding, Rooms, Settings, and Photo-First Add Plant](campaigns/onboarding-rooms-settings-photo-first-ai.md)
+- [Onboarding, Rooms, Settings, and Photo-First Add Plant](campaigns/archived/onboarding-rooms-settings-photo-first-ai.md)
 
 Completed campaigns:
 
@@ -78,9 +87,9 @@ Completed campaigns:
 - [Plant Profile + Watering Foundation Campaign](campaigns/archived/plant-profile-watering-foundation.md)
 - [Photo Identification + Reminder Sync Campaign](campaigns/archived/photo-identification-reminder-sync.md)
 
-Draft / candidate campaigns:
+Active campaign:
 
-- AI Care Setup remains a later candidate and must not overlap this campaign's identity-only pre-save Pl@ntNet scope.
+- [AI Care Setup](campaigns/ai-care-setup.md)
 
 ## Phase 0: Foundation
 
@@ -232,8 +241,8 @@ Automation can reduce friction after the app has reliable user behavior and care
 
 ## Recommended Implementation Order
 
-1. Complete product-owner production-readiness review of the merged `main` experience.
-2. Decide the next campaign before starting new feature implementation.
+1. Continue AI Care Setup with Slice 1: Care Profile Data Foundation.
+2. Expand validated coverage through Waves 1, 2, and 3 inside the same campaign.
 3. Later: health support, richer knowledge, smarter automation, and Outlook sync.
 
 This order keeps future work grounded in the implemented watering-first loop instead of adding unapproved scope.

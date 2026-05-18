@@ -1,6 +1,6 @@
 # AI Care Setup Campaign
 
-Status: **planned**.
+Status: **active**.
 
 ## Recommendation
 
@@ -101,11 +101,7 @@ docs/current-task.md
 docs/campaigns/ai-care-setup.md
 ```
 
-If this campaign doc is first created by replacing the package-style file, Codex should also inspect:
-
-```txt
-docs/campaigns/ai-care-setup-campaign-docs.md
-```
+This normalized campaign doc replaces earlier draft/package-style AI Care Setup planning references. Treat this file as the active campaign source of truth.
 
 ### Current implemented baseline
 
@@ -814,7 +810,7 @@ Wave 3 should not try to complete global plant taxonomy. It should make the app 
 
 ### Slice 0 — Campaign Doc Rewrite and Source-of-Truth Alignment
 
-Status: planned.
+Status: completed.
 
 Goal:
 
@@ -822,9 +818,9 @@ Create this campaign doc as the durable source of truth and align hot-path docs 
 
 Scope:
 
-- Replace the package-style `ai-care-setup-campaign-docs.md` with a clean `docs/campaigns/ai-care-setup.md`, or convert the existing file if preferred.
+- Create the clean `docs/campaigns/ai-care-setup.md` campaign source of truth from the enhanced campaign draft.
 - Update `docs/current-task.md` so it no longer points to stale active work.
-- Update `docs/roadmap.md` to list this campaign as planned or active, depending on product-owner approval.
+- Update `docs/roadmap.md` to list this campaign as active.
 - Document all scope, non-goals, profile levels, matching behavior, coverage waves, validation, and stop conditions.
 - Do not change app code.
 
@@ -841,7 +837,7 @@ Validation:
 
 - Docs-only consistency review.
 - Targeted search for stale active campaign references.
-- Targeted search for stale `ai-care-setup-campaign-docs.md` package references.
+- Targeted search for stale AI Care Setup package-style references in hot-path docs.
 - Report if build was skipped because no code changed.
 
 Manual QA:
