@@ -1242,7 +1242,7 @@ Stop conditions:
 
 ### Slice 8 — Add Plant / Photo-First Integration
 
-Status: planned.
+Status: completed.
 
 Goal:
 
@@ -1276,14 +1276,14 @@ Validation:
 
 Manual QA:
 
-- Manual Add Plant.
-- Photo selected, no AI.
-- Photo selected, high-confidence AI.
-- Photo selected, low-confidence AI.
-- AI provider error.
-- Care suggestion applied.
-- Care suggestion skipped.
-- Photo upload failure handling.
+- Manual Add Plant: preserved through optional photo/name flow; manual browser QA still needed.
+- Photo selected, no AI: plant creation remains available; manual browser QA still needed.
+- Photo selected, high-confidence AI: reviewed names can trigger post-save care review; manual browser QA still needed.
+- Photo selected, low-confidence AI: existing edit/skip paths preserved; manual browser QA still needed.
+- AI provider error: plant creation remains available; manual browser QA still needed.
+- Care suggestion applied: uses existing explicit apply action after save; manual browser QA still needed.
+- Care suggestion skipped: existing skip/manual paths remain available; manual browser QA still needed.
+- Photo upload failure handling: plant save still redirects to profile with failure notice; manual browser QA still needed.
 
 Stop conditions:
 

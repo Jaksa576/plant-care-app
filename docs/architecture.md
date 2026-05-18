@@ -278,6 +278,8 @@ The bucket is private. Server-rendered app surfaces create short-lived signed UR
 
 Photo-first Add Plant does not use public storage or staged photo records. The user may choose a photo before save and sees an immediate browser-local preview. The same selected file can be sent to Pl@ntNet for optional pre-save identification and is reattached to the final plant save, avoiding a second upload. The server first creates an owned plant record, then uploads the optional photo to the existing owner-scoped `{user_id}/{plant_id}/...` private Storage path and stores it as the primary photo. If the optional photo upload fails, the plant remains saved and the user can add the photo from the plant profile. Abandoning Add Plant before save leaves no staged object to clean up.
 
+When a new plant is saved with reviewed common or scientific names, Add Plant redirects to the owned plant profile with an optional care review state. The profile attempts the same internal care profile lookup from the saved names and shows the reviewable care suggestion UI when a match, fallback, or no-match state is available. This post-save care step is optional: plant creation does not require AI, care suggestions, reminders, or successful photo upload.
+
 AI-assisted identification uses Pl@ntNet for optional plant name suggestions. Required server-only environment:
 
 - `PLANTNET_API_KEY`

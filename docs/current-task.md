@@ -13,6 +13,7 @@
 - AI Care Setup Slice 5 is complete: matched care profiles can be reviewed, applied, edited first, or skipped without silent overwrite.
 - AI Care Setup Slice 6 is complete: no-match care states can offer lightweight fallback watering questions mapped to reviewed care-group or conservative fallback profiles.
 - AI Care Setup Slice 7 is complete: after applying care basics, users can optionally jump to setup or review the existing app-owned watering reminder.
+- AI Care Setup Slice 8 is complete: Add Plant can carry reviewed names into optional post-save care profile review without requiring AI, care suggestions, reminders, or successful photo upload.
 - Repo workflow helper optimization is complete as an infrastructure/docs patch and available on this branch.
 
 ## Active Campaign
@@ -23,11 +24,11 @@ Campaign source of truth: [AI Care Setup](campaigns/ai-care-setup.md).
 
 ## Active Slice
 
-Slice 8: Add Plant / Photo-First Integration.
+Slice 9: Coverage Wave 2 Expansion.
 
-Status: ready to start after Slice 7 branch review.
+Status: ready to start after Slice 8 branch review.
 
-Slice 7 status: completed.
+Slice 8 status: completed.
 
 Completed work:
 
@@ -46,27 +47,29 @@ Completed work:
 - Fallback suggestions use the same reviewable apply/edit/skip care suggestion UI and do not identify the plant.
 - Applying care basics now offers an optional link to set up or review the existing watering reminder panel.
 - Reminder handoff does not auto-create reminders and does not change Google Calendar source-of-truth behavior.
+- Add Plant redirects new plants with reviewed common or scientific names into optional post-save care profile review.
+- Manual Add Plant, photo-optional setup, failed AI, and failed photo upload remain non-blocking.
 - No reminders are created.
 
-## Slice 8 Scope
+## Slice 9 Scope
 
 Goal:
 
-Integrate grouped identification and care suggestion flow into photo-first Add Plant.
+Expand care profile coverage through Coverage Wave 2.
 
 Scope:
 
-- Integrate grouped identification into Add Plant photo flow.
-- Let users accept or edit identity before save.
-- After plant save, match care profile and show reviewable care suggestion.
-- Preserve manual Add Plant and photo-optional flow.
-- Ensure failed AI or failed photo upload does not block plant creation.
+- Expand to roughly 75-100 total practical profiles/aliases.
+- Add common retail names, messy aliases, and more genus profiles.
+- Improve ambiguity handling from Wave 1 QA.
+- Keep care copy concise and beginner-friendly.
 
 Non-goals:
 
-- No required AI, photo, care suggestion, reminder, or calendar setup.
-- No automatic care application.
-- No direct calendar event creation outside existing reminder sync.
+- No broad encyclopedia browsing.
+- No live third-party care API dependency in the user-critical setup path.
+- No LLM-generated production care data shown directly to users.
+- No schema or UI expansion beyond coverage data/tooling needed for Wave 2.
 - No diagnosis, pest, disease, treatment, or encyclopedia browsing.
 
 ## Validation Results
@@ -122,9 +125,20 @@ Slice 7:
 - `npm test`: not run; no script exists.
 - Manual browser QA: still needed for no existing reminder, existing after-watering reminder, existing fixed schedule reminder, Google Calendar connected/disconnected, decline handoff, and mobile layout.
 
+Slice 8:
+
+- `npm run validate:care-profiles`: passed with the existing intentional `money plant` ambiguity warning.
+- `npm run typecheck`: passed.
+- `npm run lint`: passed.
+- `npm run build`: passed.
+- `npm run check`: passed.
+- `.\scripts\validate.ps1`: passed.
+- `npm test`: not run; no script exists.
+- Manual browser QA: still needed for manual Add Plant, photo selected/no AI, high-confidence AI, low-confidence AI, provider error, care apply/skip, photo upload failure, and mobile layout.
+
 ## Next Recommended Action
 
-Validate, commit, push, and verify `codex/ai-care-setup-s7`, then start Slice 8 on a dedicated branch/worktree from this Slice 7 branch.
+Validate, commit, push, and verify `codex/ai-care-setup-s8`, then start Slice 9 on a dedicated branch/worktree from this Slice 8 branch.
 
 ## Validation Expectations
 

@@ -539,6 +539,48 @@ function CandidateReviewForm({
   );
 }
 
+export function PlantCareSuggestionPanel({
+  preview,
+  editHref,
+  hasExistingWateringBasics,
+  fallbackCareSuggestionAction,
+  applyCareSuggestionAction,
+}: {
+  preview: SavePlantIdentificationState["careProfilePreview"];
+  editHref: string;
+  hasExistingWateringBasics: boolean;
+  fallbackCareSuggestionAction: (
+    state: SavePlantIdentificationState,
+    formData: FormData,
+  ) => Promise<SavePlantIdentificationState>;
+  applyCareSuggestionAction: (
+    state: ApplyCareSuggestionState,
+    formData: FormData,
+  ) => Promise<ApplyCareSuggestionState>;
+}) {
+  if (!preview) {
+    return null;
+  }
+
+  return (
+    <section className="rounded-[1.5rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] p-5 sm:p-6">
+      <StatusPill>Optional care setup</StatusPill>
+      <h3 className="mt-4 text-xl font-semibold">Review watering starting point</h3>
+      <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
+        This suggestion comes from reviewed internal care profiles. Apply it only if it looks useful
+        for your home, or keep setup manual.
+      </p>
+      <CareProfilePreviewCard
+        preview={preview}
+        editHref={editHref}
+        hasExistingWateringBasics={hasExistingWateringBasics}
+        fallbackCareSuggestionAction={fallbackCareSuggestionAction}
+        applyCareSuggestionAction={applyCareSuggestionAction}
+      />
+    </section>
+  );
+}
+
 export function PlantIdentificationPanel({
   hasPhoto,
   editHref,

@@ -58,14 +58,14 @@ This document tracks product sequencing and slice status. Stable product directi
 - AI Care Setup Slice 5 reviewable watering starting point UI with explicit apply/edit/skip actions, overwrite confirmation for existing watering basics, and updates limited to editable plant watering fields.
 - AI Care Setup Slice 6 fallback watering setup questions for no-match identity cases, mapped to reviewed care-group or conservative fallback profiles.
 - AI Care Setup Slice 7 optional reminder handoff after applying care basics, using the existing app-owned reminder panel without auto-creating reminders.
+- AI Care Setup Slice 8 Add Plant/photo-first integration that carries reviewed names into post-save care profile review without making AI, care suggestions, reminders, or photo upload required.
 
 ### Active
 
-- AI Care Setup campaign, Slice 7 complete and Slice 8 next.
+- AI Care Setup campaign, Slice 8 complete and Slice 9 next.
 
 ### Planned
 
-- AI Care Setup Slice 8: Add Plant / Photo-First Integration.
 - AI Care Setup Slice 9: Coverage Wave 2 Expansion.
 - AI Care Setup Slice 10: Coverage Wave 3 Broad Coverage and QA Hardening.
 

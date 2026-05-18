@@ -136,7 +136,7 @@ async function getSignedInPlantContext() {
   };
 }
 
-async function getCareProfilePreview(
+export async function getCareProfilePreview(
   supabase: SupabaseClient,
   input: {
     scientificName?: string;
@@ -343,12 +343,20 @@ export async function createPlantAction(
 
   if (initialPhoto) {
     const photoSaved = await saveInitialPlantPhoto(supabase, user.id, result.data.id, initialPhoto);
+    const careReviewParam =
+      result.data.common_name || result.data.scientific_name ? "&care=review" : "";
 
     revalidatePath(`/app/plants/${result.data.id}`);
-    redirect(`/app/plants/${result.data.id}?created=1&photo=${photoSaved ? "saved" : "failed"}`);
+    redirect(
+      `/app/plants/${result.data.id}?created=1&photo=${
+        photoSaved ? "saved" : "failed"
+      }${careReviewParam}`,
+    );
   }
 
-  redirect(`/app/plants/${result.data.id}?created=1`);
+  const careReviewParam = result.data.common_name || result.data.scientific_name ? "&care=review" : "";
+
+  redirect(`/app/plants/${result.data.id}?created=1${careReviewParam}`);
 }
 
 export async function updatePlantAction(
