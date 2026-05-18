@@ -17,6 +17,7 @@
 - AI Care Setup Slice 9 is complete: Coverage Wave 2 expands validated care profile coverage to 41 profiles and 101 aliases.
 - AI Care Setup Slice 10 is complete: Coverage Wave 3 expands validated care profile coverage to 56 profiles and 146 aliases and finalizes campaign docs for manual QA.
 - Repo workflow helper optimization is complete as an infrastructure/docs patch and available on this branch.
+- AI Care Setup pre-merge QA patch is in progress to improve identification diagnostics, mobile photo library selection, care suggestion discoverability, and plant-profile calendar status placement.
 
 ## Active Campaign
 
@@ -26,9 +27,9 @@ Campaign source of truth: [AI Care Setup](campaigns/ai-care-setup.md).
 
 ## Active Slice
 
-AI Care Setup campaign manual QA and merge review.
+AI Care Setup pre-merge QA patch before merge.
 
-Status: implementation complete; manual QA pending.
+Status: patch implemented; validation passed; manual QA pending.
 
 Slice 10 status: completed.
 
@@ -56,17 +57,18 @@ Completed work:
 - Coverage Wave 3 adds broad retail coverage, additional genus fallbacks, common misidentification aliases, and `elephant ear` as an intentional ambiguous alias.
 - Generated seed SQL is current with fixtures.
 - No reminders are created.
+- Pre-merge QA patch narrows provider/config/photo identification errors, adds safe server diagnostics, removes forced camera capture from plant photo inputs, keeps care suggestions visible for named plants without watering basics, falls back to validated care fixtures when DB profile tables are empty, and moves Google Calendar status into the watering reminder panel.
 
 ## Remaining Scope
 
 Goal:
 
-Manually QA the full AI Care Setup branch stack and merge reviewed slices in order.
+Validate the pre-merge QA patch, then manually QA the full AI Care Setup branch stack and merge reviewed slices in order.
 
 Scope:
 
 - QA existing plant/profile identification, Add Plant integration, care matching, fallback questions, care apply/skip, overwrite protection, reminder handoff, dashboard date behavior, route protection, and mobile/desktop layouts.
-- Review and merge branches from `codex/workflow-helpers` and AI Care Setup slices in order.
+- Review and merge the pushed pre-merge QA patch branch with the completed AI Care Setup branch stack.
 
 Non-goals:
 
@@ -164,9 +166,19 @@ Slice 10:
 - `npm test`: not run; no script exists.
 - Manual browser QA: still needed for the full campaign matrix.
 
+Pre-merge QA patch:
+
+- `npm run validate:care-profiles`: passed with intentional `money plant`, `prayer plant`, and `elephant ear` ambiguity warnings.
+- `npm run typecheck`: passed.
+- `npm run lint`: passed.
+- `npm run build`: passed.
+- `npm run check`: passed.
+- `.\scripts\validate.ps1`: passed.
+- Manual browser QA: still needed for Add Plant no-photo manual flow, Add Plant library/camera photo, identification success/failure, save after identification failure, plant profile identification, exact/no-match care suggestions, apply/skip, overwrite confirmation, optional reminder handoff, compact calendar connected/disconnected states, and mobile viewport.
+
 ## Next Recommended Action
 
-Validate, commit, push, and verify `codex/ai-care-setup-s10`, then run manual campaign QA and merge reviewed branches in order.
+Run manual campaign QA against the pushed `codex/ai-care-setup-premerge-qa` branch, then merge the reviewed AI Care Setup branch stack.
 
 ## Validation Expectations
 

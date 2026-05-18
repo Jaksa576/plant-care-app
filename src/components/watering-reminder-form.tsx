@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useState } from "react";
 
 import type { WateringReminderState } from "@/app/app/plants/actions";
@@ -18,6 +19,7 @@ type WateringReminderPanelProps = {
   dateInputValue: string;
   mode: "after_watering" | "fixed_schedule";
   canUseReminderTiming: boolean;
+  googleCalendarConnected: boolean;
   saveAction: (state: WateringReminderState, formData: FormData) => Promise<WateringReminderState>;
   disableAction: (
     state: WateringReminderState,
@@ -69,6 +71,7 @@ export function WateringReminderPanel({
   dateInputValue,
   mode,
   canUseReminderTiming,
+  googleCalendarConnected,
   saveAction,
   disableAction,
   snoozeAction,
@@ -105,6 +108,20 @@ export function WateringReminderPanel({
         <p className="text-sm leading-7 text-[color:var(--muted)]">
           This reminder lives in Plant Care. It does not send push, email, or SMS notifications.
         </p>
+        <div className="mt-1 flex flex-col gap-2 rounded-[1rem] border border-[color:var(--border-soft)] bg-white/75 px-4 py-3 text-sm leading-6 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-semibold text-[color:var(--foreground)]">
+              Google Calendar: {googleCalendarConnected ? "connected" : "not connected"}
+            </p>
+            <p className="text-[color:var(--muted)]">Managed in Settings.</p>
+          </div>
+          <Link
+            href="/app/settings"
+            className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white px-4 py-2 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)]"
+          >
+            Manage in Settings
+          </Link>
+        </div>
       </div>
 
       <div className="mt-5 grid gap-4">

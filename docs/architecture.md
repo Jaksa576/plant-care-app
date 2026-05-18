@@ -35,7 +35,7 @@ This document describes implemented technical shape and architectural boundaries
 - The signed-in Home route presents the redesigned Today surface with Needs water, By room, Recent care, and an optional state-derived Getting Started checklist when setup is incomplete.
 - Dashboard urgency uses enabled app-owned reminder dates first, then falls back to watering interval calculations.
 - Plant profiles show watering history from watering events.
-- Plant profiles present a photo/identity hero, primary Water now action, secondary Snooze/Reminder actions, care basics rows, watering history, photo/identification, app reminder, lightweight Google Calendar status when relevant, edit, and archive surfaces.
+- Plant profiles present a photo/identity hero, primary Water now action, secondary Snooze/Reminder actions, care basics rows, optional care suggestion review, watering history, photo/identification, app reminder with compact Google Calendar status, edit, and archive surfaces.
 - Plant profiles support one optional primary photo per owned plant.
 - Dashboard cards show a small plant thumbnail or calm fallback.
 - Plant profiles include an optional Pl@ntNet-backed identification helper when a primary photo exists.
@@ -158,7 +158,7 @@ Aliases are unique per profile, normalized alias, and alias type. The same norma
 
 Care profile helpers live in `src/lib/care-profiles`. They normalize names, derive genus fallback keys, load profile records with aliases, and match accepted identity in a conservative order: exact scientific name, scientific alias, synonym, common-name alias, genus profile, and explicit care-group alias. Ambiguous aliases return an `ambiguous` result and no plant fields are changed.
 
-After a user saves a reviewed identification suggestion from the plant profile, the server attempts a care profile lookup using the saved scientific and common names. The plant profile identification panel can show matched, ambiguous, or no-match care states. Matched care suggestions show the profile name, check cadence, optional range, dryness preference, watering guidance, and a home-conditions caveat. Users can explicitly use the suggested care basics, edit first, or skip for now.
+After a user saves a reviewed identification suggestion from the plant profile, the server attempts a care profile lookup using the saved scientific and common names. The plant profile can also show the same optional care suggestion review for named plants that do not yet have watering basics, even outside the immediate Add Plant review redirect. The plant profile identification panel can show matched, ambiguous, or no-match care states. Matched care suggestions show the profile name, check cadence, optional range, dryness preference, watering guidance, and a home-conditions caveat. Users can explicitly use the suggested care basics, edit first, or skip for now. If the app-owned care profile tables are empty or unavailable, the server falls back to the validated in-app care profile fixtures instead of silently disabling suggestions.
 
 Applying a care suggestion updates only `plants.watering_interval_days` and `plants.watering_guidance`. Existing user-entered watering basics are protected by a required confirmation before replacement. Applying care basics does not create reminders, calendar events, or new plant truth outside the editable plant fields.
 
@@ -266,7 +266,7 @@ The app creates or updates one upcoming all-day Google Calendar event per active
 
 If Google sync fails, the Plant Care reminder remains saved and authoritative. Disconnecting Google preserves app reminders, stops future sync, and attempts to delete known app-managed Google Calendar events. If provider cleanup fails, the app still disconnects and reports a recoverable cleanup warning.
 
-Plant detail keeps plant-level reminder editing and only shows lightweight calendar status when relevant: reminder on/off, whether an event has been mirrored, last sync/status metadata where available, and a link to manage the integration in Settings. Plant detail does not own Google Calendar connect/disconnect setup.
+Plant detail keeps plant-level reminder editing and shows compact Google Calendar connection status inside the watering reminder panel: `Google Calendar: connected` or `Google Calendar: not connected`, `Managed in Settings`, and a link to manage the integration in Settings. Detailed Google Calendar connection and sync management remains in Settings; plant detail does not own Google Calendar connect/disconnect setup.
 
 ### Photos And AI
 
@@ -276,7 +276,7 @@ Photo object paths use `{user_id}/{plant_id}/primary-{uuid}.{extension}`. Storag
 
 The bucket is private. Server-rendered app surfaces create short-lived signed URLs for display on plant profiles and dashboard cards. Missing or unavailable photos fall back to calm local UI; photos are optional and user-owned.
 
-Photo-first Add Plant does not use public storage or staged photo records. The user may choose a photo before save and sees an immediate browser-local preview. The same selected file can be sent to Pl@ntNet for optional pre-save identification and is reattached to the final plant save, avoiding a second upload. The server first creates an owned plant record, then uploads the optional photo to the existing owner-scoped `{user_id}/{plant_id}/...` private Storage path and stores it as the primary photo. If the optional photo upload fails, the plant remains saved and the user can add the photo from the plant profile. Abandoning Add Plant before save leaves no staged object to clean up.
+Photo-first Add Plant does not use public storage or staged photo records. The user may choose a library photo or take a new photo where the OS offers it before save and sees an immediate browser-local preview. The same selected file can be sent to Pl@ntNet for optional pre-save identification and is reattached to the final plant save, avoiding a second upload. The server first creates an owned plant record, then uploads the optional photo to the existing owner-scoped `{user_id}/{plant_id}/...` private Storage path and stores it as the primary photo. If the optional photo upload fails, the plant remains saved and the user can add the photo from the plant profile. Abandoning Add Plant before save leaves no staged object to clean up.
 
 When a new plant is saved with reviewed common or scientific names, Add Plant redirects to the owned plant profile with an optional care review state. The profile attempts the same internal care profile lookup from the saved names and shows the reviewable care suggestion UI when a match, fallback, or no-match state is available. This post-save care step is optional: plant creation does not require AI, care suggestions, reminders, or successful photo upload.
 
@@ -285,9 +285,9 @@ AI-assisted identification uses Pl@ntNet for optional plant name suggestions. Re
 - `PLANTNET_API_KEY`
 - optional `PLANTNET_PROJECT`, defaulting to `all`
 
-The provider boundary lives in `src/lib/plant-identification/plantnet.ts`. Server actions verify plant ownership, download the owned private photo bytes from Supabase Storage, and send those bytes to `POST /v2/identify/{project}` as multipart form data with `images` and `organs=auto`. The app does not expose the API key to browser code and does not send Pl@ntNet public or signed Supabase URLs.
+The provider boundary lives in `src/lib/plant-identification/plantnet.ts`. Server actions verify plant ownership, download the owned private photo bytes from Supabase Storage, and send those bytes to `POST /v2/identify/{project}` as multipart form data with `images` and `organs=auto`. The app does not expose the API key to browser code and does not send Pl@ntNet public or signed Supabase URLs. Identification failures return safe, more specific messages for missing config, invalid/empty images, storage download failures, provider response failures, and provider request failures where possible. Server-side diagnostics log failure category, flow, status, file type/size, or storage/provider error text without logging provider secrets or raw image bytes.
 
-Add Plant also supports optional pre-save Pl@ntNet identification from the selected initial photo. That flow verifies a signed-in user, validates the submitted image, sends the transient file bytes to Pl@ntNet server-side, and returns only normalized candidate names to the client. It does not upload a staged object, create a draft plant, persist raw provider responses, or expose provider credentials. A user must choose a suggestion before common/scientific name fields are filled, and those fields remain editable before final plant save.
+Add Plant also supports optional pre-save Pl@ntNet identification from the selected initial photo. That flow verifies a signed-in user, validates the submitted image, sends the transient file bytes to Pl@ntNet server-side, and returns only normalized candidate names to the client. It does not upload a staged object, create a draft plant, persist raw provider responses, or expose provider credentials. A user must choose a suggestion before common/scientific name fields are filled, and those fields remain editable before final plant save. Saving reviewed names is the action that can trigger optional internal care profile matching after save.
 
 Pl@ntNet responses are normalized into transient candidates with:
 

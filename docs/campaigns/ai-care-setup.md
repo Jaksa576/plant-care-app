@@ -1,6 +1,14 @@
 # AI Care Setup Campaign
 
-Status: **implementation complete; manual QA and merge review pending**.
+Status: **implementation complete; pre-merge QA patch validated; manual QA and merge review pending**.
+
+Pre-merge QA patch note:
+
+- Identification failures now return safer, more specific user messages where possible and emit server-side diagnostics for missing config, invalid image, storage download, provider response, and provider request failures without logging secrets or raw image bytes.
+- Add Plant and plant-profile photo inputs allow mobile users to choose an existing library photo as well as take a new photo where the OS offers it.
+- Care suggestion review is visible for named plants without saved watering basics, not only immediately after Add Plant redirects, and validated in-app fixtures are used if the app-owned care profile tables are empty.
+- Plant-profile Google Calendar status is consolidated into the watering reminder panel as compact connected/not-connected copy with Settings management.
+- Reminders remain optional, care suggestions remain review-only, and applying care basics still updates only editable watering fields.
 
 ## Recommendation
 

@@ -24,7 +24,6 @@ import {
   LeafIcon,
   RoomIcon,
 } from "@/components/icons";
-import { GoogleCalendarPlantStatus } from "@/components/google-calendar-plant-status";
 import {
   PlantCareSuggestionPanel,
   PlantIdentificationPanel,
@@ -36,11 +35,7 @@ import { SignOutButton } from "@/components/sign-out-button";
 import { StatusPill } from "@/components/status-pill";
 import { WateringReminderPanel } from "@/components/watering-reminder-form";
 import { getAuthState } from "@/lib/auth";
-import { getGoogleCalendarConfig } from "@/lib/env";
-import {
-  getGoogleCalendarConnection,
-  getGoogleCalendarEventLinkForReminder,
-} from "@/lib/google-calendar/data";
+import { getGoogleCalendarConnection } from "@/lib/google-calendar/data";
 import { getPlantForUser } from "@/lib/plants/data";
 import { createPlantPhotoUrlMap } from "@/lib/plants/photos";
 import {
@@ -52,7 +47,6 @@ import {
 } from "@/lib/plants/presenters";
 import type {
   GoogleCalendarConnectionRecord,
-  GoogleCalendarEventLinkRecord,
   PlantRecord,
   WateringEventRecord,
   WateringReminderRecord,
@@ -162,9 +156,7 @@ function PlantProfile({
   photoUrl,
   reminder,
   reminderError,
-  googleCalendarConfigured,
   googleCalendarConnection,
-  googleCalendarEventLink,
   roomLabel,
   initialCareProfilePreview,
 }: {
@@ -175,9 +167,7 @@ function PlantProfile({
   photoUrl?: string;
   reminder: WateringReminderRecord | null;
   reminderError: boolean;
-  googleCalendarConfigured: boolean;
   googleCalendarConnection: GoogleCalendarConnectionRecord | null;
-  googleCalendarEventLink: GoogleCalendarEventLinkRecord | null;
   roomLabel: string;
   initialCareProfilePreview: Awaited<ReturnType<typeof getCareProfilePreview>> | null;
 }) {
@@ -340,18 +330,12 @@ function PlantProfile({
           dateInputValue={reminderSummary.dateInputValue}
           mode={reminderSummary.mode}
           canUseReminderTiming={Boolean(plant.watering_interval_days)}
+          googleCalendarConnected={Boolean(googleCalendarConnection)}
           saveAction={saveWateringReminderAction.bind(null, plant.id)}
           disableAction={disableWateringReminderAction.bind(null, plant.id)}
           snoozeAction={snoozeWateringReminderAction.bind(null, plant.id)}
         />
       </div>
-
-      <GoogleCalendarPlantStatus
-        configured={googleCalendarConfigured}
-        connection={googleCalendarConnection}
-        eventLink={googleCalendarEventLink}
-        reminderEnabled={Boolean(reminder?.enabled && reminder.next_reminder_date)}
-      />
     </div>
   );
 }
@@ -392,13 +376,6 @@ export default async function PlantProfilePage({ params, searchParams }: PlantPr
   const googleCalendarConnectionResult = plant
     ? await getGoogleCalendarConnection(supabase, authState.user.id)
     : null;
-  const googleCalendarEventLinkResult = reminderResult?.data
-    ? await getGoogleCalendarEventLinkForReminder(
-        supabase,
-        authState.user.id,
-        reminderResult.data.id,
-      )
-    : null;
   const wateringEvents = wateringResult?.data ?? [];
   const schedule = plant
     ? getReminderAwareWateringScheduleState(
@@ -408,8 +385,13 @@ export default async function PlantProfilePage({ params, searchParams }: PlantPr
       )
     : null;
   const photoUrls = plant ? await createPlantPhotoUrlMap(supabase, [plant]) : {};
+  const canReviewCareSuggestion =
+    plant &&
+    Boolean(plant.common_name || plant.scientific_name) &&
+    !plant.watering_interval_days &&
+    !plant.watering_guidance;
   const initialCareProfilePreview =
-    plant && created === "1" && care === "review"
+    plant && (canReviewCareSuggestion || (created === "1" && care === "review"))
       ? await getCareProfilePreview(supabase, {
           scientificName: plant.scientific_name ?? undefined,
           commonName: plant.common_name ?? undefined,
@@ -493,9 +475,7 @@ export default async function PlantProfilePage({ params, searchParams }: PlantPr
               photoUrl={photoUrls[plant.id]}
               reminder={reminderResult?.data ?? null}
               reminderError={Boolean(reminderResult?.error)}
-              googleCalendarConfigured={Boolean(getGoogleCalendarConfig())}
               googleCalendarConnection={googleCalendarConnectionResult?.data ?? null}
-              googleCalendarEventLink={googleCalendarEventLinkResult?.data ?? null}
               roomLabel={roomLabel}
               initialCareProfilePreview={initialCareProfilePreview}
             />

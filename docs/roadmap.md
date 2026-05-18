@@ -61,14 +61,15 @@ This document tracks product sequencing and slice status. Stable product directi
 - AI Care Setup Slice 8 Add Plant/photo-first integration that carries reviewed names into post-save care profile review without making AI, care suggestions, reminders, or photo upload required.
 - AI Care Setup Slice 9 Coverage Wave 2 expansion with 41 profiles, 101 aliases, additional common retail plants, messy aliases, genus fallbacks, and validated ambiguous aliases.
 - AI Care Setup Slice 10 Coverage Wave 3 expansion and QA hardening with 56 profiles, 146 aliases, additional common retail coverage, and campaign docs finalized for manual QA.
+- AI Care Setup pre-merge QA patch for safer identification diagnostics/messages, mobile library photo selection, care suggestion discoverability for named plants without watering basics, empty care-profile-table fixture fallback, and compact calendar status inside the watering reminder panel.
 
 ### Active
 
-- AI Care Setup campaign implementation complete; manual campaign QA and merge review remain.
+- AI Care Setup pre-merge QA patch; validation, branch push verification, manual campaign QA, and merge review remain.
 
 ### Planned
 
-- AI Care Setup Slice 10: Coverage Wave 3 Broad Coverage and QA Hardening.
+- No additional AI Care Setup implementation slices are planned before manual QA and merge review.
 
 ### Deferred
 

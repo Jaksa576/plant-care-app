@@ -113,6 +113,26 @@ export type WateringReminderState = {
   message: string | null;
 };
 
+function logIdentificationDiagnostic(
+  reason: string,
+  details: Record<string, string | number | boolean | null> = {},
+) {
+  console.error("[plant-identification]", {
+    reason,
+    ...details,
+  });
+}
+
+function logCareProfileDiagnostic(
+  reason: string,
+  details: Record<string, string | number | boolean | null> = {},
+) {
+  console.warn("[care-profiles]", {
+    reason,
+    ...details,
+  });
+}
+
 async function getSignedInPlantContext() {
   const authState = await getAuthState();
 
@@ -145,7 +165,14 @@ export async function getCareProfilePreview(
   },
 ): Promise<CareProfilePreview> {
   const profileResult = await listCareProfiles(supabase);
-  const profiles = profileResult.data ?? MINIMAL_CARE_PROFILES;
+  const hasDatabaseProfiles = Boolean(profileResult.data && profileResult.data.length > 0);
+  if (!hasDatabaseProfiles) {
+    logCareProfileDiagnostic("using-validated-fixture-fallback", {
+      dbProfileCount: profileResult.data?.length ?? null,
+      hasDbError: Boolean(profileResult.error),
+    });
+  }
+  const profiles = hasDatabaseProfiles ? profileResult.data : MINIMAL_CARE_PROFILES;
   const careProfiles = profiles as CareProfileWithAliases[];
   const match = findCareProfileMatch(input, careProfiles);
 
@@ -623,10 +650,16 @@ export async function identifyPlantPhotoAction(
   const plantNetConfig = getPlantNetConfig();
 
   if (!plantNetConfig) {
+    logIdentificationDiagnostic("missing-plantnet-config", {
+      flow: "plant-profile",
+      plantId: plant.id,
+      hasPhoto: Boolean(plant.primary_photo_path),
+    });
+
     return {
       status: "error",
       message:
-        "Plant identification is not configured. Add PLANTNET_API_KEY on the server to enable this helper.",
+        "Plant identification is not configured on this deployment. Your plant details are still editable.",
       candidates: [],
     };
   }
@@ -636,9 +669,16 @@ export async function identifyPlantPhotoAction(
     .download(plant.primary_photo_path);
 
   if (photoResult.error || !photoResult.data) {
+    logIdentificationDiagnostic("storage-photo-download-failed", {
+      flow: "plant-profile",
+      plantId: plant.id,
+      storageError: photoResult.error?.message ?? null,
+    });
+
     return {
       status: "error",
-      message: "Identification is unavailable right now. Your plant details are still editable.",
+      message:
+        "This photo could not be loaded for identification. Your plant details are still editable.",
       candidates: [],
     };
   }
@@ -646,6 +686,12 @@ export async function identifyPlantPhotoAction(
   const identifyResult = await identifyPlantWithPlantNet(plantNetConfig, photoResult.data);
 
   if (identifyResult.error || !identifyResult.data) {
+    logIdentificationDiagnostic("provider-identification-failed", {
+      flow: "plant-profile",
+      plantId: plant.id,
+      providerMessage: identifyResult.error ?? null,
+    });
+
     return {
       status: "error",
       message:
@@ -689,6 +735,12 @@ export async function identifyInitialPlantPhotoAction(
   const validationError = getPlantPhotoValidationError(file);
 
   if (validationError) {
+    logIdentificationDiagnostic("invalid-initial-photo", {
+      flow: "add-plant",
+      fileType: file.type || null,
+      fileSize: file.size,
+    });
+
     return {
       status: "error",
       message: validationError,
@@ -701,10 +753,16 @@ export async function identifyInitialPlantPhotoAction(
   const plantNetConfig = getPlantNetConfig();
 
   if (!plantNetConfig) {
+    logIdentificationDiagnostic("missing-plantnet-config", {
+      flow: "add-plant",
+      fileType: file.type || null,
+      fileSize: file.size,
+    });
+
     return {
       status: "error",
       message:
-        "Plant identification is not configured. Add PLANTNET_API_KEY on the server to enable this helper.",
+        "Plant identification is not configured on this deployment. You can still save this plant manually.",
       candidates: [],
     };
   }
@@ -712,6 +770,13 @@ export async function identifyInitialPlantPhotoAction(
   const identifyResult = await identifyPlantWithPlantNet(plantNetConfig, file);
 
   if (identifyResult.error || !identifyResult.data) {
+    logIdentificationDiagnostic("provider-identification-failed", {
+      flow: "add-plant",
+      fileType: file.type || null,
+      fileSize: file.size,
+      providerMessage: identifyResult.error ?? null,
+    });
+
     return {
       status: "error",
       message:

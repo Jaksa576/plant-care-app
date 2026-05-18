@@ -364,6 +364,10 @@ function InitialPhotoIdentificationControls({
             Plant suggestions are names only. Scores are match signals, not certainty. Choose one
             to fill editable fields, retry with a clearer photo, or continue manually.
           </p>
+          <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">
+            After you save reviewed names, Plant Care can look for an optional watering starting
+            point on the plant profile.
+          </p>
           <p className="mt-1 text-xs leading-5 text-[color:var(--muted)]">
             Plant suggestions powered by Pl@ntNet.
           </p>
@@ -704,7 +708,6 @@ export function PlantForm({
                         name="initialPhoto"
                         type="file"
                         accept="image/jpeg,image/png,image/webp"
-                        capture="environment"
                         onChange={(event) => handleInitialPhotoChange(event.target.files)}
                         className="w-full rounded-[1rem] border border-[color:var(--border)] bg-white/85 px-4 py-3 text-sm font-normal text-[color:var(--foreground)] outline-none transition file:mr-4 file:rounded-full file:border-0 file:bg-[color:var(--accent-soft)] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[color:var(--foreground)] focus:border-[color:var(--accent)] focus:ring-2 focus:ring-[color:var(--accent-soft)]"
                       />

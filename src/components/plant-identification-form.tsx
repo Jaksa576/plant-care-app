@@ -609,6 +609,10 @@ export function PlantIdentificationPanel({
             are only applied if you review and choose them.
           </p>
           <p className="mt-2 text-sm leading-7 text-[color:var(--muted)]">
+            Saving reviewed names checks Plant Care&apos;s internal profiles for an optional
+            watering starting point.
+          </p>
+          <p className="mt-2 text-sm leading-7 text-[color:var(--muted)]">
             Low-confidence results may need a clearer leaf photo in natural light, or you can keep
             setup manual.
           </p>
