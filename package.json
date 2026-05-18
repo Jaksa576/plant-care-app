@@ -9,7 +9,9 @@
     "start": "next start",
     "lint": "eslint .",
     "validate:care-profiles": "node scripts/validate-care-profiles.mjs",
-    "generate:care-profile-seed": "node scripts/generate-care-profile-seed-sql.mjs"
+    "generate:care-profile-seed": "node scripts/generate-care-profile-seed-sql.mjs",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm run lint && npm run build"
   },
   "dependencies": {
     "@supabase/ssr": "0.10.2",

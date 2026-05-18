@@ -39,6 +39,13 @@ Archived docs may provide history, but they are not current source of truth.
 - Never intentionally scan `.next`, `node_modules`, `dist`, `build`, `coverage`, or `.git`.
 - Avoid dependency changes unless the slice explicitly requires them; never change dependency specs to `latest`.
 
+## Standard Commands
+
+- Setup worktree: `.\scripts\setup-codex-worktree.ps1`
+- Validate: `.\scripts\validate.ps1`
+- Verify pushed branch: `.\scripts\verify-branch-pushed.ps1`
+- Dev server: `npm run dev`
+
 ## Slice Workflow
 
 Each implementation slice uses its own branch and git worktree. Do not develop in place on `main`.
@@ -54,6 +61,8 @@ Each implementation slice uses its own branch and git worktree. Do not develop i
 9. Run validation gates.
 10. Commit and push the branch if validation passes.
 11. Review through Vercel preview before manual merge.
+
+When working in a local worktree, always create or use a named branch, commit changes, push to `origin`, and verify the branch is pushed before the final report. Do not report implementation complete for local-only commits. If push fails, stop and report the failure.
 
 ## Validation Gates
 

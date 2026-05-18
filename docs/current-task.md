@@ -10,6 +10,7 @@
 - AI-assisted plant identification is implemented as an optional Pl@ntNet-backed helper from an owned primary photo.
 - AI Care Setup Slices 0-3 are complete: campaign docs, care profile foundation, Wave 1 seed workflow, and clearer Pl@ntNet recommendation UI are implemented.
 - AI Care Setup Slice 4 is complete: reviewed identity saves now attempt internal care profile matching and show read-only matched, ambiguous, or no-match preview states.
+- Repo workflow helper optimization is complete as an infrastructure/docs patch and available on this branch.
 
 ## Active Campaign
 
@@ -21,7 +22,7 @@ Campaign source of truth: [AI Care Setup](campaigns/ai-care-setup.md).
 
 Slice 5: Reviewable Watering Starting Point UI.
 
-Status: ready to start.
+Status: in progress.
 
 Slice 4 status: completed.
 
@@ -58,25 +59,34 @@ Non-goals:
 
 ## Validation Results
 
+Workflow helper patch:
+
+- `npm run typecheck`: passed.
+- `npm run lint`: passed.
+- `npm run build`: passed.
+- `npm run check`: passed.
+- `.\scripts\validate.ps1`: passed.
+- `.\scripts\verify-branch-pushed.ps1`: passed on `codex/workflow-helpers`.
+
 Slice 4:
 
 - `npm run lint`: passed.
 - `npm run build`: passed.
-- `npm run typecheck`: not run; no script exists.
+- `npm run typecheck`: not run; no script existed at the time.
 - `npm test`: not run; no script exists.
 - `npm run validate:care-profiles`: not run; care profile fixtures did not change.
 - Manual browser QA: still needed for exact species, synonym, common-name, genus, ambiguous, and no-match preview states.
 
 ## Next Recommended Action
 
-Start Slice 5 on a dedicated branch/worktree from this Slice 4 branch: convert matched previews into a reviewable care suggestion card with explicit apply/edit/skip actions, while protecting existing watering basics from silent overwrite.
+Finish Slice 5 on `codex/ai-care-setup-s5`: convert matched previews into a reviewable care suggestion card with explicit apply/edit/skip actions, while protecting existing watering basics from silent overwrite.
 
 ## Validation Expectations
 
-For future implementation slices, run the scripts that exist in `package.json`:
-
 - `npm run validate:care-profiles` when care profile fixtures change.
-- `npm run typecheck` if present.
+- `npm run typecheck`.
 - `npm test` if present.
 - `npm run build`.
 - `npm run lint`.
+- `npm run check`.
+- `.\scripts\validate.ps1`.
