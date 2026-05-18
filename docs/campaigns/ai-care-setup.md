@@ -1194,7 +1194,7 @@ Stop conditions:
 
 ### Slice 7 — Optional Reminder Handoff
 
-Status: planned.
+Status: completed.
 
 Goal:
 
@@ -1226,13 +1226,13 @@ Validation:
 
 Manual QA:
 
-- No existing reminder.
-- Existing after-watering reminder.
-- Existing fixed schedule reminder.
-- Google Calendar disconnected.
-- Google Calendar connected.
-- Decline reminder handoff.
-- Mobile layout.
+- No existing reminder: care apply response links to optional reminder setup; manual browser QA still needed.
+- Existing after-watering reminder: care apply response links to reminder review; manual browser QA still needed.
+- Existing fixed schedule reminder: care apply response links to reminder review; manual browser QA still needed.
+- Google Calendar disconnected: existing reminder model remains app-owned; manual browser QA still needed.
+- Google Calendar connected: existing one-way sync remains unchanged; manual browser QA still needed.
+- Decline reminder handoff: reminder setup remains optional; manual browser QA still needed.
+- Mobile layout: manual browser QA still needed.
 
 Stop conditions:
 

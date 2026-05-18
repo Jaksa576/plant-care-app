@@ -12,6 +12,7 @@
 - AI Care Setup Slice 4 is complete: reviewed identity saves now attempt internal care profile matching and show read-only matched, ambiguous, or no-match preview states.
 - AI Care Setup Slice 5 is complete: matched care profiles can be reviewed, applied, edited first, or skipped without silent overwrite.
 - AI Care Setup Slice 6 is complete: no-match care states can offer lightweight fallback watering questions mapped to reviewed care-group or conservative fallback profiles.
+- AI Care Setup Slice 7 is complete: after applying care basics, users can optionally jump to setup or review the existing app-owned watering reminder.
 - Repo workflow helper optimization is complete as an infrastructure/docs patch and available on this branch.
 
 ## Active Campaign
@@ -22,11 +23,11 @@ Campaign source of truth: [AI Care Setup](campaigns/ai-care-setup.md).
 
 ## Active Slice
 
-Slice 7: Optional Reminder Handoff.
+Slice 8: Add Plant / Photo-First Integration.
 
-Status: ready to start after Slice 6 branch review.
+Status: ready to start after Slice 7 branch review.
 
-Slice 6 status: completed.
+Slice 7 status: completed.
 
 Completed work:
 
@@ -43,27 +44,29 @@ Completed work:
 - No-match care states now offer a short fallback question form based on visible watering traits.
 - Fallback answers are mapped server-side to reviewed care-group or conservative fallback profiles.
 - Fallback suggestions use the same reviewable apply/edit/skip care suggestion UI and do not identify the plant.
+- Applying care basics now offers an optional link to set up or review the existing watering reminder panel.
+- Reminder handoff does not auto-create reminders and does not change Google Calendar source-of-truth behavior.
 - No reminders are created.
 
-## Slice 7 Scope
+## Slice 8 Scope
 
 Goal:
 
-After a user applies a watering starting point, optionally offer reminder setup or review.
+Integrate grouped identification and care suggestion flow into photo-first Add Plant.
 
 Scope:
 
-- If no reminder exists, offer to set one using the applied cadence.
-- If a reminder exists, offer to review it.
-- Use the existing app-owned reminder model.
-- Do not auto-create reminders.
+- Integrate grouped identification into Add Plant photo flow.
+- Let users accept or edit identity before save.
+- After plant save, match care profile and show reviewable care suggestion.
+- Preserve manual Add Plant and photo-optional flow.
+- Ensure failed AI or failed photo upload does not block plant creation.
 
 Non-goals:
 
-- No mandatory reminders.
-- No calendar-source-of-truth behavior.
+- No required AI, photo, care suggestion, reminder, or calendar setup.
+- No automatic care application.
 - No direct calendar event creation outside existing reminder sync.
-- No Add Plant care suggestion integration yet.
 - No diagnosis, pest, disease, treatment, or encyclopedia browsing.
 
 ## Validation Results
@@ -108,9 +111,20 @@ Slice 6:
 - `npm test`: not run; no script exists.
 - Manual browser QA: still needed for no-match fallback, low-confidence identity, succulent, tropical, fern/moisture-loving, orchid, skip fallback, and mobile layout.
 
+Slice 7:
+
+- `npm run validate:care-profiles`: passed with the existing intentional `money plant` ambiguity warning.
+- `npm run typecheck`: passed.
+- `npm run lint`: passed.
+- `npm run build`: passed.
+- `npm run check`: passed.
+- `.\scripts\validate.ps1`: passed.
+- `npm test`: not run; no script exists.
+- Manual browser QA: still needed for no existing reminder, existing after-watering reminder, existing fixed schedule reminder, Google Calendar connected/disconnected, decline handoff, and mobile layout.
+
 ## Next Recommended Action
 
-Validate, commit, push, and verify `codex/ai-care-setup-s6`, then start Slice 7 on a dedicated branch/worktree from this Slice 6 branch.
+Validate, commit, push, and verify `codex/ai-care-setup-s7`, then start Slice 8 on a dedicated branch/worktree from this Slice 7 branch.
 
 ## Validation Expectations
 

@@ -28,6 +28,7 @@ const emptySaveState: SavePlantIdentificationState = {
 const emptyApplyCareSuggestionState: ApplyCareSuggestionState = {
   status: "idle",
   message: null,
+  reminderHandoff: null,
 };
 
 type PlantIdentificationPanelProps = {
@@ -177,6 +178,19 @@ function CareSuggestionActions({
           }`}
         >
           {state.message}
+          {state.status === "success" && state.reminderHandoff ? (
+            <div className="mt-3">
+              <a
+                href="#watering-reminder"
+                className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full border border-emerald-300 bg-white px-4 py-2 text-sm font-semibold text-emerald-950 transition hover:bg-emerald-100"
+              >
+                {state.reminderHandoff.label}
+              </a>
+              <p className="mt-2 text-xs leading-5">
+                Reminders stay optional and use Plant Care&apos;s existing reminder settings.
+              </p>
+            </div>
+          ) : null}
         </div>
       ) : null}
 

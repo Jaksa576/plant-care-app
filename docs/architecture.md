@@ -162,6 +162,8 @@ After a user saves a reviewed identification suggestion from the plant profile, 
 
 Applying a care suggestion updates only `plants.watering_interval_days` and `plants.watering_guidance`. Existing user-entered watering basics are protected by a required confirmation before replacement. Applying care basics does not create reminders, calendar events, or new plant truth outside the editable plant fields.
 
+After care basics are applied, the plant profile may show an optional handoff link to the existing watering reminder panel. If no reminder exists, the handoff invites setup; if a reminder exists, it invites review. The care suggestion action does not create or overwrite reminders, and Google Calendar remains a one-way reflection of saved app reminders.
+
 When no internal care profile matches an accepted identity, the plant profile can offer lightweight fallback watering questions. The fallback form asks for the closest visible watering trait, maps that answer on the server to reviewed care-group or fallback profiles, and returns the same reviewable care suggestion UI. Fallback suggestions do not identify the plant and remain optional; users can keep setup manual.
 
 Wave 1 seed coverage is represented as typed fixtures in `src/lib/care-profiles/fixtures.ts`. `npm run validate:care-profiles` validates required fields, cadence ranges, duplicate aliases, and intentionally ambiguous aliases. `npm run generate:care-profile-seed` regenerates `supabase/seed_care_profiles.sql` from those fixtures.

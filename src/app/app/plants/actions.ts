@@ -78,6 +78,10 @@ export type SavePlantIdentificationState = {
 export type ApplyCareSuggestionState = {
   status: "idle" | "success" | "error" | "needs_confirmation";
   message: string | null;
+  reminderHandoff?: {
+    kind: "create" | "review";
+    label: string;
+  } | null;
 };
 
 export type CareProfilePreview =
@@ -861,6 +865,7 @@ export async function applyCareSuggestionAction(
     return {
       status: "error",
       message: "This care suggestion is missing a valid check cadence.",
+      reminderHandoff: null,
     };
   }
 
@@ -868,6 +873,7 @@ export async function applyCareSuggestionAction(
     return {
       status: "error",
       message: "This care suggestion is missing watering guidance.",
+      reminderHandoff: null,
     };
   }
 
@@ -879,6 +885,7 @@ export async function applyCareSuggestionAction(
     return {
       status: "error",
       message: "Could not apply these care basics. Please refresh and try again.",
+      reminderHandoff: null,
     };
   }
 
@@ -891,6 +898,7 @@ export async function applyCareSuggestionAction(
       status: "needs_confirmation",
       message:
         "This plant already has watering basics. Confirm before replacing them with this starting point.",
+      reminderHandoff: null,
     };
   }
 
@@ -903,8 +911,12 @@ export async function applyCareSuggestionAction(
     return {
       status: "error",
       message: updateResult.error ?? "Could not apply these care basics right now.",
+      reminderHandoff: null,
     };
   }
+
+  const reminderResult = await getWateringReminderForPlant(supabase, user.id, plant.id);
+  const hasReminder = Boolean(reminderResult.data);
 
   revalidatePath("/app");
   revalidatePath(`/app/plants/${plant.id}`);
@@ -913,6 +925,15 @@ export async function applyCareSuggestionAction(
   return {
     status: "success",
     message: "Care basics applied. You can edit this check cadence and guidance any time.",
+    reminderHandoff: hasReminder
+      ? {
+          kind: "review",
+          label: "Review watering reminder",
+        }
+      : {
+          kind: "create",
+          label: "Set up optional reminder",
+        },
   };
 }
 
