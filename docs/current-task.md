@@ -17,7 +17,7 @@
 - AI Care Setup Slice 9 is complete: Coverage Wave 2 expands validated care profile coverage to 41 profiles and 101 aliases.
 - AI Care Setup Slice 10 is complete: Coverage Wave 3 expands validated care profile coverage to 56 profiles and 146 aliases and finalizes campaign docs for manual QA.
 - Repo workflow helper optimization is complete as an infrastructure/docs patch and available on this branch.
-- AI Care Setup pre-merge QA patch is in progress to improve identification diagnostics, mobile photo library selection, care suggestion discoverability, and plant-profile calendar status placement.
+- AI Care Setup pre-merge QA patch is in progress to improve identification diagnostics, mobile photo library selection, care suggestion discoverability, plant-profile calendar status placement, JPG/PNG photo format clarity, and pre-save Add Plant watering recommendations.
 
 ## Active Campaign
 
@@ -29,7 +29,7 @@ Campaign source of truth: [AI Care Setup](campaigns/ai-care-setup.md).
 
 AI Care Setup pre-merge QA patch before merge.
 
-Status: patch implemented; validation passed; manual QA pending.
+Status: follow-up patch implemented; validation passed; manual QA pending.
 
 Slice 10 status: completed.
 
@@ -58,12 +58,13 @@ Completed work:
 - Generated seed SQL is current with fixtures.
 - No reminders are created.
 - Pre-merge QA patch narrows provider/config/photo identification errors, adds safe server diagnostics, removes forced camera capture from plant photo inputs, keeps care suggestions visible for named plants without watering basics, falls back to validated care fixtures when DB profile tables are empty, and moves Google Calendar status into the watering reminder panel.
+- Follow-up patch intentionally supports JPG/PNG photos only because Pl@ntNet identification accepts JPG/PNG input, and adds pre-save Add Plant care preview so reviewed common/scientific names can show and apply a watering starting point before plant save.
 
 ## Remaining Scope
 
 Goal:
 
-Validate the pre-merge QA patch, then manually QA the full AI Care Setup branch stack and merge reviewed slices in order.
+Validate the follow-up pre-merge QA patch, then manually QA the full AI Care Setup branch stack and merge reviewed slices in order.
 
 Scope:
 
@@ -175,6 +176,16 @@ Pre-merge QA patch:
 - `npm run check`: passed.
 - `.\scripts\validate.ps1`: passed.
 - Manual browser QA: still needed for Add Plant no-photo manual flow, Add Plant library/camera photo, identification success/failure, save after identification failure, plant profile identification, exact/no-match care suggestions, apply/skip, overwrite confirmation, optional reminder handoff, compact calendar connected/disconnected states, and mobile viewport.
+
+Follow-up pre-merge QA patch:
+
+- `npm run validate:care-profiles`: passed with intentional `money plant`, `prayer plant`, and `elephant ear` ambiguity warnings.
+- `npm run typecheck`: passed.
+- `npm run lint`: passed.
+- `npm run build`: passed.
+- `npm run check`: passed.
+- `.\scripts\validate.ps1`: passed.
+- Manual browser QA: still needed for JPG, PNG, rejected WebP, unsupported file type, accepted identification suggestion to pre-save care recommendation, manual `Pothos` / `Epipremnum aureum` lookup before save, apply/skip recommendation, stale suggestion clearing after identity change, save with and without applied recommendation, mobile picker, and mobile watering step.
 
 ## Next Recommended Action
 

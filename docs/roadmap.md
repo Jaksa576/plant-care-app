@@ -62,10 +62,11 @@ This document tracks product sequencing and slice status. Stable product directi
 - AI Care Setup Slice 9 Coverage Wave 2 expansion with 41 profiles, 101 aliases, additional common retail plants, messy aliases, genus fallbacks, and validated ambiguous aliases.
 - AI Care Setup Slice 10 Coverage Wave 3 expansion and QA hardening with 56 profiles, 146 aliases, additional common retail coverage, and campaign docs finalized for manual QA.
 - AI Care Setup pre-merge QA patch for safer identification diagnostics/messages, mobile library photo selection, care suggestion discoverability for named plants without watering basics, empty care-profile-table fixture fallback, and compact calendar status inside the watering reminder panel.
+- AI Care Setup follow-up pre-merge QA patch for intentional JPG/PNG-only photo support and pre-save Add Plant watering recommendations from reviewed common/scientific names.
 
 ### Active
 
-- AI Care Setup pre-merge QA patch; validation, branch push verification, manual campaign QA, and merge review remain.
+- AI Care Setup follow-up pre-merge QA patch; validation, branch push verification, manual campaign QA, and merge review remain.
 
 ### Planned
 

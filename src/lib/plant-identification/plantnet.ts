@@ -151,7 +151,7 @@ export async function identifyPlantWithPlantNet(
 
     return {
       data: null,
-      error: "That image could not be read. Choose a JPG, PNG, or WebP photo and try again.",
+      error: "That image could not be read. Choose a JPG or PNG photo and try again.",
     };
   }
 

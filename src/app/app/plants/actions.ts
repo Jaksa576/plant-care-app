@@ -75,6 +75,12 @@ export type SavePlantIdentificationState = {
   careProfilePreview?: CareProfilePreview | null;
 };
 
+export type PreviewCareProfileState = {
+  status: "idle" | "success" | "error";
+  message: string | null;
+  careProfilePreview: CareProfilePreview | null;
+};
+
 export type ApplyCareSuggestionState = {
   status: "idle" | "success" | "error" | "needs_confirmation";
   message: string | null;
@@ -221,6 +227,52 @@ export async function getCareProfilePreview(
   return {
     status: "no_match",
   };
+}
+
+export async function previewCareProfileForPlantNamesAction(
+  formData: FormData,
+): Promise<PreviewCareProfileState> {
+  const commonNameValue = formData.get("commonName");
+  const scientificNameValue = formData.get("scientificName");
+  const commonName = typeof commonNameValue === "string" ? commonNameValue.trim() : "";
+  const scientificName =
+    typeof scientificNameValue === "string" ? scientificNameValue.trim() : "";
+
+  if (!commonName && !scientificName) {
+    return {
+      status: "success",
+      message: null,
+      careProfilePreview: { status: "no_match" },
+    };
+  }
+
+  const { supabase } = await getSignedInPlantContext();
+
+  try {
+    const careProfilePreview = await getCareProfilePreview(supabase, {
+      commonName,
+      scientificName,
+    });
+
+    return {
+      status: "success",
+      message: null,
+      careProfilePreview,
+    };
+  } catch (error) {
+    logCareProfileDiagnostic("pre-save-preview-failed", {
+      hasCommonName: Boolean(commonName),
+      hasScientificName: Boolean(scientificName),
+      errorMessage: error instanceof Error ? error.message : "unknown care preview error",
+    });
+
+    return {
+      status: "error",
+      message:
+        "We couldn't look up a watering starting point right now. Manual setup still works.",
+      careProfilePreview: null,
+    };
+  }
 }
 
 const fallbackCareGroupAliases: Record<string, string> = {

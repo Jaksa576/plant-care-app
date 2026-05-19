@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import {
   createPlantAction,
   identifyInitialPlantPhotoAction,
+  previewCareProfileForPlantNamesAction,
 } from "@/app/app/plants/actions";
 import { AppShell } from "@/components/app-shell";
 import { PlantForm } from "@/components/plant-form";
@@ -61,6 +62,7 @@ export default async function NewPlantPage({ searchParams }: NewPlantPageProps) 
           allowInitialPhoto
           startsWithPhoto
           identifyInitialPhotoAction={identifyInitialPlantPhotoAction}
+          previewCareProfileAction={previewCareProfileForPlantNamesAction}
         />
       </div>
     </AppShell>

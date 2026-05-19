@@ -5,7 +5,7 @@ import type { PlantRecord } from "@/lib/plants/types";
 export const PLANT_PHOTO_BUCKET = "plant-photos";
 export const PLANT_PHOTO_MAX_MB = 12;
 export const PLANT_PHOTO_MAX_BYTES = PLANT_PHOTO_MAX_MB * 1024 * 1024;
-export const PLANT_PHOTO_ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
+export const PLANT_PHOTO_ALLOWED_TYPES = ["image/jpeg", "image/png"] as const;
 
 const SIGNED_PHOTO_URL_SECONDS = 60 * 60;
 
@@ -14,10 +14,6 @@ export type PlantPhotoUrlMap = Record<string, string>;
 export function getPlantPhotoExtension(fileType: string) {
   if (fileType === "image/png") {
     return "png";
-  }
-
-  if (fileType === "image/webp") {
-    return "webp";
   }
 
   return "jpg";
@@ -35,7 +31,7 @@ export function getPlantPhotoValidationError(file: File | null) {
   }
 
   if (!PLANT_PHOTO_ALLOWED_TYPES.includes(file.type as (typeof PLANT_PHOTO_ALLOWED_TYPES)[number])) {
-    return "Use a JPG, PNG, or WebP image.";
+    return "Use a JPG or PNG image. WebP is not supported for plant identification yet.";
   }
 
   if (file.size > PLANT_PHOTO_MAX_BYTES) {

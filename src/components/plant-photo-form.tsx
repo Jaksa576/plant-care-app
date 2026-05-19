@@ -45,10 +45,14 @@ export function PlantPhotoForm({ uploadAction, removeAction, hasPhoto }: PlantPh
           <input
             name="photo"
             type="file"
-            accept="image/jpeg,image/png,image/webp"
+            accept="image/jpeg,image/png"
             disabled={uploadPending}
             className="w-full rounded-[1rem] border border-[color:var(--border)] bg-white/85 px-4 py-3 text-sm font-normal text-[color:var(--foreground)] outline-none transition file:mr-4 file:rounded-full file:border-0 file:bg-[color:var(--accent-soft)] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[color:var(--foreground)] focus:border-[color:var(--accent)] focus:ring-2 focus:ring-[color:var(--accent-soft)] disabled:cursor-not-allowed disabled:opacity-60"
           />
+          <span className="text-sm leading-6 text-[color:var(--muted)]">
+            Use a JPG or PNG image under 12 MB. WebP is not supported for plant
+            identification yet.
+          </span>
         </label>
         <button
           type="submit"

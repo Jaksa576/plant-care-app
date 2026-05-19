@@ -4,7 +4,11 @@ import { useActionState, useEffect, useMemo, useState, useTransition } from "rea
 
 import { CameraIcon, DropletIcon, LeafIcon, RoomIcon } from "@/components/icons";
 import { StatusPill } from "@/components/status-pill";
-import type { PlantIdentificationState } from "@/app/app/plants/actions";
+import type {
+  CareProfilePreview,
+  PlantIdentificationState,
+  PreviewCareProfileState,
+} from "@/app/app/plants/actions";
 import type { PlantIdentificationCandidate } from "@/lib/plant-identification/types";
 import {
   emptyPlantFormState,
@@ -27,6 +31,7 @@ type PlantFormProps = {
     state: PlantIdentificationState,
     formData: FormData,
   ) => Promise<PlantIdentificationState>;
+  previewCareProfileAction?: (formData: FormData) => Promise<PreviewCareProfileState>;
 };
 
 type ReviewItemProps = {
@@ -290,6 +295,12 @@ const emptyIdentificationState: PlantIdentificationState = {
   candidates: [],
 };
 
+const emptyCarePreviewState: PreviewCareProfileState = {
+  status: "idle",
+  message: null,
+  careProfilePreview: null,
+};
+
 function getConfidenceText(label: PlantIdentificationCandidate["confidenceLabel"]) {
   if (label === "strong") {
     return "Strong match";
@@ -304,6 +315,101 @@ function getConfidenceText(label: PlantIdentificationCandidate["confidenceLabel"
 
 function getConfidencePercent(candidate: PlantIdentificationCandidate) {
   return `${Math.round(Math.max(0, Math.min(candidate.confidenceScore, 1)) * 100)}%`;
+}
+
+function getDrynessPreferenceLabel(preference: string) {
+  if (preference === "dry_fully") {
+    return "Let the soil dry fully before watering.";
+  }
+
+  if (preference === "dry_mostly") {
+    return "Let most of the soil dry before watering.";
+  }
+
+  if (preference === "dry_top_half") {
+    return "Let the top half of the soil dry before watering.";
+  }
+
+  if (preference === "dry_top_inch") {
+    return "Let the top inch of soil dry before watering.";
+  }
+
+  if (preference === "lightly_moist") {
+    return "Keep lightly moist, but not soggy.";
+  }
+
+  if (preference === "evenly_moist") {
+    return "Keep evenly moist and check often.";
+  }
+
+  if (preference === "special_medium") {
+    return "Follow medium-specific guidance, such as bark mix.";
+  }
+
+  return "Start conservatively and adjust based on how this plant dries in your home.";
+}
+
+function createCareIdentityKey(commonName: string, scientificName: string) {
+  return `${commonName.trim().toLowerCase()}::${scientificName.trim().toLowerCase()}`;
+}
+
+function AddPlantCareSuggestionPanel({
+  preview,
+  onApply,
+  onSkip,
+}: {
+  preview: Extract<CareProfilePreview, { status: "matched" }>;
+  onApply: () => void;
+  onSkip: () => void;
+}) {
+  const cadenceRange =
+    preview.cadenceDaysMin && preview.cadenceDaysMax
+      ? `Range: ${preview.cadenceDaysMin}-${preview.cadenceDaysMax} days.`
+      : null;
+
+  return (
+    <div className="rounded-[1.25rem] border border-[color:var(--border-soft)] bg-[color:var(--stone)] p-4 text-sm leading-6">
+      <StatusPill>Optional watering starting point</StatusPill>
+      <p className="mt-3 text-base font-semibold text-[color:var(--foreground)]">
+        {preview.displayName}
+      </p>
+      <dl className="mt-3 grid gap-2 text-[color:var(--muted)]">
+        <div>
+          <dt className="font-semibold text-[color:var(--foreground)]">Check cadence</dt>
+          <dd>
+            Start by checking every {preview.cadenceDays} days. {cadenceRange}
+          </dd>
+        </div>
+        <div>
+          <dt className="font-semibold text-[color:var(--foreground)]">Dryness preference</dt>
+          <dd>{getDrynessPreferenceLabel(preview.drynessPreference)}</dd>
+        </div>
+        <div>
+          <dt className="font-semibold text-[color:var(--foreground)]">Watering guidance</dt>
+          <dd>{preview.wateringGuidance}</dd>
+        </div>
+      </dl>
+      <p className="mt-2 text-xs font-semibold text-[color:var(--muted)]">
+        This is a starting point for your home conditions, not a guaranteed watering schedule.
+      </p>
+      <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+        <button
+          type="button"
+          onClick={onApply}
+          className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full bg-[color:var(--accent)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-95"
+        >
+          Use these care basics
+        </button>
+        <button
+          type="button"
+          onClick={onSkip}
+          className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)]"
+        >
+          Skip for now
+        </button>
+      </div>
+    </div>
+  );
 }
 
 function InitialPhotoIdentificationControls({
@@ -365,8 +471,8 @@ function InitialPhotoIdentificationControls({
             to fill editable fields, retry with a clearer photo, or continue manually.
           </p>
           <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">
-            After you save reviewed names, Plant Care can look for an optional watering starting
-            point on the plant profile.
+            After you accept or enter reviewed names, Plant Care can look for an optional watering
+            starting point before you save.
           </p>
           <p className="mt-1 text-xs leading-5 text-[color:var(--muted)]">
             Plant suggestions powered by Pl@ntNet.
@@ -494,6 +600,7 @@ export function PlantForm({
   rooms = [],
   allowInitialPhoto = false,
   identifyInitialPhotoAction,
+  previewCareProfileAction,
 }: PlantFormProps) {
   const startingState = {
     ...emptyPlantFormState,
@@ -512,7 +619,12 @@ export function PlantForm({
   );
   const [selectedInitialPhoto, setSelectedInitialPhoto] = useState<File | null>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
+  const [carePreviewState, setCarePreviewState] =
+    useState<PreviewCareProfileState>(emptyCarePreviewState);
+  const [carePreviewIdentityKey, setCarePreviewIdentityKey] = useState("");
+  const [careSuggestionSkipped, setCareSuggestionSkipped] = useState(false);
   const [isSubmitTransitionPending, startSubmitTransition] = useTransition();
+  const [isCarePreviewPending, startCarePreviewTransition] = useTransition();
 
   const fieldErrors = state.fieldErrors;
   const submitPending = isPending || isSubmitTransitionPending;
@@ -523,6 +635,16 @@ export function PlantForm({
   const currentStepNumber = currentStepIndex >= 0 ? currentStepIndex + 1 : 1;
   const isFirstStep = visibleStep === steps[0];
   const isReviewStep = visibleStep === "review";
+  const currentCareIdentityKey = createCareIdentityKey(
+    values.commonName,
+    values.scientificName,
+  );
+  const isCarePreviewCurrent =
+    currentCareIdentityKey.length > 2 && carePreviewIdentityKey === currentCareIdentityKey;
+  const matchedCarePreview =
+    isCarePreviewCurrent && carePreviewState.careProfilePreview?.status === "matched"
+      ? carePreviewState.careProfilePreview
+      : null;
 
   const photoPreviewUrl = useMemo(
     () => (selectedInitialPhoto ? URL.createObjectURL(selectedInitialPhoto) : null),
@@ -537,19 +659,58 @@ export function PlantForm({
     };
   }, [photoPreviewUrl]);
 
+  function clearCarePreviewForIdentityChange() {
+    setCarePreviewState(emptyCarePreviewState);
+    setCarePreviewIdentityKey("");
+    setCareSuggestionSkipped(false);
+  }
+
   function updateField(name: keyof PlantFormValues, value: string) {
+    if (name === "commonName" || name === "scientificName") {
+      clearCarePreviewForIdentityChange();
+    }
+
     setValues((current) => ({
       ...current,
       [name]: value,
     }));
   }
 
+  function requestCareProfilePreview(commonName: string, scientificName: string) {
+    if (!previewCareProfileAction) {
+      return;
+    }
+
+    const nextIdentityKey = createCareIdentityKey(commonName, scientificName);
+
+    if (nextIdentityKey.length <= 2) {
+      setCarePreviewState(emptyCarePreviewState);
+      setCarePreviewIdentityKey("");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.set("commonName", commonName);
+    formData.set("scientificName", scientificName);
+    setCareSuggestionSkipped(false);
+    startCarePreviewTransition(() => {
+      void previewCareProfileAction(formData).then((result) => {
+        setCarePreviewIdentityKey(nextIdentityKey);
+        setCarePreviewState(result);
+      });
+    });
+  }
+
   function acceptIdentificationCandidate(candidate: PlantIdentificationCandidate) {
+    const commonName = candidate.commonName ?? values.commonName;
+    const scientificName = candidate.scientificName;
+
     setValues((current) => ({
       ...current,
-      commonName: candidate.commonName ?? current.commonName,
-      scientificName: candidate.scientificName,
+      commonName,
+      scientificName,
     }));
+    requestCareProfilePreview(commonName, scientificName);
   }
 
   function handleInitialPhotoChange(fileList: FileList | null) {
@@ -588,7 +749,12 @@ export function PlantForm({
     const index = steps.indexOf(visibleStep);
 
     if (index < steps.length - 1) {
-      setStep(steps[index + 1]);
+      const nextStep = steps[index + 1];
+      setStep(nextStep);
+
+      if (nextStep === "watering") {
+        requestCareProfilePreview(values.commonName, values.scientificName);
+      }
     }
   }
 
@@ -707,7 +873,7 @@ export function PlantForm({
                       <input
                         name="initialPhoto"
                         type="file"
-                        accept="image/jpeg,image/png,image/webp"
+                        accept="image/jpeg,image/png"
                         onChange={(event) => handleInitialPhotoChange(event.target.files)}
                         className="w-full rounded-[1rem] border border-[color:var(--border)] bg-white/85 px-4 py-3 text-sm font-normal text-[color:var(--foreground)] outline-none transition file:mr-4 file:rounded-full file:border-0 file:bg-[color:var(--accent-soft)] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[color:var(--foreground)] focus:border-[color:var(--accent)] focus:ring-2 focus:ring-[color:var(--accent-soft)]"
                       />
@@ -733,8 +899,9 @@ export function PlantForm({
                     ) : null}
                     <p className="text-sm leading-6 text-[color:var(--muted)]">
                       A photo helps you recognize this plant. Identification suggestions stay
-                      optional, names-only, and editable before saving. Use a JPG, PNG, or WebP
-                      image under {PLANT_PHOTO_MAX_MB} MB.
+                      optional, names-only, and editable before saving. Use a JPG or PNG image
+                      under {PLANT_PHOTO_MAX_MB} MB. WebP is not supported for plant
+                      identification yet.
                     </p>
                     {identifyInitialPhotoAction ? (
                       <InitialPhotoIdentificationControls
@@ -795,6 +962,62 @@ export function PlantForm({
           {visibleStep === "watering" ? (
             <FormSection icon={<DropletIcon className="h-5 w-5" />} title="Watering basics">
               <div className="grid gap-4">
+                {previewCareProfileAction ? (
+                  <div className="rounded-[1.25rem] border border-[color:var(--border-soft)] bg-white/75 p-4">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <p className="text-sm font-semibold text-[color:var(--foreground)]">
+                          Optional watering recommendation
+                        </p>
+                        <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">
+                          If the plant name matches Plant Care&apos;s reviewed profiles, you can
+                          fill a starting cadence before saving.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        disabled={
+                          isCarePreviewPending ||
+                          (!values.commonName.trim() && !values.scientificName.trim())
+                        }
+                        onClick={() =>
+                          requestCareProfilePreview(values.commonName, values.scientificName)
+                        }
+                        className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white px-4 py-2 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)] disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {isCarePreviewPending ? "Checking..." : "Find starting point"}
+                      </button>
+                    </div>
+
+                    {carePreviewState.message ? (
+                      <div className="mt-4 rounded-[1rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950">
+                        {carePreviewState.message}
+                      </div>
+                    ) : null}
+
+                    {matchedCarePreview && !careSuggestionSkipped ? (
+                      <div className="mt-4">
+                        <AddPlantCareSuggestionPanel
+                          preview={matchedCarePreview}
+                          onApply={() => {
+                            setValues((current) => ({
+                              ...current,
+                              wateringIntervalDays: String(matchedCarePreview.cadenceDays),
+                              wateringGuidance: matchedCarePreview.wateringGuidance,
+                            }));
+                          }}
+                          onSkip={() => setCareSuggestionSkipped(true)}
+                        />
+                      </div>
+                    ) : null}
+
+                    {careSuggestionSkipped ? (
+                      <p className="mt-4 rounded-[1rem] border border-[color:var(--border-soft)] bg-white/75 px-4 py-3 text-sm leading-6 text-[color:var(--muted)]">
+                        Recommendation skipped. Manual watering basics remain available below.
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
                 <FormField
                   label="Watering interval in days"
                   name="wateringIntervalDays"

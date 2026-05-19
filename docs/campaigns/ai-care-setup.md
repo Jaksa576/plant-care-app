@@ -1,6 +1,6 @@
 # AI Care Setup Campaign
 
-Status: **implementation complete; pre-merge QA patch validated; manual QA and merge review pending**.
+Status: **implementation complete; follow-up pre-merge QA patch validated; manual QA and merge review pending**.
 
 Pre-merge QA patch note:
 
@@ -8,6 +8,8 @@ Pre-merge QA patch note:
 - Add Plant and plant-profile photo inputs allow mobile users to choose an existing library photo as well as take a new photo where the OS offers it.
 - Care suggestion review is visible for named plants without saved watering basics, not only immediately after Add Plant redirects, and validated in-app fixtures are used if the app-owned care profile tables are empty.
 - Plant-profile Google Calendar status is consolidated into the watering reminder panel as compact connected/not-connected copy with Settings management.
+- Photo inputs intentionally support JPG/PNG only because Pl@ntNet identification accepts JPG/PNG images; WebP is rejected with clear inline copy instead of being advertised.
+- Add Plant can preview a matched internal care profile during the Watering basics step before save when reviewed common/scientific names are already known, and users can explicitly apply or skip the suggested cadence/guidance.
 - Reminders remain optional, care suggestions remain review-only, and applying care basics still updates only editable watering fields.
 
 ## Recommendation
