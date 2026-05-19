@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useState, useTransition } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from "react";
 
 import { CameraIcon, DropletIcon, LeafIcon, RoomIcon } from "@/components/icons";
 import { StatusPill } from "@/components/status-pill";
@@ -629,6 +629,8 @@ export function PlantForm({
   const [fallbackCareAnswer, setFallbackCareAnswer] = useState("");
   const [isSubmitTransitionPending, startSubmitTransition] = useTransition();
   const [isCarePreviewPending, startCarePreviewTransition] = useTransition();
+  const formTopRef = useRef<HTMLDivElement | null>(null);
+  const hasMountedRef = useRef(false);
 
   const fieldErrors = state.fieldErrors;
   const submitPending = isPending || isSubmitTransitionPending;
@@ -671,6 +673,20 @@ export function PlantForm({
       }
     };
   }, [photoPreviewUrl]);
+
+  useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      formTopRef.current?.scrollIntoView({
+        block: "start",
+        behavior: "smooth",
+      });
+    });
+  }, [visibleStep]);
 
   function clearCarePreviewForIdentityChange() {
     setCarePreviewState(emptyCarePreviewState);
@@ -825,7 +841,7 @@ export function PlantForm({
     "Unassigned";
 
   return (
-    <div className="flex flex-col gap-6">
+    <div ref={formTopRef} className="scroll-mt-4 flex flex-col gap-6 sm:scroll-mt-6">
       <section className="border-b border-[color:var(--border-soft)] pb-5">
         <StatusPill>
           {isReviewStep

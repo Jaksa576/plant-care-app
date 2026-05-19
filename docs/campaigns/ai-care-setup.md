@@ -11,6 +11,7 @@ Pre-merge QA patch note:
 - Photo inputs intentionally support JPG/PNG only because Pl@ntNet identification accepts JPG/PNG images; WebP is rejected with clear inline copy instead of being advertised.
 - Add Plant can preview a matched internal care profile during the Watering basics step before save when reviewed common/scientific names are already known, and users can explicitly apply or skip the suggested cadence/guidance.
 - Care setup lives in Add/Edit Plant watering basics instead of a persistent duplicate plant-profile panel. Add/Edit can show matched watering suggestions or a basic plant profile selector before save; the normal Add Plant save path lands on the profile without another care setup panel.
+- Add/Edit Plant step navigation scrolls back to the form header on step changes, including validation-driven jumps, so each step starts at the top on mobile and desktop.
 - Plant-profile care suggestions remain available only as immediate feedback after the user explicitly saves reviewed identification from an existing plant profile.
 - Reminders remain optional, care suggestions remain review-only, and applying care basics still updates only editable watering fields.
 

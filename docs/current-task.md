@@ -17,7 +17,7 @@
 - AI Care Setup Slice 9 is complete: Coverage Wave 2 expands validated care profile coverage to 41 profiles and 101 aliases.
 - AI Care Setup Slice 10 is complete: Coverage Wave 3 expands validated care profile coverage to 56 profiles and 146 aliases and finalizes campaign docs for manual QA.
 - Repo workflow helper optimization is complete as an infrastructure/docs patch and available on this branch.
-- AI Care Setup pre-merge QA patch is in progress to improve identification diagnostics, mobile photo library selection, care suggestion discoverability, plant-profile calendar status placement, JPG/PNG photo format clarity, pre-save Add Plant watering recommendations, and Add/Edit form-based care setup placement.
+- AI Care Setup pre-merge QA patch is in progress to improve identification diagnostics, mobile photo library selection, care suggestion discoverability, plant-profile calendar status placement, JPG/PNG photo format clarity, pre-save Add Plant watering recommendations, Add/Edit form-based care setup placement, and Add/Edit stepped-form scroll behavior.
 
 ## Active Campaign
 
@@ -29,7 +29,7 @@ Campaign source of truth: [AI Care Setup](campaigns/ai-care-setup.md).
 
 AI Care Setup pre-merge QA patch before merge.
 
-Status: second follow-up patch implemented; validation passed; manual QA pending.
+Status: third follow-up patch implemented; validation passed; manual QA pending.
 
 Slice 10 status: completed.
 
@@ -60,6 +60,7 @@ Completed work:
 - Pre-merge QA patch narrows provider/config/photo identification errors, adds safe server diagnostics, removes forced camera capture from plant photo inputs, keeps care suggestions discoverable in setup/edit flows, falls back to validated care fixtures when DB profile tables are empty, and moves Google Calendar status into the watering reminder panel.
 - Follow-up patch intentionally supports JPG/PNG photos only because Pl@ntNet identification accepts JPG/PNG input, and adds pre-save Add Plant care preview so reviewed common/scientific names can show and apply a watering starting point before plant save.
 - Second follow-up patch moves care setup into Add/Edit Plant watering basics, adds basic profile selection when names do not match or are blank, removes the normal post-save duplicate profile care setup panel, and keeps profile care suggestions only as feedback after explicit profile identification saves.
+- Third follow-up patch makes Add/Edit Plant step changes scroll back to the form header so users start each step from the top.
 
 ## Remaining Scope
 
@@ -198,9 +199,18 @@ Second follow-up pre-merge UX patch:
 - `.\scripts\validate.ps1`: passed.
 - Manual browser QA: still needed for Add Plant matched name, accepted AI suggestion, non-matching name, no name, basic profile apply/skip, no duplicate profile setup after save, Edit Plant matched/non-matching/no-name cases, existing watering basics overwrite confirmation, mobile Add Plant step 3, and mobile Edit Plant watering basics.
 
+Third follow-up pre-merge UX patch:
+
+- `npm run typecheck`: passed.
+- `npm run lint`: passed.
+- `npm run build`: passed.
+- `npm run check`: passed.
+- `.\scripts\validate.ps1`: passed.
+- Manual browser QA: still needed for Add Plant step 1 to 2, step 2 to 3, step 3 to review, back navigation, validation jump from review, Edit Plant navigation, mobile viewport, and preserving selected photo, accepted name, care recommendation, and watering fields.
+
 ## Next Recommended Action
 
-Validate and push the second follow-up pre-merge UX patch, then run manual campaign QA against the pushed `codex/ai-care-setup-premerge-qa` branch and merge the reviewed AI Care Setup branch stack.
+Push and verify the third follow-up pre-merge UX patch, then run manual campaign QA against the pushed `codex/ai-care-setup-premerge-qa` branch and merge the reviewed AI Care Setup branch stack.
 
 ## Validation Expectations
 
