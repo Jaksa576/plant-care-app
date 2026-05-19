@@ -366,10 +366,11 @@ function FallbackCareQuestionForm({
   return (
     <div className="mt-4 rounded-[1rem] border border-[color:var(--border-soft)] bg-white/80 p-4">
       <p className="font-semibold text-[color:var(--foreground)]">
-        Try a conservative fallback instead
+        Try a basic plant profile
       </p>
       <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">
-        Choose the closest watering pattern. This will not identify the plant.
+        Not sure what this plant is? Choose the closest type and we&apos;ll suggest a simple watering
+        starting point.
       </p>
 
       <form action={formAction} className="mt-4 flex flex-col gap-3">
@@ -381,7 +382,7 @@ function FallbackCareQuestionForm({
             className="min-h-[var(--tap-target)] rounded-[1rem] border border-[color:var(--border)] bg-white px-4 py-3 text-base font-normal outline-none transition focus:border-[color:var(--accent)] focus:ring-2 focus:ring-[color:var(--accent-soft)]"
           >
             <option value="" disabled>
-              Choose a fallback
+              Choose a basic profile
             </option>
             <option value="cactus">Cactus or very dry plant</option>
             <option value="succulent">Thick, fleshy leaves</option>
@@ -400,7 +401,7 @@ function FallbackCareQuestionForm({
             disabled={isPending}
             className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full bg-[color:var(--accent)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isPending ? "Preparing..." : "Suggest fallback cadence"}
+            {isPending ? "Preparing..." : "Use basic profile"}
           </button>
           <Link
             href={editHref}
@@ -536,48 +537,6 @@ function CandidateReviewForm({
       />
 
     </div>
-  );
-}
-
-export function PlantCareSuggestionPanel({
-  preview,
-  editHref,
-  hasExistingWateringBasics,
-  fallbackCareSuggestionAction,
-  applyCareSuggestionAction,
-}: {
-  preview: SavePlantIdentificationState["careProfilePreview"];
-  editHref: string;
-  hasExistingWateringBasics: boolean;
-  fallbackCareSuggestionAction: (
-    state: SavePlantIdentificationState,
-    formData: FormData,
-  ) => Promise<SavePlantIdentificationState>;
-  applyCareSuggestionAction: (
-    state: ApplyCareSuggestionState,
-    formData: FormData,
-  ) => Promise<ApplyCareSuggestionState>;
-}) {
-  if (!preview) {
-    return null;
-  }
-
-  return (
-    <section className="rounded-[1.5rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] p-5 sm:p-6">
-      <StatusPill>Optional care setup</StatusPill>
-      <h3 className="mt-4 text-xl font-semibold">Review watering starting point</h3>
-      <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
-        This suggestion comes from reviewed internal care profiles. Apply it only if it looks useful
-        for your home, or keep setup manual.
-      </p>
-      <CareProfilePreviewCard
-        preview={preview}
-        editHref={editHref}
-        hasExistingWateringBasics={hasExistingWateringBasics}
-        fallbackCareSuggestionAction={fallbackCareSuggestionAction}
-        applyCareSuggestionAction={applyCareSuggestionAction}
-      />
-    </section>
   );
 }
 

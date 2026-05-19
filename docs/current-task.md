@@ -13,11 +13,11 @@
 - AI Care Setup Slice 5 is complete: matched care profiles can be reviewed, applied, edited first, or skipped without silent overwrite.
 - AI Care Setup Slice 6 is complete: no-match care states can offer lightweight fallback watering questions mapped to reviewed care-group or conservative fallback profiles.
 - AI Care Setup Slice 7 is complete: after applying care basics, users can optionally jump to setup or review the existing app-owned watering reminder.
-- AI Care Setup Slice 8 is complete: Add Plant can carry reviewed names into optional post-save care profile review without requiring AI, care suggestions, reminders, or successful photo upload.
+- AI Care Setup Slice 8 is complete: Add Plant can carry reviewed names into care profile review without requiring AI, care suggestions, reminders, or successful photo upload. The latest pre-merge UX patch moves normal Add Plant care review into the Watering basics step before save.
 - AI Care Setup Slice 9 is complete: Coverage Wave 2 expands validated care profile coverage to 41 profiles and 101 aliases.
 - AI Care Setup Slice 10 is complete: Coverage Wave 3 expands validated care profile coverage to 56 profiles and 146 aliases and finalizes campaign docs for manual QA.
 - Repo workflow helper optimization is complete as an infrastructure/docs patch and available on this branch.
-- AI Care Setup pre-merge QA patch is in progress to improve identification diagnostics, mobile photo library selection, care suggestion discoverability, plant-profile calendar status placement, JPG/PNG photo format clarity, and pre-save Add Plant watering recommendations.
+- AI Care Setup pre-merge QA patch is in progress to improve identification diagnostics, mobile photo library selection, care suggestion discoverability, plant-profile calendar status placement, JPG/PNG photo format clarity, pre-save Add Plant watering recommendations, and Add/Edit form-based care setup placement.
 
 ## Active Campaign
 
@@ -29,7 +29,7 @@ Campaign source of truth: [AI Care Setup](campaigns/ai-care-setup.md).
 
 AI Care Setup pre-merge QA patch before merge.
 
-Status: follow-up patch implemented; validation passed; manual QA pending.
+Status: second follow-up patch implemented; validation passed; manual QA pending.
 
 Slice 10 status: completed.
 
@@ -50,15 +50,16 @@ Completed work:
 - Fallback suggestions use the same reviewable apply/edit/skip care suggestion UI and do not identify the plant.
 - Applying care basics now offers an optional link to set up or review the existing watering reminder panel.
 - Reminder handoff does not auto-create reminders and does not change Google Calendar source-of-truth behavior.
-- Add Plant redirects new plants with reviewed common or scientific names into optional post-save care profile review.
+- Add/Edit Plant watering basics can preview matched care profiles or basic plant profiles before save.
 - Manual Add Plant, photo-optional setup, failed AI, and failed photo upload remain non-blocking.
 - Coverage Wave 2 adds common retail plants, messy aliases, additional species profiles, and genus fallbacks.
 - Seed validation now reports `money plant` and `prayer plant` as intentional ambiguous aliases.
 - Coverage Wave 3 adds broad retail coverage, additional genus fallbacks, common misidentification aliases, and `elephant ear` as an intentional ambiguous alias.
 - Generated seed SQL is current with fixtures.
 - No reminders are created.
-- Pre-merge QA patch narrows provider/config/photo identification errors, adds safe server diagnostics, removes forced camera capture from plant photo inputs, keeps care suggestions visible for named plants without watering basics, falls back to validated care fixtures when DB profile tables are empty, and moves Google Calendar status into the watering reminder panel.
+- Pre-merge QA patch narrows provider/config/photo identification errors, adds safe server diagnostics, removes forced camera capture from plant photo inputs, keeps care suggestions discoverable in setup/edit flows, falls back to validated care fixtures when DB profile tables are empty, and moves Google Calendar status into the watering reminder panel.
 - Follow-up patch intentionally supports JPG/PNG photos only because Pl@ntNet identification accepts JPG/PNG input, and adds pre-save Add Plant care preview so reviewed common/scientific names can show and apply a watering starting point before plant save.
+- Second follow-up patch moves care setup into Add/Edit Plant watering basics, adds basic profile selection when names do not match or are blank, removes the normal post-save duplicate profile care setup panel, and keeps profile care suggestions only as feedback after explicit profile identification saves.
 
 ## Remaining Scope
 
@@ -187,9 +188,19 @@ Follow-up pre-merge QA patch:
 - `.\scripts\validate.ps1`: passed.
 - Manual browser QA: still needed for JPG, PNG, rejected WebP, unsupported file type, accepted identification suggestion to pre-save care recommendation, manual `Pothos` / `Epipremnum aureum` lookup before save, apply/skip recommendation, stale suggestion clearing after identity change, save with and without applied recommendation, mobile picker, and mobile watering step.
 
+Second follow-up pre-merge UX patch:
+
+- `npm run validate:care-profiles`: passed with intentional `money plant`, `prayer plant`, and `elephant ear` ambiguity warnings.
+- `npm run typecheck`: passed.
+- `npm run lint`: passed after escaping JSX copy.
+- `npm run build`: passed.
+- `npm run check`: passed.
+- `.\scripts\validate.ps1`: passed.
+- Manual browser QA: still needed for Add Plant matched name, accepted AI suggestion, non-matching name, no name, basic profile apply/skip, no duplicate profile setup after save, Edit Plant matched/non-matching/no-name cases, existing watering basics overwrite confirmation, mobile Add Plant step 3, and mobile Edit Plant watering basics.
+
 ## Next Recommended Action
 
-Run manual campaign QA against the pushed `codex/ai-care-setup-premerge-qa` branch, then merge the reviewed AI Care Setup branch stack.
+Validate and push the second follow-up pre-merge UX patch, then run manual campaign QA against the pushed `codex/ai-care-setup-premerge-qa` branch and merge the reviewed AI Care Setup branch stack.
 
 ## Validation Expectations
 

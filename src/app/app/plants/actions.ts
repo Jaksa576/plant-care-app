@@ -234,11 +234,14 @@ export async function previewCareProfileForPlantNamesAction(
 ): Promise<PreviewCareProfileState> {
   const commonNameValue = formData.get("commonName");
   const scientificNameValue = formData.get("scientificName");
+  const fallbackCareAnswerValue = formData.get("fallbackCareAnswer");
   const commonName = typeof commonNameValue === "string" ? commonNameValue.trim() : "";
   const scientificName =
     typeof scientificNameValue === "string" ? scientificNameValue.trim() : "";
+  const fallbackCareAnswer =
+    typeof fallbackCareAnswerValue === "string" ? fallbackCareAnswerValue.trim() : "";
 
-  if (!commonName && !scientificName) {
+  if (!commonName && !scientificName && !fallbackCareAnswer) {
     return {
       status: "success",
       message: null,
@@ -249,6 +252,32 @@ export async function previewCareProfileForPlantNamesAction(
   const { supabase } = await getSignedInPlantContext();
 
   try {
+    if (fallbackCareAnswer) {
+      const careGroupAlias = fallbackCareGroupAliases[fallbackCareAnswer];
+
+      if (!careGroupAlias) {
+        return {
+          status: "error",
+          message: "Choose a basic plant profile, or keep setup manual.",
+          careProfilePreview: null,
+        };
+      }
+
+      const careProfilePreview = await getCareProfilePreview(supabase, {
+        careGroupAlias,
+      });
+
+      return {
+        status: careProfilePreview.status === "matched" ? "success" : "error",
+        message:
+          careProfilePreview.status === "matched"
+            ? null
+            : "No basic plant profile is available right now. Manual setup still works.",
+        careProfilePreview:
+          careProfilePreview.status === "matched" ? careProfilePreview : null,
+      };
+    }
+
     const careProfilePreview = await getCareProfilePreview(supabase, {
       commonName,
       scientificName,
@@ -422,20 +451,16 @@ export async function createPlantAction(
 
   if (initialPhoto) {
     const photoSaved = await saveInitialPlantPhoto(supabase, user.id, result.data.id, initialPhoto);
-    const careReviewParam =
-      result.data.common_name || result.data.scientific_name ? "&care=review" : "";
 
     revalidatePath(`/app/plants/${result.data.id}`);
     redirect(
       `/app/plants/${result.data.id}?created=1&photo=${
         photoSaved ? "saved" : "failed"
-      }${careReviewParam}`,
+      }`,
     );
   }
 
-  const careReviewParam = result.data.common_name || result.data.scientific_name ? "&care=review" : "";
-
-  redirect(`/app/plants/${result.data.id}?created=1${careReviewParam}`);
+  redirect(`/app/plants/${result.data.id}?created=1`);
 }
 
 export async function updatePlantAction(

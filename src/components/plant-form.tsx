@@ -369,7 +369,10 @@ function AddPlantCareSuggestionPanel({
 
   return (
     <div className="rounded-[1.25rem] border border-[color:var(--border-soft)] bg-[color:var(--stone)] p-4 text-sm leading-6">
-      <StatusPill>Optional watering starting point</StatusPill>
+      <StatusPill>Suggested watering starting point</StatusPill>
+      <p className="mt-3 text-sm leading-6 text-[color:var(--muted)]">
+        Based on the plant name you entered. You can use this, edit it, or skip it.
+      </p>
       <p className="mt-3 text-base font-semibold text-[color:var(--foreground)]">
         {preview.displayName}
       </p>
@@ -623,6 +626,7 @@ export function PlantForm({
     useState<PreviewCareProfileState>(emptyCarePreviewState);
   const [carePreviewIdentityKey, setCarePreviewIdentityKey] = useState("");
   const [careSuggestionSkipped, setCareSuggestionSkipped] = useState(false);
+  const [fallbackCareAnswer, setFallbackCareAnswer] = useState("");
   const [isSubmitTransitionPending, startSubmitTransition] = useTransition();
   const [isCarePreviewPending, startCarePreviewTransition] = useTransition();
 
@@ -639,12 +643,21 @@ export function PlantForm({
     values.commonName,
     values.scientificName,
   );
+  const isFallbackCarePreview = carePreviewIdentityKey.startsWith("fallback::");
   const isCarePreviewCurrent =
-    currentCareIdentityKey.length > 2 && carePreviewIdentityKey === currentCareIdentityKey;
+    (currentCareIdentityKey.length > 2 && carePreviewIdentityKey === currentCareIdentityKey) ||
+    isFallbackCarePreview;
   const matchedCarePreview =
     isCarePreviewCurrent && carePreviewState.careProfilePreview?.status === "matched"
       ? carePreviewState.careProfilePreview
       : null;
+  const hasEnteredPlantName = Boolean(values.commonName.trim() || values.scientificName.trim());
+  const shouldShowBasicProfile =
+    !matchedCarePreview &&
+    !careSuggestionSkipped &&
+    (!hasEnteredPlantName ||
+      carePreviewState.careProfilePreview?.status === "no_match" ||
+      carePreviewState.status === "idle");
 
   const photoPreviewUrl = useMemo(
     () => (selectedInitialPhoto ? URL.createObjectURL(selectedInitialPhoto) : null),
@@ -663,6 +676,7 @@ export function PlantForm({
     setCarePreviewState(emptyCarePreviewState);
     setCarePreviewIdentityKey("");
     setCareSuggestionSkipped(false);
+    setFallbackCareAnswer("");
   }
 
   function updateField(name: keyof PlantFormValues, value: string) {
@@ -676,14 +690,20 @@ export function PlantForm({
     }));
   }
 
-  function requestCareProfilePreview(commonName: string, scientificName: string) {
+  function requestCareProfilePreview(
+    commonName: string,
+    scientificName: string,
+    fallbackAnswer = "",
+  ) {
     if (!previewCareProfileAction) {
       return;
     }
 
-    const nextIdentityKey = createCareIdentityKey(commonName, scientificName);
+    const nextIdentityKey = fallbackAnswer
+      ? `fallback::${fallbackAnswer}`
+      : createCareIdentityKey(commonName, scientificName);
 
-    if (nextIdentityKey.length <= 2) {
+    if (!fallbackAnswer && nextIdentityKey.length <= 2) {
       setCarePreviewState(emptyCarePreviewState);
       setCarePreviewIdentityKey("");
       return;
@@ -692,6 +712,7 @@ export function PlantForm({
     const formData = new FormData();
     formData.set("commonName", commonName);
     formData.set("scientificName", scientificName);
+    formData.set("fallbackCareAnswer", fallbackAnswer);
     setCareSuggestionSkipped(false);
     startCarePreviewTransition(() => {
       void previewCareProfileAction(formData).then((result) => {
@@ -995,6 +1016,13 @@ export function PlantForm({
                       </div>
                     ) : null}
 
+                    {carePreviewState.careProfilePreview?.status === "no_match" ? (
+                      <p className="mt-4 rounded-[1rem] border border-[color:var(--border-soft)] bg-white/75 px-4 py-3 text-sm leading-6 text-[color:var(--muted)]">
+                        No matching plant profile yet. You can set watering manually or try a
+                        basic plant profile.
+                      </p>
+                    ) : null}
+
                     {matchedCarePreview && !careSuggestionSkipped ? (
                       <div className="mt-4">
                         <AddPlantCareSuggestionPanel
@@ -1008,6 +1036,54 @@ export function PlantForm({
                           }}
                           onSkip={() => setCareSuggestionSkipped(true)}
                         />
+                      </div>
+                    ) : null}
+
+                    {shouldShowBasicProfile ? (
+                      <div className="mt-4 rounded-[1rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] p-4">
+                        <p className="font-semibold text-[color:var(--foreground)]">
+                          Try a basic plant profile
+                        </p>
+                        <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">
+                          Not sure what this plant is? Choose the closest type and we&apos;ll
+                          suggest a simple watering starting point.
+                        </p>
+                        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
+                          <label className="flex max-w-sm flex-1 flex-col gap-2 text-sm font-semibold text-[color:var(--foreground)]">
+                            Basic profile
+                            <select
+                              value={fallbackCareAnswer}
+                              onChange={(event) => setFallbackCareAnswer(event.target.value)}
+                              className="min-h-[var(--tap-target)] rounded-[1rem] border border-[color:var(--border)] bg-white px-4 py-3 text-base font-normal outline-none transition focus:border-[color:var(--accent)] focus:ring-2 focus:ring-[color:var(--accent-soft)]"
+                            >
+                              <option value="">Choose a basic profile</option>
+                              <option value="cactus">Cactus or very dry plant</option>
+                              <option value="succulent">Thick, fleshy leaves</option>
+                              <option value="orchid">Orchid or bark mix</option>
+                              <option value="fern">Fern-like, soft fronds</option>
+                              <option value="moisture_loving">
+                                Likes staying lightly moist
+                              </option>
+                              <option value="palm">Palm-like plant</option>
+                              <option value="tropical">Leafy tropical plant</option>
+                              <option value="unknown">Not sure; start cautiously</option>
+                            </select>
+                          </label>
+                          <button
+                            type="button"
+                            disabled={isCarePreviewPending || !fallbackCareAnswer}
+                            onClick={() =>
+                              requestCareProfilePreview(
+                                values.commonName,
+                                values.scientificName,
+                                fallbackCareAnswer,
+                              )
+                            }
+                            className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white px-4 py-2 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)] disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {isCarePreviewPending ? "Checking..." : "Use basic profile"}
+                          </button>
+                        </div>
                       </div>
                     ) : null}
 

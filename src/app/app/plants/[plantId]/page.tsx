@@ -6,7 +6,6 @@ import {
   archivePlantAction,
   disableWateringReminderAction,
   getFallbackCareSuggestionAction,
-  getCareProfilePreview,
   identifyPlantPhotoAction,
   markWateredAction,
   removePlantPhotoAction,
@@ -25,7 +24,6 @@ import {
   RoomIcon,
 } from "@/components/icons";
 import {
-  PlantCareSuggestionPanel,
   PlantIdentificationPanel,
 } from "@/components/plant-identification-form";
 import { PlantDetailActions } from "@/components/plant-detail-actions";
@@ -71,7 +69,6 @@ type PlantProfilePageProps = {
     updated?: string;
     photo?: string;
     archiveError?: string;
-    care?: string;
   }>;
 };
 
@@ -158,7 +155,6 @@ function PlantProfile({
   reminderError,
   googleCalendarConnection,
   roomLabel,
-  initialCareProfilePreview,
 }: {
   plant: PlantRecord;
   schedule: WateringScheduleState;
@@ -169,7 +165,6 @@ function PlantProfile({
   reminderError: boolean;
   googleCalendarConnection: GoogleCalendarConnectionRecord | null;
   roomLabel: string;
-  initialCareProfilePreview: Awaited<ReturnType<typeof getCareProfilePreview>> | null;
 }) {
   const primaryLabel = getPlantPrimaryLabel(plant);
   const secondaryLabel = getPlantSecondaryLabel(plant);
@@ -279,16 +274,6 @@ function PlantProfile({
         ) : null}
       </section>
 
-      <PlantCareSuggestionPanel
-        preview={initialCareProfilePreview}
-        editHref={`/app/plants/${plant.id}/edit`}
-        hasExistingWateringBasics={Boolean(
-          plant.watering_interval_days || plant.watering_guidance,
-        )}
-        fallbackCareSuggestionAction={getFallbackCareSuggestionAction.bind(null, plant.id)}
-        applyCareSuggestionAction={applyCareSuggestionAction.bind(null, plant.id)}
-      />
-
       <WateringHistorySection events={wateringEvents} showError={wateringStateError} />
 
       <section className="grid gap-5 lg:grid-cols-2">
@@ -341,7 +326,7 @@ function PlantProfile({
 }
 
 export default async function PlantProfilePage({ params, searchParams }: PlantProfilePageProps) {
-  const [{ plantId }, { created, updated, photo, archiveError, care }, authState] = await Promise.all([
+  const [{ plantId }, { created, updated, photo, archiveError }, authState] = await Promise.all([
     params,
     searchParams,
     getAuthState(),
@@ -385,18 +370,6 @@ export default async function PlantProfilePage({ params, searchParams }: PlantPr
       )
     : null;
   const photoUrls = plant ? await createPlantPhotoUrlMap(supabase, [plant]) : {};
-  const canReviewCareSuggestion =
-    plant &&
-    Boolean(plant.common_name || plant.scientific_name) &&
-    !plant.watering_interval_days &&
-    !plant.watering_guidance;
-  const initialCareProfilePreview =
-    plant && (canReviewCareSuggestion || (created === "1" && care === "review"))
-      ? await getCareProfilePreview(supabase, {
-          scientificName: plant.scientific_name ?? undefined,
-          commonName: plant.common_name ?? undefined,
-        })
-      : null;
 
   return (
     <AppShell
@@ -477,7 +450,6 @@ export default async function PlantProfilePage({ params, searchParams }: PlantPr
               reminderError={Boolean(reminderResult?.error)}
               googleCalendarConnection={googleCalendarConnectionResult?.data ?? null}
               roomLabel={roomLabel}
-              initialCareProfilePreview={initialCareProfilePreview}
             />
             <ArchivePlantForm
               action={archivePlantAction.bind(

@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { archivePlantAction, updatePlantAction } from "@/app/app/plants/actions";
+import {
+  archivePlantAction,
+  previewCareProfileForPlantNamesAction,
+  updatePlantAction,
+} from "@/app/app/plants/actions";
 import { AppShell } from "@/components/app-shell";
 import { ArchivePlantForm } from "@/components/archive-plant-form";
 import { PlantForm } from "@/components/plant-form";
@@ -114,6 +118,7 @@ export default async function EditPlantPage({ params, searchParams }: EditPlantP
               description="You can update names, location, notes, and user-editable watering guidance here without turning this slice into watering workflow logic."
               initialValues={toPlantFormValues(plant)}
               rooms={roomsResult.data ?? []}
+              previewCareProfileAction={previewCareProfileForPlantNamesAction}
             />
 
             <ArchivePlantForm

@@ -58,15 +58,16 @@ This document tracks product sequencing and slice status. Stable product directi
 - AI Care Setup Slice 5 reviewable watering starting point UI with explicit apply/edit/skip actions, overwrite confirmation for existing watering basics, and updates limited to editable plant watering fields.
 - AI Care Setup Slice 6 fallback watering setup questions for no-match identity cases, mapped to reviewed care-group or conservative fallback profiles.
 - AI Care Setup Slice 7 optional reminder handoff after applying care basics, using the existing app-owned reminder panel without auto-creating reminders.
-- AI Care Setup Slice 8 Add Plant/photo-first integration that carries reviewed names into post-save care profile review without making AI, care suggestions, reminders, or photo upload required.
+- AI Care Setup Slice 8 Add Plant/photo-first integration that carries reviewed names into care profile review without making AI, care suggestions, reminders, or photo upload required. The latest pre-merge UX patch moves normal Add Plant care review into the Watering basics step before save.
 - AI Care Setup Slice 9 Coverage Wave 2 expansion with 41 profiles, 101 aliases, additional common retail plants, messy aliases, genus fallbacks, and validated ambiguous aliases.
 - AI Care Setup Slice 10 Coverage Wave 3 expansion and QA hardening with 56 profiles, 146 aliases, additional common retail coverage, and campaign docs finalized for manual QA.
 - AI Care Setup pre-merge QA patch for safer identification diagnostics/messages, mobile library photo selection, care suggestion discoverability for named plants without watering basics, empty care-profile-table fixture fallback, and compact calendar status inside the watering reminder panel.
 - AI Care Setup follow-up pre-merge QA patch for intentional JPG/PNG-only photo support and pre-save Add Plant watering recommendations from reviewed common/scientific names.
+- AI Care Setup second follow-up pre-merge UX patch moving care recommendations into Add/Edit Plant watering basics, adding basic profile fallback selection before save, and removing the normal post-save duplicate care setup panel.
 
 ### Active
 
-- AI Care Setup follow-up pre-merge QA patch; validation, branch push verification, manual campaign QA, and merge review remain.
+- AI Care Setup second follow-up pre-merge UX patch; validation passed, with branch push verification, manual campaign QA, and merge review remaining.
 
 ### Planned
 

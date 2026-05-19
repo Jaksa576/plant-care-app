@@ -6,10 +6,12 @@ Pre-merge QA patch note:
 
 - Identification failures now return safer, more specific user messages where possible and emit server-side diagnostics for missing config, invalid image, storage download, provider response, and provider request failures without logging secrets or raw image bytes.
 - Add Plant and plant-profile photo inputs allow mobile users to choose an existing library photo as well as take a new photo where the OS offers it.
-- Care suggestion review is visible for named plants without saved watering basics, not only immediately after Add Plant redirects, and validated in-app fixtures are used if the app-owned care profile tables are empty.
+- Care suggestions are available in Add/Edit Plant watering basics for matched names or basic profile selection, and validated in-app fixtures are used if the app-owned care profile tables are empty.
 - Plant-profile Google Calendar status is consolidated into the watering reminder panel as compact connected/not-connected copy with Settings management.
 - Photo inputs intentionally support JPG/PNG only because Pl@ntNet identification accepts JPG/PNG images; WebP is rejected with clear inline copy instead of being advertised.
 - Add Plant can preview a matched internal care profile during the Watering basics step before save when reviewed common/scientific names are already known, and users can explicitly apply or skip the suggested cadence/guidance.
+- Care setup lives in Add/Edit Plant watering basics instead of a persistent duplicate plant-profile panel. Add/Edit can show matched watering suggestions or a basic plant profile selector before save; the normal Add Plant save path lands on the profile without another care setup panel.
+- Plant-profile care suggestions remain available only as immediate feedback after the user explicitly saves reviewed identification from an existing plant profile.
 - Reminders remain optional, care suggestions remain review-only, and applying care basics still updates only editable watering fields.
 
 ## Recommendation
@@ -1288,7 +1290,7 @@ Manual QA:
 
 - Manual Add Plant: preserved through optional photo/name flow; manual browser QA still needed.
 - Photo selected, no AI: plant creation remains available; manual browser QA still needed.
-- Photo selected, high-confidence AI: reviewed names can trigger post-save care review; manual browser QA still needed.
+- Photo selected, high-confidence AI: reviewed names can trigger Add Plant watering-step care review before save; manual browser QA still needed.
 - Photo selected, low-confidence AI: existing edit/skip paths preserved; manual browser QA still needed.
 - AI provider error: plant creation remains available; manual browser QA still needed.
 - Care suggestion applied: uses existing explicit apply action after save; manual browser QA still needed.
