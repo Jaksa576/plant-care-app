@@ -104,7 +104,7 @@ docs/architecture.md
 docs/roadmap.md
 docs/current-task.md
 docs/campaigns/onboarding-rooms-settings-photo-first-ai.md
-docs/campaigns/ai-care-setup.md
+docs/campaigns/archived/ai-care-setup.md
 ```
 
 Also inspect design references when UI work is included:
@@ -142,7 +142,7 @@ The roadmap lists this campaign as completed and merged, with manual production 
 
 ### AI Care Setup alignment note
 
-`docs/campaigns/ai-care-setup.md` defines the AI care setup campaign focused on:
+`docs/campaigns/archived/ai-care-setup.md` defines the completed AI care setup campaign focused on:
 
 - clearer Pl@ntNet confidence and grouped recommendations
 - internal curated `care_profiles`
@@ -150,13 +150,13 @@ The roadmap lists this campaign as completed and merged, with manual production 
 - reviewable suggested watering/care basics
 - applying only editable plant fields after user action
 
-This campaign should avoid those areas. It may create the safe photo-first/staged-photo foundation that the later AI campaign can reuse.
+This onboarding campaign avoided those areas and created the safe photo-first foundation that AI Care Setup later reused.
 
 ### Doc conflict / stale-area note
 
 There is no direct implementation-status conflict in the hot-path docs.
 
-The main stale-area risk was roadmap visibility. AI Care Setup should be treated as active only when the hot-path roadmap/current-task docs say so.
+The main stale-area risk was roadmap visibility. AI Care Setup is now completed and archived.
 
 ## Scope and non-goals
 

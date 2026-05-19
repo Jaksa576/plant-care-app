@@ -1,6 +1,10 @@
 # AI Care Setup Campaign
 
-Status: **implementation complete; follow-up pre-merge QA patch validated; manual QA and merge review pending**.
+Status: **completed and merged to `main`**.
+
+Archive note:
+
+- This campaign is complete and archived. Hot-path status now lives in [Current Task](../../current-task.md), [Roadmap](../../roadmap.md), and [Architecture](../../architecture.md).
 
 Pre-merge QA patch note:
 
@@ -111,10 +115,10 @@ docs/product.md
 docs/architecture.md
 docs/roadmap.md
 docs/current-task.md
-docs/campaigns/ai-care-setup.md
+docs/campaigns/archived/ai-care-setup.md
 ```
 
-This normalized campaign doc replaces earlier draft/package-style AI Care Setup planning references. Treat this file as the active campaign source of truth.
+This normalized campaign doc replaced earlier draft/package-style AI Care Setup planning references during implementation. It is now archived because the campaign is merged to `main`.
 
 ### Current implemented baseline
 
@@ -835,7 +839,7 @@ Create this campaign doc as the durable source of truth and align hot-path docs 
 
 Scope:
 
-- Create the clean `docs/campaigns/ai-care-setup.md` campaign source of truth from the enhanced campaign draft.
+- Create the clean `docs/campaigns/ai-care-setup.md` campaign source of truth from the enhanced campaign draft. After closeout, this doc was archived at `docs/campaigns/archived/ai-care-setup.md`.
 - Update `docs/current-task.md` so it no longer points to stale active work.
 - Update `docs/roadmap.md` to list this campaign as active.
 - Document all scope, non-goals, profile levels, matching behavior, coverage waves, validation, and stop conditions.
@@ -1484,7 +1488,7 @@ Every slice should update:
 
 ```txt
 docs/current-task.md
-docs/campaigns/ai-care-setup.md
+docs/campaigns/archived/ai-care-setup.md
 ```
 
 Update `docs/architecture.md` when:

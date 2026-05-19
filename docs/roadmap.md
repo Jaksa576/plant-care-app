@@ -64,14 +64,20 @@ This document tracks product sequencing and slice status. Stable product directi
 - AI Care Setup pre-merge QA patch for safer identification diagnostics/messages, mobile library photo selection, care suggestion discoverability for named plants without watering basics, empty care-profile-table fixture fallback, and compact calendar status inside the watering reminder panel.
 - AI Care Setup follow-up pre-merge QA patch for intentional JPG/PNG-only photo support and pre-save Add Plant watering recommendations from reviewed common/scientific names.
 - AI Care Setup second follow-up pre-merge UX patch moving care recommendations into Add/Edit Plant watering basics, adding basic profile fallback selection before save, and removing the normal post-save duplicate care setup panel.
+- AI Care Setup final pre-merge UX patch for Add/Edit Plant step navigation that scrolls back to the form header on step changes.
+- Internal care profile database with `care_profiles`, `care_profile_aliases`, species/genus/care-group/fallback levels, ambiguity-safe lookup, validated seed fixtures, generated seed SQL, and 56 reviewed practical profiles with 146 aliases.
+- Care profile matching by exact species, synonym, common-name alias, genus, explicit care group, and conservative fallback/basic profile selection.
+- Add/Edit Plant watering starting point suggestions that apply only editable `plants.watering_interval_days` and `plants.watering_guidance` after user review.
+- Clearer Pl@ntNet confidence and grouping with match percentages, conservative labels, grouped same-common-name recommendations, compact alternate scientific details, and safer low-confidence/manual copy.
+- AI Care Setup campaign merged to `main`.
 
 ### Active
 
-- AI Care Setup second follow-up pre-merge UX patch; validation passed, with branch push verification, manual campaign QA, and merge review remaining.
+- Manual production verification of the merged `main` experience.
 
 ### Planned
 
-- No additional AI Care Setup implementation slices are planned before manual QA and merge review.
+- Select the next campaign after production verification.
 
 ### Deferred
 
@@ -85,6 +91,7 @@ This document tracks product sequencing and slice status. Stable product directi
 Merged campaign:
 
 - [Onboarding, Rooms, Settings, and Photo-First Add Plant](campaigns/archived/onboarding-rooms-settings-photo-first-ai.md)
+- [AI Care Setup](campaigns/archived/ai-care-setup.md)
 
 Completed campaigns:
 
@@ -94,7 +101,7 @@ Completed campaigns:
 
 Active campaign:
 
-- [AI Care Setup](campaigns/ai-care-setup.md)
+- None.
 
 ## Phase 0: Foundation
 
