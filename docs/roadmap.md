@@ -61,11 +61,12 @@ This document tracks product sequencing and slice status. Stable product directi
 - AI Care Setup Slice 8 Add Plant/photo-first integration that carries reviewed names into care profile review without making AI, care suggestions, reminders, or photo upload required. The latest pre-merge UX patch moves normal Add Plant care review into the Watering basics step before save.
 - AI Care Setup Slice 9 Coverage Wave 2 expansion with 41 profiles, 101 aliases, additional common retail plants, messy aliases, genus fallbacks, and validated ambiguous aliases.
 - AI Care Setup Slice 10 Coverage Wave 3 expansion and QA hardening with 56 profiles, 146 aliases, additional common retail coverage, and campaign docs finalized for manual QA.
+- Internal care profile library follow-up expansion with 111 profiles, 344 aliases, broader practical houseplant coverage, regenerated seed SQL, and validated intentional ambiguity warnings.
 - AI Care Setup pre-merge QA patch for safer identification diagnostics/messages, mobile library photo selection, care suggestion discoverability for named plants without watering basics, empty care-profile-table fixture fallback, and compact calendar status inside the watering reminder panel.
 - AI Care Setup follow-up pre-merge QA patch for intentional JPG/PNG-only photo support and pre-save Add Plant watering recommendations from reviewed common/scientific names.
 - AI Care Setup second follow-up pre-merge UX patch moving care recommendations into Add/Edit Plant watering basics, adding basic profile fallback selection before save, and removing the normal post-save duplicate care setup panel.
 - AI Care Setup final pre-merge UX patch for Add/Edit Plant step navigation that scrolls back to the form header on step changes.
-- Internal care profile database with `care_profiles`, `care_profile_aliases`, species/genus/care-group/fallback levels, ambiguity-safe lookup, validated seed fixtures, generated seed SQL, and 56 reviewed practical profiles with 146 aliases.
+- Internal care profile database with `care_profiles`, `care_profile_aliases`, species/genus/care-group/fallback levels, ambiguity-safe lookup, validated seed fixtures, generated seed SQL, and 111 reviewed practical profiles with 344 aliases.
 - Care profile matching by exact species, synonym, common-name alias, genus, explicit care group, and conservative fallback/basic profile selection.
 - Add/Edit Plant watering starting point suggestions that apply only editable `plants.watering_interval_days` and `plants.watering_guidance` after user review.
 - Clearer Pl@ntNet confidence and grouping with match percentages, conservative labels, grouped same-common-name recommendations, compact alternate scientific details, and safer low-confidence/manual copy.
