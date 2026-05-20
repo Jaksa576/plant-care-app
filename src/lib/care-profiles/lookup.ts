@@ -1,4 +1,8 @@
-import { getNormalizedGenus, normalizeCareProfileName } from "@/lib/care-profiles/normalize";
+import {
+  getNormalizedGenus,
+  getScientificNameCandidates,
+  normalizeCareProfileName,
+} from "@/lib/care-profiles/normalize";
 import { MINIMAL_CARE_PROFILES } from "@/lib/care-profiles/seed";
 import type {
   CareProfileAliasType,
@@ -117,30 +121,34 @@ export function findCareProfileMatch(
   input: CareProfileMatchInput,
   profiles: CareProfileWithAliases[] = MINIMAL_CARE_PROFILES,
 ): CareProfileMatchResult {
-  const normalizedScientificName = normalizeCareProfileName(input.scientificName);
-  const exactScientificProfiles = normalizedScientificName
-    ? findProfilesByAcceptedScientificName(profiles, normalizedScientificName)
-    : [];
-  const exactScientificMatch = toMatchResult(
-    exactScientificProfiles,
-    "scientific",
-    normalizedScientificName,
-  );
+  const scientificNameCandidates = getScientificNameCandidates(input.scientificName);
 
-  if (exactScientificMatch.status !== "no_match") {
-    return exactScientificMatch;
+  for (const normalizedScientificName of scientificNameCandidates) {
+    const exactScientificMatch = toMatchResult(
+      findProfilesByAcceptedScientificName(profiles, normalizedScientificName),
+      "scientific",
+      normalizedScientificName,
+    );
+
+    if (exactScientificMatch.status !== "no_match") {
+      return exactScientificMatch;
+    }
   }
 
-  const scientificAliasMatch = matchNormalizedName(profiles, normalizedScientificName, "scientific");
+  for (const normalizedScientificName of scientificNameCandidates) {
+    const scientificAliasMatch = matchNormalizedName(profiles, normalizedScientificName, "scientific");
 
-  if (scientificAliasMatch.status !== "no_match") {
-    return scientificAliasMatch;
+    if (scientificAliasMatch.status !== "no_match") {
+      return scientificAliasMatch;
+    }
   }
 
-  const synonymMatch = matchNormalizedName(profiles, normalizedScientificName, "synonym");
+  for (const normalizedScientificName of scientificNameCandidates) {
+    const synonymMatch = matchNormalizedName(profiles, normalizedScientificName, "synonym");
 
-  if (synonymMatch.status !== "no_match") {
-    return synonymMatch;
+    if (synonymMatch.status !== "no_match") {
+      return synonymMatch;
+    }
   }
 
   const normalizedCommonName = normalizeCareProfileName(input.commonName);

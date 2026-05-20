@@ -19,9 +19,9 @@ Completed campaign archive: [AI Care Setup](campaigns/archived/ai-care-setup.md)
 
 ## Active Slice
 
-Internal care profile gap-first patch for common missing/basic plant names.
+Internal care profile QA patch for failed spider plant, moth orchid, and corn plant matches.
 
-Status: implemented and validating on `codex/care-profile-gap-patch`; no new campaign.
+Status: implemented and validating on `codex/care-profile-qa-scientific-fix`; no new campaign.
 
 ## Completed Work
 
@@ -41,6 +41,10 @@ Status: implemented and validating on `codex/care-profile-gap-patch`; no new cam
 - Strengthened orchid matching by keeping Phalaenopsis as the beginner/default orchid profile, adding grocery/supermarket orchid aliases, and adding conservative special-medium starters for Dendrobium, Oncidium, Cattleya, Paphiopedilum, and Cymbidium.
 - Strengthened corn plant coverage on the existing `Dracaena fragrans` profile with cornstalk dracaena, mass cane, cane plant, happy plant, and Massangeana aliases plus more cautious cane/root sogginess guidance.
 - Added missing common profiles for money tree, lucky bamboo, Norfolk Island pine, Triostar stromanthe, Ctenanthe, Ming aralia, and false aralia.
+- Patched three failed QA care-profile cases: spider plant / `Chlorophytum capense`, moth orchid / `Phalaenopsis x singuliflora`, and corn plant / `Dracaena fragrans`.
+- Added exact scientific aliases for `Chlorophytum capense`, `Phalaenopsis × singuliflora`, `Phalaenopsis x singuliflora`, and `Phalaenopsis singuliflora`.
+- Hardened scientific-name matching by deriving safe normalized candidates for full scientific names, hybrid-marker-cleaned names, and genus/species binomials before falling back to genus matching; no broad fuzzy lookup or common-name similarity matching was added.
+- Final care profile coverage is 123 profiles and 411 aliases.
 - Improved Pl@ntNet identification clarity with percentages, conservative confidence labels, same-common-name grouping, alternate scientific details, and safer retry/manual copy.
 - Added reviewed-identity care matching for exact species, synonym, common name, genus, care group, ambiguous, and no-match states.
 - Added Add/Edit Plant watering setup suggestions from matched care profiles or basic profile fallback selection before save.
@@ -95,6 +99,15 @@ Care profile gap-first patch validation on `codex/care-profile-gap-patch`:
 - `.\scripts\validate.ps1`: passed, including `npm run typecheck`, `npm run lint`, and `npm run build`.
 - `npm test`: no `test` script is defined.
 
+Care profile QA scientific-name patch validation on `codex/care-profile-qa-scientific-fix`:
+
+- `npm run validate:care-profiles`: passed at 123 profiles / 411 aliases with intentional `money plant`, `prayer plant`, `angel wing begonia`, `elephant ear`, and `zebra plant` ambiguity warnings.
+- Targeted local verification passed: spider plant / `Chlorophytum capense` matched `species-chlorophytum-comosum`; moth orchid / `Phalaenopsis × singuliflora` matched `genus-phalaenopsis`; corn plant / `Dracaena fragrans` matched `species-dracaena-fragrans`.
+- `npm run generate:care-profile-seed`: passed and regenerated `supabase/seed_care_profiles.sql`.
+- Second `npm run validate:care-profiles`: passed with the same intentional ambiguity warnings.
+- `.\scripts\validate.ps1`: passed, including `npm run typecheck`, `npm run lint`, and `npm run build`.
+- `npm test`: no `test` script is defined.
+
 Most recent reviewed branch validation before merge:
 
 - `npm run validate:care-profiles`: passed with intentional `money plant`, `prayer plant`, and `elephant ear` ambiguity warnings.
@@ -123,7 +136,7 @@ Most recent reviewed branch validation before merge:
 
 ## Next Recommended Action
 
-Review the gap-first care profile patch and apply the regenerated `supabase/seed_care_profiles.sql` after merge/deployment so the database-backed lookup receives the new 123-profile / 407-alias coverage.
+Review the QA scientific-name patch and apply the regenerated `supabase/seed_care_profiles.sql` after merge/deployment so the database-backed lookup receives the new 123-profile / 411-alias coverage.
 
 ## Validation Expectations
 

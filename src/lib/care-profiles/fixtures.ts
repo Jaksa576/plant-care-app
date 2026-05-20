@@ -246,6 +246,7 @@ export const CARE_PROFILE_FIXTURES: CareProfileFixture[] = [
       alias("Spider ivy", "common", 30),
       alias("Variegated spider plant", "common", 30),
       alias("Bonnie spider plant", "common", 30),
+      alias("Chlorophytum capense", "scientific", 20),
       alias("Chlorophytum comosum 'Vittatum'", "synonym", 30),
       alias("Chlorophytum comosum 'Variegatum'", "synonym", 30),
     ],
@@ -342,6 +343,9 @@ export const CARE_PROFILE_FIXTURES: CareProfileFixture[] = [
       alias("Phalaenopsis", "common", 20),
       alias("Grocery store orchid", "common", 30),
       alias("Supermarket orchid", "common", 30),
+      alias("Phalaenopsis × singuliflora", "scientific", 20),
+      alias("Phalaenopsis x singuliflora", "synonym", 20),
+      alias("Phalaenopsis singuliflora", "synonym", 30),
     ],
   ),
   genusCommon(
