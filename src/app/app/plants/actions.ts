@@ -11,6 +11,7 @@ import {
   getFallbackCareProfile,
   MINIMAL_CARE_PROFILES,
 } from "@/lib/care-profiles";
+import { careProfileFixtureAliasRows } from "@/lib/care-profiles/fixtures";
 import { listCareProfiles } from "@/lib/care-profiles/data";
 import type {
   CareProfileMatchType,
@@ -140,6 +141,47 @@ function logCareProfileDiagnostic(
   });
 }
 
+const fixtureProfileCount = MINIMAL_CARE_PROFILES.length;
+const fixtureAliasCount = careProfileFixtureAliasRows().length;
+
+function getCareProfileAliasCount(profiles: CareProfileWithAliases[]) {
+  return profiles.reduce((total, profile) => total + profile.aliases.length, 0);
+}
+
+function getRuntimeCareProfiles(profileResult: Awaited<ReturnType<typeof listCareProfiles>>) {
+  const dbProfiles = profileResult.data ?? [];
+  const dbProfileCount = dbProfiles.length;
+  const dbAliasCount = getCareProfileAliasCount(dbProfiles);
+  const hasDatabaseProfiles = dbProfileCount > 0;
+  const hasStaleDatabaseCoverage =
+    hasDatabaseProfiles && (dbProfileCount < fixtureProfileCount || dbAliasCount < fixtureAliasCount);
+
+  if (!hasDatabaseProfiles) {
+    logCareProfileDiagnostic("using-validated-fixture-fallback", {
+      dbProfileCount: profileResult.data?.length ?? null,
+      dbAliasCount: profileResult.data ? dbAliasCount : null,
+      fixtureProfileCount,
+      fixtureAliasCount,
+      hasDbError: Boolean(profileResult.error),
+    });
+
+    return MINIMAL_CARE_PROFILES;
+  }
+
+  if (hasStaleDatabaseCoverage) {
+    logCareProfileDiagnostic("stale-database-care-profiles", {
+      dbProfileCount,
+      dbAliasCount,
+      fixtureProfileCount,
+      fixtureAliasCount,
+    });
+
+    return MINIMAL_CARE_PROFILES;
+  }
+
+  return dbProfiles;
+}
+
 async function getSignedInPlantContext() {
   const authState = await getAuthState();
 
@@ -172,14 +214,7 @@ export async function getCareProfilePreview(
   },
 ): Promise<CareProfilePreview> {
   const profileResult = await listCareProfiles(supabase);
-  const hasDatabaseProfiles = Boolean(profileResult.data && profileResult.data.length > 0);
-  if (!hasDatabaseProfiles) {
-    logCareProfileDiagnostic("using-validated-fixture-fallback", {
-      dbProfileCount: profileResult.data?.length ?? null,
-      hasDbError: Boolean(profileResult.error),
-    });
-  }
-  const profiles = hasDatabaseProfiles ? profileResult.data : MINIMAL_CARE_PROFILES;
+  const profiles = getRuntimeCareProfiles(profileResult);
   const careProfiles = profiles as CareProfileWithAliases[];
   const match = findCareProfileMatch(input, careProfiles);
 

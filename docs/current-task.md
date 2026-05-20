@@ -45,6 +45,9 @@ Status: implemented and validating on `codex/care-profile-qa-scientific-fix`; no
 - Added exact scientific aliases for `Chlorophytum capense`, `Phalaenopsis × singuliflora`, `Phalaenopsis x singuliflora`, and `Phalaenopsis singuliflora`.
 - Hardened scientific-name matching by deriving safe normalized candidates for full scientific names, hybrid-marker-cleaned names, and genus/species binomials before falling back to genus matching; no broad fuzzy lookup or common-name similarity matching was added.
 - Final care profile coverage is 123 profiles and 411 aliases.
+- Diagnosed the app/fixture mismatch: local lookup verification used validated fixture data, while the actual app runtime prefers Supabase-backed care profiles whenever database coverage is non-empty.
+- Added runtime stale-seed hardening so empty or stale Supabase care-profile coverage logs a diagnostic and falls back to the validated fixture library rather than silently returning no match.
+- Added `scripts/verify-care-profile-runtime-matches.mjs` to query configured Supabase care-profile tables, compare DB coverage with fixture coverage, and verify the three QA cases against both direct DB data and the effective runtime source.
 - Improved Pl@ntNet identification clarity with percentages, conservative confidence labels, same-common-name grouping, alternate scientific details, and safer retry/manual copy.
 - Added reviewed-identity care matching for exact species, synonym, common name, genus, care group, ambiguous, and no-match states.
 - Added Add/Edit Plant watering setup suggestions from matched care profiles or basic profile fallback selection before save.
@@ -108,6 +111,19 @@ Care profile QA scientific-name patch validation on `codex/care-profile-qa-scien
 - `.\scripts\validate.ps1`: passed, including `npm run typecheck`, `npm run lint`, and `npm run build`.
 - `npm test`: no `test` script is defined.
 
+Care profile runtime DB verification and stale-seed hardening patch on `codex/care-profile-qa-scientific-fix`:
+
+- Confirmed `getCareProfilePreview` previously used Supabase-backed profiles whenever `listCareProfiles` returned any database profiles.
+- Confirmed previous targeted verification used the fixture-backed `MINIMAL_CARE_PROFILES` path, not Supabase-backed runtime data.
+- `npm run validate:care-profiles`: passed at 123 profiles / 411 aliases with the existing intentional ambiguity warnings.
+- `npm run generate:care-profile-seed`: passed and regenerated `supabase/seed_care_profiles.sql`.
+- Second `npm run validate:care-profiles`: passed with the same intentional ambiguity warnings.
+- `node scripts/verify-care-profile-runtime-matches.mjs`: passed for the effective runtime source. Observed DB coverage was 0 profiles / 0 aliases with no `SUPABASE_SERVICE_ROLE_KEY` configured, so the direct DB match checks returned no match and the effective runtime source was `validated-fixtures`.
+- `.\scripts\validate.ps1`: passed, including `npm run typecheck`, `npm run lint`, and `npm run build`.
+- `npm test`: no `test` script is defined.
+- Fixture coverage remains 123 profiles / 411 aliases.
+- The configured QA/preview database still needs `supabase/seed_care_profiles.sql` applied or verified with service-role access so authenticated runtime DB coverage reaches 123 profiles / 411 aliases.
+
 Most recent reviewed branch validation before merge:
 
 - `npm run validate:care-profiles`: passed with intentional `money plant`, `prayer plant`, and `elephant ear` ambiguity warnings.
@@ -136,7 +152,7 @@ Most recent reviewed branch validation before merge:
 
 ## Next Recommended Action
 
-Review the QA scientific-name patch and apply the regenerated `supabase/seed_care_profiles.sql` after merge/deployment so the database-backed lookup receives the new 123-profile / 411-alias coverage.
+Review the runtime stale-seed hardening patch, apply or verify `supabase/seed_care_profiles.sql` in the QA/preview database, and rerun `node scripts/verify-care-profile-runtime-matches.mjs` with `SUPABASE_SERVICE_ROLE_KEY` available to confirm DB-backed coverage reaches 123 profiles / 411 aliases.
 
 ## Validation Expectations
 
