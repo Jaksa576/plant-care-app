@@ -19,9 +19,9 @@ Completed campaign archive: [AI Care Setup](campaigns/archived/ai-care-setup.md)
 
 ## Active Slice
 
-Internal care profile library expansion for practical watering-first houseplant coverage.
+Internal care profile gap-first patch for common missing/basic plant names.
 
-Status: implemented and validating on `codex/care-profile-library-expansion`; no new campaign.
+Status: implemented and validating on `codex/care-profile-gap-patch`; no new campaign.
 
 ## Completed Work
 
@@ -36,6 +36,11 @@ Status: implemented and validating on `codex/care-profile-library-expansion`; no
 - Expanded coverage through Waves 1, 2, and 3 to 56 profiles and 146 aliases, with intentional ambiguity warnings for unsafe common-name collisions.
 - Expanded the internal care profile library to 111 profiles and 344 aliases, adding practical common houseplant coverage across aroids, hoyas, peperomias, succulents, ferns, palms, upright foliage, flowering plants, and conservative special-medium carnivorous plants.
 - Regenerated `supabase/seed_care_profiles.sql` from `src/lib/care-profiles/fixtures.ts`.
+- Expanded gap-first coverage to 123 profiles and 407 aliases.
+- Added spider plant aliases to the existing `Chlorophytum comosum` profile, including airplane plant, ribbon plant, spider ivy, variegated spider plant, Bonnie spider plant, and common cultivar names.
+- Strengthened orchid matching by keeping Phalaenopsis as the beginner/default orchid profile, adding grocery/supermarket orchid aliases, and adding conservative special-medium starters for Dendrobium, Oncidium, Cattleya, Paphiopedilum, and Cymbidium.
+- Strengthened corn plant coverage on the existing `Dracaena fragrans` profile with cornstalk dracaena, mass cane, cane plant, happy plant, and Massangeana aliases plus more cautious cane/root sogginess guidance.
+- Added missing common profiles for money tree, lucky bamboo, Norfolk Island pine, Triostar stromanthe, Ctenanthe, Ming aralia, and false aralia.
 - Improved Pl@ntNet identification clarity with percentages, conservative confidence labels, same-common-name grouping, alternate scientific details, and safer retry/manual copy.
 - Added reviewed-identity care matching for exact species, synonym, common name, genus, care group, ambiguous, and no-match states.
 - Added Add/Edit Plant watering setup suggestions from matched care profiles or basic profile fallback selection before save.
@@ -81,6 +86,15 @@ Care profile library expansion validation on `codex/care-profile-library-expansi
 - `.\scripts\validate.ps1`: passed, including `npm run typecheck`, `npm run lint`, and `npm run build`.
 - `npm test`: no `test` script is defined.
 
+Care profile gap-first patch validation on `codex/care-profile-gap-patch`:
+
+- Baseline `npm run validate:care-profiles`: passed at 111 profiles / 344 aliases with intentional `money plant`, `prayer plant`, `angel wing begonia`, `elephant ear`, and `zebra plant` ambiguity warnings.
+- `npm run validate:care-profiles`: passed at 123 profiles / 407 aliases with intentional `money plant`, `prayer plant`, `angel wing begonia`, `elephant ear`, and `zebra plant` ambiguity warnings.
+- `npm run generate:care-profile-seed`: passed and regenerated `supabase/seed_care_profiles.sql`.
+- Second `npm run validate:care-profiles`: passed with the same intentional ambiguity warnings.
+- `.\scripts\validate.ps1`: passed, including `npm run typecheck`, `npm run lint`, and `npm run build`.
+- `npm test`: no `test` script is defined.
+
 Most recent reviewed branch validation before merge:
 
 - `npm run validate:care-profiles`: passed with intentional `money plant`, `prayer plant`, and `elephant ear` ambiguity warnings.
@@ -109,7 +123,7 @@ Most recent reviewed branch validation before merge:
 
 ## Next Recommended Action
 
-Review the expanded care profile library and apply the regenerated `supabase/seed_care_profiles.sql` after merge/deployment so the database-backed lookup receives the new 111-profile / 344-alias coverage.
+Review the gap-first care profile patch and apply the regenerated `supabase/seed_care_profiles.sql` after merge/deployment so the database-backed lookup receives the new 123-profile / 407-alias coverage.
 
 ## Validation Expectations
 
