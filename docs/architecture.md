@@ -274,11 +274,11 @@ Plant detail keeps plant-level reminder editing and shows compact Google Calenda
 
 ### Photos And AI
 
-Plant photos use a private Supabase Storage bucket named `plant-photos`. V1 supports one primary photo per plant by storing a durable object path on `plants.primary_photo_path`; `primary_photo_uploaded_at` records when the current reference was saved.
+Plant photos use a private Supabase Storage bucket named `plant-photos`. V1 supports one primary photo per plant by storing a durable object path on `plants.primary_photo_path`; `primary_photo_uploaded_at` records when the current reference was saved. User-facing photo validation allows JPG/PNG images under 12 MB; the Next server action/proxy body limit keeps a 16 MB buffer for multipart overhead.
 
 Photo object paths use `{user_id}/{plant_id}/primary-{uuid}.{extension}`. Storage policies allow select, insert, update, and delete only when the first path segment matches `auth.uid()` and the second path segment maps to a plant owned by that user. Inserts and updates require the plant to be active. Server actions still verify plant ownership before upload, replace, or remove.
 
-The bucket is private. Server-rendered app surfaces create short-lived signed URLs for display on plant profiles and dashboard cards. Missing or unavailable photos fall back to calm local UI; photos are optional and user-owned.
+The bucket is private. Server-rendered app surfaces create short-lived signed URLs for display on plant profiles and dashboard cards. Missing or unavailable photos fall back to calm local UI; photos are optional and user-owned. Plant profile photo replace offers explicit JPG/PNG library and camera choices, uses camera capture where the browser supports it, and submits only the selected file as the primary photo.
 
 Photo-first Add Plant does not use public storage or staged photo records. The user may choose a JPG/PNG library photo or take a new JPG/PNG photo where the OS offers it before save and sees an immediate browser-local preview. WebP is intentionally not advertised or accepted because the Pl@ntNet identification provider accepts JPG/PNG input. The same selected file can be sent to Pl@ntNet for optional pre-save identification and is reattached to the final plant save, avoiding a second upload. The server first creates an owned plant record, then uploads the optional photo to the existing owner-scoped `{user_id}/{plant_id}/...` private Storage path and stores it as the primary photo. If the optional photo upload fails, the plant remains saved and the user can add the photo from the plant profile. Abandoning Add Plant before save leaves no staged object to clean up.
 

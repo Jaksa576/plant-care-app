@@ -19,12 +19,17 @@ Completed campaign archive: [AI Care Setup](campaigns/archived/ai-care-setup.md)
 
 ## Active Slice
 
-Production verification / post-merge cleanup.
+Post-merge production/mobile QA patch: mobile photo source choices and photo identification crash hardening.
 
-Status: AI Care Setup merged to `main`; final validation and operational deployment verification are in progress.
+Status: implemented and validated on `codex/mobile-photo-identification-patch`; no new campaign.
 
 ## Completed Work
 
+- Patched Add Plant photo-first setup to offer explicit JPG/PNG `Choose from library` and `Take a photo` choices while preserving one selected photo, one preview, optional pre-save identification, and final primary-photo save behavior.
+- Patched plant profile photo replace to offer the same explicit library/camera choices without submitting two same-name file inputs.
+- Kept the user-facing photo max at 12 MB and raised the Next server action/proxy body limit to 16 MB for multipart overhead.
+- Hardened profile and Add Plant identification so storage/download/provider surprises return calm inline errors instead of hard page failures, with safe diagnostics only.
+- Hardened the Pl@ntNet boundary around multipart construction, provider fetch, JSON parsing, response shape, and PNG/JPG filename selection.
 - Added app-owned `care_profiles` and `care_profile_aliases` reference tables with RLS read policies for authenticated users.
 - Added care profile levels: `species`, `genus`, `care_group`, and `fallback`.
 - Added care profile normalization, alias lookup, ambiguity-safe matching helpers, typed fixtures, seed validation, seed SQL generation, and `supabase/seed_care_profiles.sql`.
@@ -45,6 +50,17 @@ Status: AI Care Setup merged to `main`; final validation and operational deploym
 - Verify production Add/Edit Plant care suggestion flow after deployment, including matched names, no-match basic profile fallback, no-name basic profile fallback, apply/skip, overwrite confirmation, and manual setup.
 
 ## Validation Results
+
+Mobile photo identification patch validation:
+
+- `npm run validate:care-profiles`: passed with intentional `money plant`, `prayer plant`, and `elephant ear` ambiguity warnings.
+- `npm run typecheck`: passed.
+- `npm run lint`: passed.
+- `npm run build`: passed via `npm run check` and `.\scripts\validate.ps1`.
+- `npm run check`: passed.
+- `.\scripts\validate.ps1`: passed.
+- `npm test`: no `test` script is defined.
+- Targeted source checks confirmed explicit Add Plant/profile `Choose from library` and `Take a photo` controls, `capture="environment"` only on camera inputs, no duplicate same-name file inputs in the patched forms, and 16 MB Next body/proxy limits.
 
 Final merged `main` validation:
 
@@ -67,6 +83,9 @@ Most recent reviewed branch validation before merge:
 
 ## Manual QA Needed
 
+- Android Pixel / real mobile browser QA remains needed for OS camera/library picker behavior because local Browser plugin automation failed in this Windows sandbox and the protected app requires an authenticated browser session.
+- Local dev server smoke check: `http://localhost:3000/login` returned 200 OK, and protected Add Plant route redirected to login when unauthenticated.
+- Required real-device checks: Add Plant library photo preview, Add Plant camera photo preview, Identify from photo for both paths, save plant for both paths, existing profile replace from library, existing profile replace from camera, profile identification from each replaced photo, unsupported type, oversized file, provider unavailable/missing config, and missing profile photo.
 - Add Plant with matching name shows watering suggestion during watering step.
 - Add Plant with no match offers basic plant profile fallback during watering step.
 - Add Plant with no common/scientific name offers basic plant profile fallback.

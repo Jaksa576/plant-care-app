@@ -622,6 +622,8 @@ export function PlantForm({
   );
   const [selectedInitialPhoto, setSelectedInitialPhoto] = useState<File | null>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
+  const libraryPhotoInputRef = useRef<HTMLInputElement | null>(null);
+  const cameraPhotoInputRef = useRef<HTMLInputElement | null>(null);
   const [carePreviewState, setCarePreviewState] =
     useState<PreviewCareProfileState>(emptyCarePreviewState);
   const [carePreviewIdentityKey, setCarePreviewIdentityKey] = useState("");
@@ -750,8 +752,17 @@ export function PlantForm({
     requestCareProfilePreview(commonName, scientificName);
   }
 
-  function handleInitialPhotoChange(fileList: FileList | null) {
+  function handleInitialPhotoChange(fileList: FileList | null, source: "library" | "camera") {
     const file = fileList?.[0] ?? null;
+
+    if (source === "library" && cameraPhotoInputRef.current) {
+      cameraPhotoInputRef.current.value = "";
+    }
+
+    if (source === "camera" && libraryPhotoInputRef.current) {
+      libraryPhotoInputRef.current.value = "";
+    }
+
     setSelectedInitialPhoto(file);
     setPhotoError(file ? getPlantPhotoValidationError(file) : null);
   }
@@ -905,16 +916,44 @@ export function PlantForm({
               <div className="grid gap-3">
                 {allowInitialPhoto ? (
                   <>
-                    <label className="flex flex-col gap-2 text-sm font-medium text-[color:var(--foreground)]">
-                      <span>Optional photo</span>
-                      <input
-                        name="initialPhoto"
-                        type="file"
-                        accept="image/jpeg,image/png"
-                        onChange={(event) => handleInitialPhotoChange(event.target.files)}
-                        className="w-full rounded-[1rem] border border-[color:var(--border)] bg-white/85 px-4 py-3 text-sm font-normal text-[color:var(--foreground)] outline-none transition file:mr-4 file:rounded-full file:border-0 file:bg-[color:var(--accent-soft)] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[color:var(--foreground)] focus:border-[color:var(--accent)] focus:ring-2 focus:ring-[color:var(--accent-soft)]"
-                      />
-                    </label>
+                    <fieldset className="grid gap-3">
+                      <legend className="text-sm font-semibold text-[color:var(--foreground)]">
+                        Optional photo
+                      </legend>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <label className="flex cursor-pointer flex-col gap-3 rounded-[1.25rem] border border-[color:var(--border)] bg-white/80 p-4 text-sm leading-6 transition hover:bg-[color:var(--accent-soft)]">
+                          <span className="font-semibold">Choose from library</span>
+                          <span className="text-[color:var(--muted)]">
+                            Pick an existing JPG or PNG photo from this device.
+                          </span>
+                          <input
+                            ref={libraryPhotoInputRef}
+                            type="file"
+                            accept="image/jpeg,image/png"
+                            onChange={(event) =>
+                              handleInitialPhotoChange(event.target.files, "library")
+                            }
+                            className="w-full text-sm font-normal text-[color:var(--foreground)] file:mr-4 file:rounded-full file:border-0 file:bg-[color:var(--accent-soft)] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[color:var(--foreground)]"
+                          />
+                        </label>
+                        <label className="flex cursor-pointer flex-col gap-3 rounded-[1.25rem] border border-[color:var(--border)] bg-white/80 p-4 text-sm leading-6 transition hover:bg-[color:var(--accent-soft)]">
+                          <span className="font-semibold">Take a photo</span>
+                          <span className="text-[color:var(--muted)]">
+                            Open the device camera where your browser supports it.
+                          </span>
+                          <input
+                            ref={cameraPhotoInputRef}
+                            type="file"
+                            accept="image/jpeg,image/png"
+                            capture="environment"
+                            onChange={(event) =>
+                              handleInitialPhotoChange(event.target.files, "camera")
+                            }
+                            className="w-full text-sm font-normal text-[color:var(--foreground)] file:mr-4 file:rounded-full file:border-0 file:bg-[color:var(--accent-soft)] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[color:var(--foreground)]"
+                          />
+                        </label>
+                      </div>
+                    </fieldset>
                     {photoPreviewUrl ? (
                       <div className="overflow-hidden rounded-[1.25rem] border border-[color:var(--border-soft)] bg-[color:var(--stone)]">
                         {/* eslint-disable-next-line @next/next/no-img-element */}

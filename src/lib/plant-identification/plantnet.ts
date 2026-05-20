@@ -55,6 +55,10 @@ function getConfidenceLabel(score: number): PlantIdentificationCandidate["confid
   return "low";
 }
 
+function getPlantNetImageFilename(imageType: string) {
+  return imageType === "image/png" ? "plant-photo.png" : "plant-photo.jpg";
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
@@ -160,11 +164,11 @@ export async function identifyPlantWithPlantNet(
   endpoint.searchParams.set("lang", "en");
   endpoint.searchParams.set("nb-results", String(PLANTNET_RESULT_LIMIT));
 
-  const formData = new FormData();
-  formData.append("images", image, "plant-photo.jpg");
-  formData.append("organs", "auto");
-
   try {
+    const formData = new FormData();
+    formData.append("images", image, getPlantNetImageFilename(image.type));
+    formData.append("organs", "auto");
+
     const response = await fetch(endpoint, {
       method: "POST",
       body: formData,
@@ -185,8 +189,42 @@ export async function identifyPlantWithPlantNet(
       };
     }
 
-    const payload: unknown = await response.json();
-    const results = isRecord(payload) && Array.isArray(payload.results) ? payload.results : [];
+    let payload: unknown;
+
+    try {
+      payload = await response.json();
+    } catch (error) {
+      logPlantNetDiagnostic("provider-json-parse-error", {
+        project: config.project,
+        imageType: image.type || null,
+        imageSize: image.size,
+        errorName: error instanceof Error ? error.name : "unknown",
+        errorMessage: error instanceof Error ? error.message : "unknown parse error",
+      });
+
+      return {
+        data: null,
+        error:
+          "Plant identification provider returned an unreadable response. Your plant details are still editable.",
+      };
+    }
+
+    if (!isRecord(payload) || !Array.isArray(payload.results)) {
+      logPlantNetDiagnostic("provider-unexpected-response-shape", {
+        project: config.project,
+        imageType: image.type || null,
+        imageSize: image.size,
+        hasPayload: Boolean(payload),
+      });
+
+      return {
+        data: null,
+        error:
+          "Plant identification provider returned an unexpected response. Your plant details are still editable.",
+      };
+    }
+
+    const results = payload.results;
     const candidates = results
       .map(normalizePlantNetCandidate)
       .filter((candidate): candidate is PlantIdentificationCandidate => Boolean(candidate))

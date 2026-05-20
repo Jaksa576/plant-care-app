@@ -38,6 +38,7 @@ import { createPlantFormErrorState, parsePlantFormData } from "@/lib/plants/form
 import {
   getPlantPhotoPath,
   getPlantPhotoValidationError,
+  PLANT_PHOTO_ALLOWED_TYPES,
   PLANT_PHOTO_BUCKET,
 } from "@/lib/plants/photos";
 import { emptyPlantFormState, type PlantFormState } from "@/lib/plants/types";
@@ -741,9 +742,26 @@ export async function identifyPlantPhotoAction(
     };
   }
 
-  const photoResult = await supabase.storage
-    .from(PLANT_PHOTO_BUCKET)
-    .download(plant.primary_photo_path);
+  let photoResult;
+
+  try {
+    photoResult = await supabase.storage
+      .from(PLANT_PHOTO_BUCKET)
+      .download(plant.primary_photo_path);
+  } catch (error) {
+    logIdentificationDiagnostic("storage-photo-download-threw", {
+      flow: "plant-profile",
+      plantId: plant.id,
+      errorMessage: error instanceof Error ? error.message : "unknown storage error",
+    });
+
+    return {
+      status: "error",
+      message:
+        "This photo could not be loaded for identification. Your plant details are still editable.",
+      candidates: [],
+    };
+  }
 
   if (photoResult.error || !photoResult.data) {
     logIdentificationDiagnostic("storage-photo-download-failed", {
@@ -760,12 +778,53 @@ export async function identifyPlantPhotoAction(
     };
   }
 
-  const identifyResult = await identifyPlantWithPlantNet(plantNetConfig, photoResult.data);
+  if (
+    !PLANT_PHOTO_ALLOWED_TYPES.includes(
+      photoResult.data.type as (typeof PLANT_PHOTO_ALLOWED_TYPES)[number],
+    )
+  ) {
+    logIdentificationDiagnostic("unsupported-profile-photo", {
+      flow: "plant-profile",
+      plantId: plant.id,
+      fileType: photoResult.data.type || null,
+      fileSize: photoResult.data.size,
+    });
+
+    return {
+      status: "error",
+      message:
+        "Use a JPG or PNG photo for identification. Your plant details are still editable.",
+      candidates: [],
+    };
+  }
+
+  let identifyResult;
+
+  try {
+    identifyResult = await identifyPlantWithPlantNet(plantNetConfig, photoResult.data);
+  } catch (error) {
+    logIdentificationDiagnostic("provider-identification-threw", {
+      flow: "plant-profile",
+      plantId: plant.id,
+      fileType: photoResult.data.type || null,
+      fileSize: photoResult.data.size,
+      errorMessage: error instanceof Error ? error.message : "unknown provider error",
+    });
+
+    return {
+      status: "error",
+      message:
+        "Identification is unavailable right now. Your plant details are still editable.",
+      candidates: [],
+    };
+  }
 
   if (identifyResult.error || !identifyResult.data) {
     logIdentificationDiagnostic("provider-identification-failed", {
       flow: "plant-profile",
       plantId: plant.id,
+      fileType: photoResult.data.type || null,
+      fileSize: photoResult.data.size,
       providerMessage: identifyResult.error ?? null,
     });
 
@@ -844,7 +903,25 @@ export async function identifyInitialPlantPhotoAction(
     };
   }
 
-  const identifyResult = await identifyPlantWithPlantNet(plantNetConfig, file);
+  let identifyResult;
+
+  try {
+    identifyResult = await identifyPlantWithPlantNet(plantNetConfig, file);
+  } catch (error) {
+    logIdentificationDiagnostic("provider-identification-threw", {
+      flow: "add-plant",
+      fileType: file.type || null,
+      fileSize: file.size,
+      errorMessage: error instanceof Error ? error.message : "unknown provider error",
+    });
+
+    return {
+      status: "error",
+      message:
+        "Identification is unavailable right now. Your plant details are still editable.",
+      candidates: [],
+    };
+  }
 
   if (identifyResult.error || !identifyResult.data) {
     logIdentificationDiagnostic("provider-identification-failed", {
