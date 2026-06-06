@@ -19,15 +19,23 @@ Completed campaign archive: [AI Care Setup](campaigns/archived/ai-care-setup.md)
 
 ## Active Slice
 
-Mobile plant setup + reminders polish patch for GitHub issues #2, #3, #4, #5, #7, #8, #9, and #10.
+Focused mobile/PWA follow-up patch for GitHub issues #1 and #2.
 
-Status: implemented on `codex/mobile-setup-reminders-polish`; validation in progress. No active campaign.
+Status: implemented on `codex/pwa-launch-mobile-ai-focus`; validation in progress. No active campaign.
+
+Readiness notes:
+
+- GitHub still shows #1 and #2 open; PR #11 was merged into this worktree and addressed the broader setup/reminder polish, but #1 was explicitly deferred and #2 had residual scroll/focus QA gaps.
+- The current code still made installed PWA launches start at `/`, which is reproducibly the public landing path from code inspection; changing the manifest start URL to `/app?source=pwa` is a narrow fix because `/app` already has signed-in dashboard rendering and signed-out middleware/login protection.
+- The current plant setup/identification flow lives in `src/components/plant-form.tsx`, rendered by `src/app/app/plants/new/page.tsx`, with pre-save identification wired through `identifyInitialPlantPhotoAction`.
+- No shared scroll/focus helper or button primitive exists for this flow, so this patch keeps a local helper and narrowly updates the relevant AI/setup actions only.
 
 Scope notes:
 
-- Addressed setup continuity, compact setup progress, simplified photo input, identification nickname autofill, shorter AI/setup copy, reminder mode switching, setup reminder defaults, and scoped mobile press/result feedback.
-- Deferred #1 PWA launch route because it is outside this patch and not clearly tied to the setup/reminder flow.
-- Added only a small nullable user preference column for new-plant reminder defaults; no broad schema redesign or external calendar rewrite.
+- Address #1 by starting installed PWA launches at the protected app dashboard route while preserving normal `/` public landing behavior and `/app` signed-out redirect behavior.
+- Address the remaining #2 residual behavior by smoothing/focusing Identify from photo results, Use these names populated name fields, and Use these care basics populated watering/care fields.
+- Keep AI suggestions assistive and editable; no setup redesign, reminder rework, new AI feature, data-model change, or calendar-sync change.
+- Issues #3-#10 may still need repository maintenance cleanup if GitHub state was not updated after the merged comprehensive setup/reminders PR.
 
 ## Completed Work
 
@@ -61,7 +69,6 @@ Scope notes:
 - Added optional reminder handoff after applying care basics without auto-creating reminders or changing Google Calendar source-of-truth behavior.
 - Preserved manual setup, optional photo/AI/care/reminder paths, private photo handling, route protection, and user-owned data boundaries.
 - Merged final pre-merge QA patches for safer identification diagnostics, JPG/PNG photo format clarity, mobile library photo selection, no duplicate profile care setup after Add Plant save, compact calendar status placement, and Add/Edit stepped-form scroll-to-top behavior.
-
 
 Mobile plant setup + reminders polish patch on `codex/mobile-setup-reminders-polish`:
 
