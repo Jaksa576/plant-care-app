@@ -16,7 +16,7 @@ This document describes implemented technical shape and architectural boundaries
 
 - `/` is a public landing page.
 - `/login` provides Supabase email sign-in and sign-up.
-- `/app` is the protected signed-in app area.
+- `/app` is the protected signed-in app area. The PWA manifest starts installed app launches at `/app?source=pwa`, so signed-in users open on the dashboard while signed-out users still pass through protected-route middleware to `/login`; ordinary browser visits to `/` remain the public landing page.
 - `/app/onboarding` is the protected, skippable setup route for signed-in users who have no plants and have not completed onboarding. It can also be revisited from Settings.
 - `/app/plants` is the protected redesigned Plants tab for browsing the full active collection by room.
 - `/app/plants/[plantId]` is the protected redesigned plant detail/profile inspector for a single user-owned plant.
@@ -292,7 +292,7 @@ AI-assisted identification uses Pl@ntNet for optional plant name suggestions. Re
 
 The provider boundary lives in `src/lib/plant-identification/plantnet.ts`. Server actions verify plant ownership, download the owned private photo bytes from Supabase Storage, and send those bytes to `POST /v2/identify/{project}` as multipart form data with `images` and `organs=auto`. The app does not expose the API key to browser code and does not send Pl@ntNet public or signed Supabase URLs. Identification failures return safe, more specific messages for missing config, invalid/empty images, storage download failures, provider response failures, and provider request failures where possible. Server-side diagnostics log failure category, flow, status, file type/size, or storage/provider error text without logging provider secrets or raw image bytes.
 
-Add Plant also supports optional pre-save Pl@ntNet identification from the selected initial photo. That flow verifies a signed-in user, validates the submitted JPG/PNG image, sends the transient file bytes to Pl@ntNet server-side, and returns only normalized candidate names to the client. It does not upload a staged object, create a draft plant, persist raw provider responses, or expose provider credentials. A user must choose a suggestion before common/scientific name fields are filled, and those fields remain editable before final plant save. Accepted or manually entered reviewed names can trigger optional internal care profile matching before save.
+Add Plant also supports optional pre-save Pl@ntNet identification from the selected initial photo. That flow verifies a signed-in user, validates the submitted JPG/PNG image, sends the transient file bytes to Pl@ntNet server-side, and returns only normalized candidate names to the client. It does not upload a staged object, create a draft plant, persist raw provider responses, or expose provider credentials. A user must choose a suggestion before common/scientific name fields are filled, and those fields remain editable before final plant save. On mobile, successful identification smooth-scrolls/focuses the result region, accepted names smooth-scroll/focus the editable names region, and applied care basics smooth-scroll/focus the editable watering interval/guidance region without trapping keyboard focus. Accepted or manually entered reviewed names can trigger optional internal care profile matching before save.
 
 Pl@ntNet responses are normalized into transient candidates with:
 

@@ -508,12 +508,30 @@ function getReminderDateFromInterval(intervalDays: string) {
   return getDateInputDaysFromToday(1);
 }
 
+function scrollAndFocusSection(
+  element: HTMLElement | null,
+  options: ScrollIntoViewOptions = { block: "start", behavior: "smooth" },
+) {
+  if (!element) {
+    return;
+  }
+
+  window.requestAnimationFrame(() => {
+    element.scrollIntoView(options);
+    window.setTimeout(() => {
+      element.focus({ preventScroll: true });
+    }, 180);
+  });
+}
+
 function AddPlantCareSuggestionPanel({
   preview,
+  applied,
   onApply,
   onSkip,
 }: {
   preview: Extract<CareProfilePreview, { status: "matched" }>;
+  applied: boolean;
   onApply: () => void;
   onSkip: () => void;
 }) {
@@ -555,8 +573,9 @@ function AddPlantCareSuggestionPanel({
           type="button"
           onClick={onApply}
           className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full bg-[color:var(--accent)] px-4 py-2 text-sm font-semibold text-white transition active:scale-[0.98] hover:opacity-95"
+          aria-describedby={applied ? "care-basics-applied-status" : undefined}
         >
-          Use these care basics
+          {applied ? "Care basics copied" : "Use these care basics"}
         </button>
         <button
           type="button"
@@ -566,6 +585,14 @@ function AddPlantCareSuggestionPanel({
           Skip for now
         </button>
       </div>
+      {applied ? (
+        <p
+          id="care-basics-applied-status"
+          className="mt-3 text-sm font-semibold leading-6 text-[color:var(--accent-ink)]"
+        >
+          Care basics copied into the editable fields below.
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -593,20 +620,20 @@ function InitialPhotoIdentificationControls({
   const [reviewMessage, setReviewMessage] = useState<string | null>(null);
   const [localMessage, setLocalMessage] = useState<string | null>(null);
   const resultRef = useRef<HTMLDivElement | null>(null);
+  const [acceptedCandidateKey, setAcceptedCandidateKey] = useState<string | null>(null);
   const hasCandidates = state.candidates.length > 0 && showCandidates;
   const identifyPending = isPending || isIdentifyTransitionPending;
 
   useEffect(() => {
     if (state.status === "success" || hasCandidates) {
-      window.requestAnimationFrame(() => {
-        resultRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
-      });
+      scrollAndFocusSection(resultRef.current, { block: "start", behavior: "smooth" });
     }
   }, [hasCandidates, state.status]);
 
   function handleIdentifyClick() {
     setShowCandidates(true);
     setReviewMessage(null);
+    setAcceptedCandidateKey(null);
 
     if (!selectedPhoto) {
       setLocalMessage("Choose a photo before asking for identification help.");
@@ -662,7 +689,8 @@ function InitialPhotoIdentificationControls({
         <div
           ref={resultRef}
           tabIndex={-1}
-          className={`mt-4 rounded-[1rem] border px-4 py-3 text-sm leading-6 outline-none ${
+          aria-live="polite"
+          className={`mt-4 scroll-mt-24 rounded-[1rem] border px-4 py-3 text-sm leading-6 outline-none focus:ring-2 focus:ring-[color:var(--accent-soft)] ${
             state.status === "success"
               ? "border-emerald-200 bg-emerald-50 text-emerald-950"
               : "border-amber-200 bg-amber-50 text-amber-950"
@@ -673,10 +701,18 @@ function InitialPhotoIdentificationControls({
       ) : null}
 
       {hasCandidates ? (
-        <div ref={state.message ? undefined : resultRef} className="mt-4 grid gap-3">
-          {state.candidates.map((candidate) => (
+        <div
+          ref={state.message ? undefined : resultRef}
+          tabIndex={state.message ? undefined : -1}
+          aria-label="Identification results"
+          className="mt-4 grid scroll-mt-24 gap-3 outline-none focus:ring-2 focus:ring-[color:var(--accent-soft)]"
+        >
+          {state.candidates.map((candidate) => {
+            const candidateKey = `${candidate.scientificName}-${candidate.commonName ?? "no-common"}`;
+
+            return (
             <div
-              key={`${candidate.scientificName}-${candidate.commonName ?? "no-common"}`}
+              key={candidateKey}
               className="rounded-[1rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-4"
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -707,17 +743,19 @@ function InitialPhotoIdentificationControls({
                   type="button"
                   onClick={() => {
                     onAcceptCandidate(candidate);
+                    setAcceptedCandidateKey(candidateKey);
                     setReviewMessage(
                       "Suggestion copied into the editable name fields. Review it before saving.",
                     );
                   }}
                   className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white px-4 py-2 text-sm font-semibold transition active:scale-[0.98] hover:bg-[color:var(--accent-soft)]"
                 >
-                  Use these names
+                  {acceptedCandidateKey === candidateKey ? "Names copied" : "Use these names"}
                 </button>
               </div>
             </div>
-          ))}
+            );
+          })}
           <button
             type="button"
             onClick={() => {
@@ -801,6 +839,9 @@ export function PlantForm({
   const [isSubmitTransitionPending, startSubmitTransition] = useTransition();
   const [isCarePreviewPending, startCarePreviewTransition] = useTransition();
   const formTopRef = useRef<HTMLDivElement | null>(null);
+  const namesSectionRef = useRef<HTMLDivElement | null>(null);
+  const careBasicsSectionRef = useRef<HTMLDivElement | null>(null);
+  const [appliedCareBasicsKey, setAppliedCareBasicsKey] = useState<string | null>(null);
   const hasMountedRef = useRef(false);
 
   const fieldErrors = state.fieldErrors;
@@ -875,6 +916,10 @@ export function PlantForm({
       clearCarePreviewForIdentityChange();
     }
 
+    if (name === "wateringIntervalDays" || name === "wateringGuidance") {
+      setAppliedCareBasicsKey(null);
+    }
+
     setValues((current) => ({
       ...current,
       [name]: value,
@@ -913,6 +958,14 @@ export function PlantForm({
     });
   }
 
+  function focusNamesSection() {
+    scrollAndFocusSection(namesSectionRef.current, { block: "start", behavior: "smooth" });
+  }
+
+  function focusCareBasicsSection() {
+    scrollAndFocusSection(careBasicsSectionRef.current, { block: "start", behavior: "smooth" });
+  }
+
   function acceptIdentificationCandidate(candidate: PlantIdentificationCandidate) {
     const commonName = candidate.commonName ?? values.commonName;
     const scientificName = candidate.scientificName;
@@ -925,6 +978,7 @@ export function PlantForm({
       scientificName,
     }));
     requestCareProfilePreview(commonName, scientificName);
+    focusNamesSection();
   }
 
   function handleInitialPhotoChange(fileList: FileList | null, source: "library" | "camera") {
@@ -1173,7 +1227,12 @@ export function PlantForm({
                   </>
                 ) : null}
 
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div
+                  ref={namesSectionRef}
+                  tabIndex={-1}
+                  aria-label="Editable plant names"
+                  className="grid scroll-mt-24 gap-4 rounded-[1.25rem] outline-none focus:ring-2 focus:ring-[color:var(--accent-soft)] sm:grid-cols-2"
+                >
                   <FormField
                     label="Nickname"
                     name="nickname"
@@ -1265,12 +1324,15 @@ export function PlantForm({
                       <div className="mt-4">
                         <AddPlantCareSuggestionPanel
                           preview={matchedCarePreview}
+                          applied={appliedCareBasicsKey === carePreviewIdentityKey}
                           onApply={() => {
                             setValues((current) => ({
                               ...current,
                               wateringIntervalDays: String(matchedCarePreview.cadenceDays),
                               wateringGuidance: matchedCarePreview.wateringGuidance,
                             }));
+                            setAppliedCareBasicsKey(carePreviewIdentityKey);
+                            focusCareBasicsSection();
                           }}
                           onSkip={() => setCareSuggestionSkipped(true)}
                         />
@@ -1332,22 +1394,29 @@ export function PlantForm({
                     ) : null}
                   </div>
                 ) : null}
-                <FormField
-                  label="Watering interval in days"
-                  name="wateringIntervalDays"
-                  value={values.wateringIntervalDays}
-                  onChange={(value) => updateField("wateringIntervalDays", value)}
-                  error={fieldErrors.wateringIntervalDays}
-                  placeholder="7"
-                />
-                <FormField
-                  label="Watering guidance"
-                  name="wateringGuidance"
-                  value={values.wateringGuidance}
-                  onChange={(value) => updateField("wateringGuidance", value)}
-                  placeholder="Let the top inch dry out first."
-                  rows={4}
-                />
+                <div
+                  ref={careBasicsSectionRef}
+                  tabIndex={-1}
+                  aria-label="Editable watering interval and care basics"
+                  className="grid scroll-mt-24 gap-4 rounded-[1.25rem] outline-none focus:ring-2 focus:ring-[color:var(--accent-soft)]"
+                >
+                  <FormField
+                    label="Watering interval in days"
+                    name="wateringIntervalDays"
+                    value={values.wateringIntervalDays}
+                    onChange={(value) => updateField("wateringIntervalDays", value)}
+                    error={fieldErrors.wateringIntervalDays}
+                    placeholder="7"
+                  />
+                  <FormField
+                    label="Watering guidance"
+                    name="wateringGuidance"
+                    value={values.wateringGuidance}
+                    onChange={(value) => updateField("wateringGuidance", value)}
+                    placeholder="Let the top inch dry out first."
+                    rows={4}
+                  />
+                </div>
                 {showReminderSetup ? (
                   <SetupReminderChoice
                     enabled={setupReminderEnabled}

@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: "Plant Care",
     description:
       "A personal plant care app for tracking watering, rooms, photos, and notes.",
-    start_url: "/",
+    start_url: "/app?source=pwa",
     scope: "/",
     display: "standalone",
     background_color: "#FBF8F1",
