@@ -416,6 +416,52 @@ function getOptionalInitialPhoto(formData: FormData) {
   return file;
 }
 
+type SetupReminderInput = {
+  enabled: boolean;
+  reminderMode: "after_watering" | "fixed_schedule";
+  nextReminderDate: string;
+};
+
+function parseSetupReminderFromForm(
+  formData: FormData,
+  parsed: ReturnType<typeof parsePlantFormData> & { success: true },
+): { reminder: SetupReminderInput | null; error: string | null } {
+  const enabledValue = formData.get("setupReminderEnabled");
+
+  if (enabledValue !== "on") {
+    return { reminder: null, error: null };
+  }
+
+  const modeValue = formData.get("setupReminderMode");
+  const reminderMode = modeValue === "fixed_schedule" ? "fixed_schedule" : "after_watering";
+  const dateValue = formData.get("setupReminderDate");
+  const nextReminderDate = typeof dateValue === "string" ? dateValue.trim() : "";
+
+  if (!nextReminderDate) {
+    return { reminder: null, error: "Choose a next reminder date or turn reminders off." };
+  }
+
+  if (nextReminderDate < getTodayDateInputValue()) {
+    return { reminder: null, error: "Choose today or a future date for the reminder." };
+  }
+
+  if (reminderMode === "after_watering" && !parsed.plantInput.watering_interval_days) {
+    return {
+      reminder: null,
+      error: "Add a watering interval before using after-watering reminders.",
+    };
+  }
+
+  return {
+    reminder: {
+      enabled: true,
+      reminderMode,
+      nextReminderDate,
+    },
+    error: null,
+  };
+}
+
 async function saveInitialPlantPhoto(
   supabase: SupabaseClient,
   userId: string,
@@ -462,6 +508,14 @@ export async function createPlantAction(
     }
   }
 
+  const setupReminder = parseSetupReminderFromForm(formData, parsed);
+
+  if (setupReminder.error) {
+    return createPlantFormErrorState(parsed.values, setupReminder.error, {
+      wateringIntervalDays: setupReminder.error,
+    });
+  }
+
   const { supabase, user } = await getSignedInPlantContext();
   const roomResult = await resolvePlantRoomFromForm(supabase, user.id, parsed);
 
@@ -481,6 +535,18 @@ export async function createPlantAction(
       parsed.values,
       result.error ?? "We couldn't save this plant yet.",
     );
+  }
+
+  if (setupReminder.reminder) {
+    const reminderResult = await upsertWateringReminderForPlant(supabase, user.id, result.data.id, {
+      enabled: true,
+      reminder_mode: setupReminder.reminder.reminderMode,
+      next_reminder_date: setupReminder.reminder.nextReminderDate,
+    });
+
+    if (reminderResult.data) {
+      await syncWateringReminderToGoogleCalendar(supabase, user.id, result.data, reminderResult.data);
+    }
   }
 
   revalidatePath("/app");

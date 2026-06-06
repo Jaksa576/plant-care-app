@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from "react";
 
-import { CameraIcon, DropletIcon, LeafIcon, RoomIcon } from "@/components/icons";
+import { CameraIcon, DropletIcon, ImageIcon, LeafIcon, RoomIcon } from "@/components/icons";
 import { StatusPill } from "@/components/status-pill";
 import type {
   CareProfilePreview,
@@ -32,6 +32,9 @@ type PlantFormProps = {
     formData: FormData,
   ) => Promise<PlantIdentificationState>;
   previewCareProfileAction?: (formData: FormData) => Promise<PreviewCareProfileState>;
+  showReminderSetup?: boolean;
+  defaultReminderEnabled?: boolean;
+  calendarConnected?: boolean;
 };
 
 type ReviewItemProps = {
@@ -41,6 +44,7 @@ type ReviewItemProps = {
 };
 
 type PlantFormStep = "details" | "room" | "watering" | "review";
+type SetupReminderMode = "after_watering" | "fixed_schedule";
 type RoomChoice = "unassigned" | "existing" | "new";
 
 function FormField({
@@ -289,6 +293,125 @@ function FormSection({
   );
 }
 
+function SetupProgressIndicator({ step }: { step: PlantFormStep }) {
+  const stageIndex = step === "details" ? 0 : step === "room" ? 1 : 2;
+  const stages = ["Photo/name", "Room", "Watering"];
+
+  return (
+    <div aria-label="Plant setup progress" className="mt-4 grid gap-2">
+      <div className="flex items-center gap-2">
+        {stages.map((label, index) => {
+          const isCurrent = index === stageIndex;
+          const isComplete = index < stageIndex || step === "review";
+
+          return (
+            <div key={label} className="flex flex-1 items-center gap-2">
+              <span
+                className={`h-2 flex-1 rounded-full transition ${
+                  isCurrent || isComplete
+                    ? "bg-[color:var(--accent)]"
+                    : "bg-[color:var(--border-soft)]"
+                }`}
+              />
+              <span className="sr-only">
+                {label}: {isComplete ? "complete" : isCurrent ? "current" : "not started"}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--muted)]">
+        {step === "review" ? "Review" : `Step ${stageIndex + 1} of 3 · ${stages[stageIndex]}`}
+      </p>
+    </div>
+  );
+}
+
+function SetupReminderChoice({
+  enabled,
+  mode,
+  nextDate,
+  hasInterval,
+  calendarConnected,
+  onEnabledChange,
+  onModeChange,
+}: {
+  enabled: boolean;
+  mode: SetupReminderMode;
+  nextDate: string;
+  hasInterval: boolean;
+  calendarConnected: boolean;
+  onEnabledChange: (enabled: boolean) => void;
+  onModeChange: (mode: SetupReminderMode) => void;
+}) {
+  return (
+    <div className="rounded-[1.25rem] border border-[color:var(--border-soft)] bg-white/75 p-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-sm font-semibold text-[color:var(--foreground)]">Reminder</p>
+          <p className="mt-1 text-sm leading-6 text-[color:var(--muted)]">
+            Keep an app reminder for this plant. You can change it later.
+          </p>
+        </div>
+        <label className="inline-flex min-h-[var(--tap-target)] w-fit items-center gap-2 rounded-full border border-[color:var(--border)] bg-[color:var(--surface-strong)] px-4 py-2 text-sm font-semibold transition active:scale-[0.98]">
+          <input
+            type="checkbox"
+            checked={enabled}
+            onChange={(event) => onEnabledChange(event.target.checked)}
+          />
+          {enabled ? "On" : "Off"}
+        </label>
+      </div>
+
+      {enabled ? (
+        <div className="mt-4 grid gap-3">
+          <fieldset className="grid gap-3 sm:grid-cols-2">
+            <legend className="sr-only">Reminder timing</legend>
+            <label
+              className={`flex gap-3 rounded-[1rem] border p-3 text-sm leading-6 transition active:scale-[0.99] ${
+                hasInterval
+                  ? "border-[color:var(--border)] bg-[color:var(--surface-strong)]"
+                  : "border-[color:var(--border-soft)] bg-[color:var(--stone)] opacity-75"
+              }`}
+            >
+              <input
+                type="radio"
+                checked={mode === "after_watering"}
+                onChange={() => onModeChange("after_watering")}
+                disabled={!hasInterval}
+                className="mt-1"
+              />
+              <span>
+                <span className="block font-semibold">After I water</span>
+                <span className="text-[color:var(--muted)]">
+                  {hasInterval ? "Uses the watering interval." : "Add an interval to enable."}
+                </span>
+              </span>
+            </label>
+            <label className="flex gap-3 rounded-[1rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-3 text-sm leading-6 transition active:scale-[0.99]">
+              <input
+                type="radio"
+                checked={mode === "fixed_schedule"}
+                onChange={() => onModeChange("fixed_schedule")}
+                className="mt-1"
+              />
+              <span>
+                <span className="block font-semibold">Fixed date</span>
+                <span className="text-[color:var(--muted)]">Next: {nextDate}.</span>
+              </span>
+            </label>
+          </fieldset>
+          <p className="text-xs leading-5 text-[color:var(--muted)]">
+            {calendarConnected
+              ? "Google Calendar is connected; saved app reminders can sync there."
+              : "This stays inside Plant Care unless you connect Google Calendar later."}
+          </p>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 const emptyIdentificationState: PlantIdentificationState = {
   status: "idle",
   message: null,
@@ -353,6 +476,38 @@ function createCareIdentityKey(commonName: string, scientificName: string) {
   return `${commonName.trim().toLowerCase()}::${scientificName.trim().toLowerCase()}`;
 }
 
+function getNicknameSuggestion(candidate: PlantIdentificationCandidate) {
+  const commonName = candidate.commonName?.trim();
+
+  if (commonName) {
+    return commonName;
+  }
+
+  const cleanedScientificName = candidate.scientificName
+    .replace(/[×x]/gi, " ")
+    .replace(/[^A-Za-z\s-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return cleanedScientificName.split(" ")[0] ?? "";
+}
+
+function getDateInputDaysFromToday(days: number) {
+  const date = new Date();
+  date.setDate(date.getDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+function getReminderDateFromInterval(intervalDays: string) {
+  const parsed = Number.parseInt(intervalDays, 10);
+
+  if (Number.isInteger(parsed) && parsed > 0) {
+    return getDateInputDaysFromToday(parsed);
+  }
+
+  return getDateInputDaysFromToday(1);
+}
+
 function AddPlantCareSuggestionPanel({
   preview,
   onApply,
@@ -399,14 +554,14 @@ function AddPlantCareSuggestionPanel({
         <button
           type="button"
           onClick={onApply}
-          className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full bg-[color:var(--accent)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-95"
+          className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full bg-[color:var(--accent)] px-4 py-2 text-sm font-semibold text-white transition active:scale-[0.98] hover:opacity-95"
         >
           Use these care basics
         </button>
         <button
           type="button"
           onClick={onSkip}
-          className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)]"
+          className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold transition active:scale-[0.98] hover:bg-[color:var(--accent-soft)]"
         >
           Skip for now
         </button>
@@ -437,8 +592,17 @@ function InitialPhotoIdentificationControls({
   const [showCandidates, setShowCandidates] = useState(true);
   const [reviewMessage, setReviewMessage] = useState<string | null>(null);
   const [localMessage, setLocalMessage] = useState<string | null>(null);
+  const resultRef = useRef<HTMLDivElement | null>(null);
   const hasCandidates = state.candidates.length > 0 && showCandidates;
   const identifyPending = isPending || isIdentifyTransitionPending;
+
+  useEffect(() => {
+    if (state.status === "success" || hasCandidates) {
+      window.requestAnimationFrame(() => {
+        resultRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      });
+    }
+  }, [hasCandidates, state.status]);
 
   function handleIdentifyClick() {
     setShowCandidates(true);
@@ -470,13 +634,9 @@ function InitialPhotoIdentificationControls({
             Optional identification help
           </p>
           <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">
-            Plant suggestions are names only. Scores are match signals, not certainty. Choose one
-            to fill editable fields, retry with a clearer photo, or continue manually.
+            Suggestions are names only, not certainty. Choose one or continue manually.
           </p>
-          <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">
-            After you accept or enter reviewed names, Plant Care can look for an optional watering
-            starting point before you save.
-          </p>
+
           <p className="mt-1 text-xs leading-5 text-[color:var(--muted)]">
             Plant suggestions powered by Pl@ntNet.
           </p>
@@ -485,7 +645,7 @@ function InitialPhotoIdentificationControls({
           type="button"
           disabled={identifyPending}
           onClick={handleIdentifyClick}
-          className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center gap-2 rounded-full bg-[color:var(--accent)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center gap-2 rounded-full bg-[color:var(--accent)] px-4 py-2 text-sm font-semibold text-white transition active:scale-[0.98] hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
         >
           <CameraIcon className="h-4 w-4" />
           {identifyPending ? "Checking..." : "Identify from photo"}
@@ -500,7 +660,9 @@ function InitialPhotoIdentificationControls({
 
       {state.message ? (
         <div
-          className={`mt-4 rounded-[1rem] border px-4 py-3 text-sm leading-6 ${
+          ref={resultRef}
+          tabIndex={-1}
+          className={`mt-4 rounded-[1rem] border px-4 py-3 text-sm leading-6 outline-none ${
             state.status === "success"
               ? "border-emerald-200 bg-emerald-50 text-emerald-950"
               : "border-amber-200 bg-amber-50 text-amber-950"
@@ -511,7 +673,7 @@ function InitialPhotoIdentificationControls({
       ) : null}
 
       {hasCandidates ? (
-        <div className="mt-4 grid gap-3">
+        <div ref={state.message ? undefined : resultRef} className="mt-4 grid gap-3">
           {state.candidates.map((candidate) => (
             <div
               key={`${candidate.scientificName}-${candidate.commonName ?? "no-common"}`}
@@ -549,7 +711,7 @@ function InitialPhotoIdentificationControls({
                       "Suggestion copied into the editable name fields. Review it before saving.",
                     );
                   }}
-                  className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white px-4 py-2 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)]"
+                  className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white px-4 py-2 text-sm font-semibold transition active:scale-[0.98] hover:bg-[color:var(--accent-soft)]"
                 >
                   Use these names
                 </button>
@@ -562,7 +724,7 @@ function InitialPhotoIdentificationControls({
               setShowCandidates(false);
               setReviewMessage("Suggestions rejected. Continue with manual plant details.");
             }}
-            className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)]"
+            className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold transition active:scale-[0.98] hover:bg-[color:var(--accent-soft)]"
           >
             Continue manually
           </button>
@@ -604,6 +766,9 @@ export function PlantForm({
   allowInitialPhoto = false,
   identifyInitialPhotoAction,
   previewCareProfileAction,
+  showReminderSetup = false,
+  defaultReminderEnabled = false,
+  calendarConnected = false,
 }: PlantFormProps) {
   const startingState = {
     ...emptyPlantFormState,
@@ -629,6 +794,10 @@ export function PlantForm({
   const [carePreviewIdentityKey, setCarePreviewIdentityKey] = useState("");
   const [careSuggestionSkipped, setCareSuggestionSkipped] = useState(false);
   const [fallbackCareAnswer, setFallbackCareAnswer] = useState("");
+  const [setupReminderEnabled, setSetupReminderEnabled] =
+    useState(defaultReminderEnabled);
+  const [setupReminderMode, setSetupReminderMode] =
+    useState<SetupReminderMode>("after_watering");
   const [isSubmitTransitionPending, startSubmitTransition] = useTransition();
   const [isCarePreviewPending, startCarePreviewTransition] = useTransition();
   const formTopRef = useRef<HTMLDivElement | null>(null);
@@ -639,8 +808,6 @@ export function PlantForm({
   const errorStep =
     state.status === "error" && step === "review" ? getFirstErrorStep(fieldErrors) : null;
   const visibleStep = errorStep ?? step;
-  const currentStepIndex = steps.indexOf(visibleStep);
-  const currentStepNumber = currentStepIndex >= 0 ? currentStepIndex + 1 : 1;
   const isFirstStep = visibleStep === steps[0];
   const isReviewStep = visibleStep === "review";
   const currentCareIdentityKey = createCareIdentityKey(
@@ -656,6 +823,12 @@ export function PlantForm({
       ? carePreviewState.careProfilePreview
       : null;
   const hasEnteredPlantName = Boolean(values.commonName.trim() || values.scientificName.trim());
+  const hasWateringInterval = Boolean(values.wateringIntervalDays.trim());
+  const setupReminderDate = getReminderDateFromInterval(values.wateringIntervalDays);
+  const effectiveSetupReminderMode =
+    !hasWateringInterval && setupReminderMode === "after_watering"
+      ? "fixed_schedule"
+      : setupReminderMode;
   const shouldShowBasicProfile =
     !matchedCarePreview &&
     !careSuggestionSkipped &&
@@ -743,9 +916,11 @@ export function PlantForm({
   function acceptIdentificationCandidate(candidate: PlantIdentificationCandidate) {
     const commonName = candidate.commonName ?? values.commonName;
     const scientificName = candidate.scientificName;
+    const nicknameSuggestion = getNicknameSuggestion(candidate);
 
     setValues((current) => ({
       ...current,
+      nickname: current.nickname.trim() ? current.nickname : nicknameSuggestion,
       commonName,
       scientificName,
     }));
@@ -821,6 +996,11 @@ export function PlantForm({
 
     event.preventDefault();
 
+    if (visibleStep !== "review") {
+      goToNextStep();
+      return;
+    }
+
     if (photoError) {
       setStep("details");
       return;
@@ -836,6 +1016,9 @@ export function PlantForm({
     formData.set("wateringIntervalDays", values.wateringIntervalDays);
     formData.set("wateringGuidance", values.wateringGuidance);
     formData.set("notes", values.notes);
+    formData.set("setupReminderEnabled", setupReminderEnabled ? "on" : "off");
+    formData.set("setupReminderMode", effectiveSetupReminderMode);
+    formData.set("setupReminderDate", setupReminderDate);
 
     if (selectedInitialPhoto) {
       formData.set("initialPhoto", selectedInitialPhoto, selectedInitialPhoto.name);
@@ -865,9 +1048,7 @@ export function PlantForm({
         <p className="mt-3 max-w-2xl text-sm leading-7 text-[color:var(--muted)] sm:text-base">
           {description}
         </p>
-        <div className="mt-4 inline-flex w-fit items-center rounded-full border border-[color:var(--border-soft)] bg-[color:var(--surface-strong)] px-4 py-2 text-sm font-semibold text-[color:var(--muted)]">
-          Step {currentStepNumber} of {steps.length}
-        </div>
+        <SetupProgressIndicator step={visibleStep} />
       </section>
 
       {state.message ? (
@@ -903,6 +1084,13 @@ export function PlantForm({
         />
         <input type="hidden" name="wateringGuidance" value={values.wateringGuidance} />
         <input type="hidden" name="notes" value={values.notes} />
+        <input
+          type="hidden"
+          name="setupReminderEnabled"
+          value={setupReminderEnabled ? "on" : "off"}
+        />
+        <input type="hidden" name="setupReminderMode" value={effectiveSetupReminderMode} />
+        <input type="hidden" name="setupReminderDate" value={setupReminderDate} />
         <div
           className={`grid gap-5 ${
             isReviewStep && state.status !== "error" ? "hidden" : ""
@@ -920,36 +1108,34 @@ export function PlantForm({
                       <legend className="text-sm font-semibold text-[color:var(--foreground)]">
                         Optional photo
                       </legend>
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <label className="flex cursor-pointer flex-col gap-3 rounded-[1.25rem] border border-[color:var(--border)] bg-white/80 p-4 text-sm leading-6 transition hover:bg-[color:var(--accent-soft)]">
-                          <span className="font-semibold">Choose from library</span>
-                          <span className="text-[color:var(--muted)]">
-                            Pick an existing JPG or PNG photo from this device.
-                          </span>
+                      <div className="grid grid-cols-2 gap-3">
+                        <label className="flex min-h-[5.5rem] cursor-pointer flex-col items-center justify-center gap-2 rounded-[1.25rem] border border-[color:var(--border)] bg-white/80 p-4 text-center text-sm font-semibold transition active:scale-[0.98] hover:bg-[color:var(--accent-soft)]">
+                          <ImageIcon className="h-6 w-6 text-[color:var(--accent)]" />
+                          <span>Choose from library</span>
                           <input
                             ref={libraryPhotoInputRef}
                             type="file"
                             accept="image/jpeg,image/png"
+                            aria-label="Choose plant photo from library"
                             onChange={(event) =>
                               handleInitialPhotoChange(event.target.files, "library")
                             }
-                            className="w-full text-sm font-normal text-[color:var(--foreground)] file:mr-4 file:rounded-full file:border-0 file:bg-[color:var(--accent-soft)] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[color:var(--foreground)]"
+                            className="sr-only"
                           />
                         </label>
-                        <label className="flex cursor-pointer flex-col gap-3 rounded-[1.25rem] border border-[color:var(--border)] bg-white/80 p-4 text-sm leading-6 transition hover:bg-[color:var(--accent-soft)]">
-                          <span className="font-semibold">Take a photo</span>
-                          <span className="text-[color:var(--muted)]">
-                            Open the device camera where your browser supports it.
-                          </span>
+                        <label className="flex min-h-[5.5rem] cursor-pointer flex-col items-center justify-center gap-2 rounded-[1.25rem] border border-[color:var(--border)] bg-white/80 p-4 text-center text-sm font-semibold transition active:scale-[0.98] hover:bg-[color:var(--accent-soft)]">
+                          <CameraIcon className="h-6 w-6 text-[color:var(--accent)]" />
+                          <span>Take photo</span>
                           <input
                             ref={cameraPhotoInputRef}
                             type="file"
                             accept="image/jpeg,image/png"
                             capture="environment"
+                            aria-label="Take plant photo with camera"
                             onChange={(event) =>
                               handleInitialPhotoChange(event.target.files, "camera")
                             }
-                            className="w-full text-sm font-normal text-[color:var(--foreground)] file:mr-4 file:rounded-full file:border-0 file:bg-[color:var(--accent-soft)] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[color:var(--foreground)]"
+                            className="sr-only"
                           />
                         </label>
                       </div>
@@ -974,10 +1160,7 @@ export function PlantForm({
                       </div>
                     ) : null}
                     <p className="text-sm leading-6 text-[color:var(--muted)]">
-                      A photo helps you recognize this plant. Identification suggestions stay
-                      optional, names-only, and editable before saving. Use a JPG or PNG image
-                      under {PLANT_PHOTO_MAX_MB} MB. WebP is not supported for plant
-                      identification yet.
+                      JPG or PNG, under {PLANT_PHOTO_MAX_MB} MB. Identification is optional and editable.
                     </p>
                     {identifyInitialPhotoAction ? (
                       <InitialPhotoIdentificationControls
@@ -1059,7 +1242,7 @@ export function PlantForm({
                         onClick={() =>
                           requestCareProfilePreview(values.commonName, values.scientificName)
                         }
-                        className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white px-4 py-2 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)] disabled:cursor-not-allowed disabled:opacity-60"
+                        className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white px-4 py-2 text-sm font-semibold transition active:scale-[0.98] hover:bg-[color:var(--accent-soft)] disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {isCarePreviewPending ? "Checking..." : "Find starting point"}
                       </button>
@@ -1134,7 +1317,7 @@ export function PlantForm({
                                 fallbackCareAnswer,
                               )
                             }
-                            className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white px-4 py-2 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)] disabled:cursor-not-allowed disabled:opacity-60"
+                            className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white px-4 py-2 text-sm font-semibold transition active:scale-[0.98] hover:bg-[color:var(--accent-soft)] disabled:cursor-not-allowed disabled:opacity-60"
                           >
                             {isCarePreviewPending ? "Checking..." : "Use basic profile"}
                           </button>
@@ -1165,6 +1348,17 @@ export function PlantForm({
                   placeholder="Let the top inch dry out first."
                   rows={4}
                 />
+                {showReminderSetup ? (
+                  <SetupReminderChoice
+                    enabled={setupReminderEnabled}
+                    mode={effectiveSetupReminderMode}
+                    nextDate={setupReminderDate}
+                    hasInterval={hasWateringInterval}
+                    calendarConnected={calendarConnected}
+                    onEnabledChange={setSetupReminderEnabled}
+                    onModeChange={setSetupReminderMode}
+                  />
+                ) : null}
                 <FormField
                   label="Notes"
                   name="notes"
@@ -1182,7 +1376,7 @@ export function PlantForm({
               <button
                 type="button"
                 onClick={goToPreviousStep}
-                className="inline-flex min-h-[var(--tap-target)] items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-5 py-3 text-sm font-semibold text-[color:var(--foreground)] transition hover:bg-[color:var(--accent-soft)]"
+                className="inline-flex min-h-[var(--tap-target)] items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-5 py-3 text-sm font-semibold text-[color:var(--foreground)] transition active:scale-[0.98] hover:bg-[color:var(--accent-soft)]"
               >
                 Back
               </button>
@@ -1190,7 +1384,7 @@ export function PlantForm({
             <button
               type="button"
               onClick={goToNextStep}
-              className="inline-flex min-h-[var(--tap-target)] items-center justify-center rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-95"
+              className="inline-flex min-h-[var(--tap-target)] items-center justify-center rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white transition active:scale-[0.98] hover:opacity-95"
             >
               {steps.indexOf(visibleStep) === steps.length - 2 ? "Review and save" : "Continue"}
             </button>
@@ -1216,6 +1410,16 @@ export function PlantForm({
               }
             />
             <ReviewItem label="Watering guidance" value={values.wateringGuidance} />
+            {showReminderSetup ? (
+              <ReviewItem
+                label="Reminder"
+                value={
+                  setupReminderEnabled
+                    ? `${effectiveSetupReminderMode === "after_watering" ? "After watering" : "Fixed date"} · ${setupReminderDate}`
+                    : "Off"
+                }
+              />
+            ) : null}
             <ReviewItem label="Notes" value={values.notes} />
           </div>
 
@@ -1227,7 +1431,11 @@ export function PlantForm({
                 {allowInitialPhoto ? " with a photo if you added one." : "."}
               </li>
               <li>AI suggestions are saved only after you review and accept them.</li>
-              <li>No reminders have been scheduled yet.</li>
+              <li>
+                {showReminderSetup && setupReminderEnabled
+                  ? "A watering reminder will be created."
+                  : "No reminder will be created."}
+              </li>
               <li>Watering guidance stays editable and can be changed later.</li>
             </ul>
           </div>
@@ -1236,14 +1444,14 @@ export function PlantForm({
             <button
               type="button"
               onClick={goToPreviousStep}
-              className="inline-flex items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-5 py-3 text-sm font-semibold text-[color:var(--foreground)] transition hover:bg-[color:var(--accent-soft)]"
+              className="inline-flex items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-5 py-3 text-sm font-semibold text-[color:var(--foreground)] transition active:scale-[0.98] hover:bg-[color:var(--accent-soft)]"
             >
               Back to editing
             </button>
             <button
               type="submit"
               disabled={submitPending}
-              className="inline-flex min-h-[var(--tap-target)] items-center justify-center rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-h-[var(--tap-target)] items-center justify-center rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white transition active:scale-[0.98] hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {submitPending ? "Saving..." : submitLabel}
             </button>

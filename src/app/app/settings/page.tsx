@@ -2,6 +2,7 @@ import {
   archiveRoomAction,
   createRoomAction,
   renameRoomAction,
+  updateReminderDefaultPreferenceAction,
 } from "@/app/app/settings/actions";
 import { disconnectGoogleCalendarAction } from "@/app/app/integrations/google-calendar/actions";
 import { AppShell } from "@/components/app-shell";
@@ -24,6 +25,7 @@ import {
 import { listPlantsForUser } from "@/lib/plants/data";
 import type { GoogleCalendarEventLinkRecord } from "@/lib/plants/types";
 import { listPlantRoomsForUser } from "@/lib/rooms/data";
+import { getUserAppPreferencesForUser } from "@/lib/user-preferences/data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -32,6 +34,7 @@ type SettingsPageProps = {
   searchParams: Promise<{
     rooms?: string;
     googleCalendar?: string;
+    reminders?: string;
   }>;
 };
 
@@ -49,6 +52,19 @@ function getRoomStatusMessage(status?: string) {
       return { tone: "warning" as const, message: "Add a room name before saving." };
     case "archive-error":
       return { tone: "warning" as const, message: "We couldn't archive that room. Please refresh and try again." };
+    default:
+      return null;
+  }
+}
+
+function getReminderPreferenceStatusMessage(status?: string) {
+  switch (status) {
+    case "on":
+      return { tone: "success" as const, message: "New plant reminders default to on." };
+    case "off":
+      return { tone: "success" as const, message: "New plant reminders default to off." };
+    case "error":
+      return { tone: "warning" as const, message: "We couldn't save reminder preferences. Please try again." };
     default:
       return null;
   }
@@ -102,12 +118,14 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
     plantsResult,
     calendarConnectionResult,
     calendarEventLinksResult,
+    preferencesResult,
   ] =
     await Promise.all([
       listPlantRoomsForUser(supabase, authState.user.id),
       listPlantsForUser(supabase, authState.user.id),
       getGoogleCalendarConnection(supabase, authState.user.id),
       listGoogleCalendarEventLinksForUser(supabase, authState.user.id),
+      getUserAppPreferencesForUser(supabase, authState.user.id),
     ]);
   const rooms = roomsResult.data ?? [];
   const plants = plantsResult.data ?? [];
@@ -120,6 +138,8 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
     return counts;
   }, {});
   const roomStatus = getRoomStatusMessage(params.rooms);
+  const reminderPreferenceStatus = getReminderPreferenceStatusMessage(params.reminders);
+  const reminderDefaultEnabled = preferencesResult.data?.default_new_plant_reminders_enabled ?? Boolean(calendarConnectionResult.data);
   const googleCalendarConfigured = Boolean(getGoogleCalendarConfig());
   const latestEventSync = getLatestGoogleCalendarEventSync(calendarEventLinks);
 
@@ -286,11 +306,40 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
             <span className="mt-1 text-[color:var(--accent)]">
               <BellIcon className="h-5 w-5" />
             </span>
-            <div>
+            <div className="flex-1">
               <h2 className="text-lg font-semibold">Reminders</h2>
               <p className="mt-1 text-sm leading-6 text-[color:var(--muted)]">
-                Watering reminders remain app-owned and are managed from each plant.
+                App-owned watering reminders are managed per plant. Choose the default for new plants.
               </p>
+              {reminderPreferenceStatus ? (
+                <div className="mt-4 rounded-[1rem] border border-[color:var(--border-soft)] bg-white/75 px-4 py-3 text-sm font-semibold text-[color:var(--foreground)]">
+                  <StatusPill tone={reminderPreferenceStatus.tone}>Saved</StatusPill>
+                  <p className="mt-2">{reminderPreferenceStatus.message}</p>
+                </div>
+              ) : null}
+              <form action={updateReminderDefaultPreferenceAction} className="mt-4 grid gap-3">
+                <label className="flex items-start gap-3 rounded-[1.25rem] border border-[color:var(--border)] bg-white/75 p-4 text-sm leading-6">
+                  <input
+                    type="checkbox"
+                    name="defaultNewPlantReminders"
+                    defaultChecked={reminderDefaultEnabled}
+                    className="mt-1"
+                  />
+                  <span>
+                    <span className="block font-semibold">Default reminders on for new plants</span>
+                    <span className="text-[color:var(--muted)]">
+                      Setup still lets you turn reminders off for each plant.
+                      {calendarConnectionResult.data ? " Connected Google Calendar follows saved app reminders." : ""}
+                    </span>
+                  </span>
+                </label>
+                <button
+                  type="submit"
+                  className="inline-flex min-h-[var(--tap-target)] w-fit items-center justify-center rounded-full bg-[color:var(--accent)] px-4 py-2 text-sm font-semibold text-white transition active:scale-[0.98] hover:opacity-95"
+                >
+                  Save reminder default
+                </button>
+              </form>
             </div>
           </div>
         </section>

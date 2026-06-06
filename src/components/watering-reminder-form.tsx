@@ -94,6 +94,8 @@ export function WateringReminderPanel({
   const [selectedMode, setSelectedMode] = useState<"after_watering" | "fixed_schedule">(
     initialMode,
   );
+  const effectiveSelectedMode =
+    selectedMode === "after_watering" && !canUseReminderTiming ? "fixed_schedule" : selectedMode;
 
   return (
     <section className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-6 shadow-[var(--shadow)] sm:p-8">
@@ -148,12 +150,12 @@ export function WateringReminderPanel({
             <legend className="text-sm font-semibold text-[color:var(--foreground)]">
               How should reminders work?
             </legend>
-            <label className="flex gap-3 rounded-[1.25rem] border border-[color:var(--border)] bg-white/75 p-4 text-sm leading-6">
+            <label className="flex gap-3 rounded-[1.25rem] border border-[color:var(--border)] bg-white/75 p-4 text-sm leading-6 transition active:scale-[0.99]">
               <input
                 type="radio"
                 name="reminderMode"
                 value="after_watering"
-                checked={selectedMode === "after_watering"}
+                checked={effectiveSelectedMode === "after_watering"}
                 onChange={() => setSelectedMode("after_watering")}
                 disabled={!canUseReminderTiming}
                 className="mt-1"
@@ -167,12 +169,12 @@ export function WateringReminderPanel({
                 </span>
               </span>
             </label>
-            <label className="flex gap-3 rounded-[1.25rem] border border-[color:var(--border)] bg-white/75 p-4 text-sm leading-6">
+            <label className="flex gap-3 rounded-[1.25rem] border border-[color:var(--border)] bg-white/75 p-4 text-sm leading-6 transition active:scale-[0.99]">
               <input
                 type="radio"
                 name="reminderMode"
                 value="fixed_schedule"
-                checked={selectedMode === "fixed_schedule"}
+                checked={effectiveSelectedMode === "fixed_schedule"}
                 onChange={() => setSelectedMode("fixed_schedule")}
                 className="mt-1"
               />
@@ -196,14 +198,14 @@ export function WateringReminderPanel({
           <button
             type="submit"
             disabled={savePending}
-            className="inline-flex w-fit items-center justify-center rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex w-fit items-center justify-center rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white transition active:scale-[0.98] hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {savePending ? "Saving..." : enabled ? "Update reminder" : "Turn reminder on"}
           </button>
           {!canUseReminderTiming ? (
             <p className="text-sm leading-7 text-[color:var(--muted)]">
-              Fixed schedule only needs a next reminder date. Add a watering interval later
-              if you want reminders to recalculate after watering.
+              Fixed schedule can still be saved. Add a watering interval in plant details to enable
+              after-watering reminders.
             </p>
           ) : null}
         </form>
@@ -215,7 +217,7 @@ export function WateringReminderPanel({
               <button
                 type="submit"
                 disabled={snoozePending}
-                className="inline-flex w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)] disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold transition active:scale-[0.98] hover:bg-[color:var(--accent-soft)] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Snooze 1 day
               </button>
@@ -225,7 +227,7 @@ export function WateringReminderPanel({
               <button
                 type="submit"
                 disabled={snoozePending}
-                className="inline-flex w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)] disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold transition active:scale-[0.98] hover:bg-[color:var(--accent-soft)] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Snooze 3 days
               </button>
@@ -234,7 +236,7 @@ export function WateringReminderPanel({
               <button
                 type="submit"
                 disabled={disablePending}
-                className="inline-flex w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold transition hover:bg-[color:var(--accent-soft)] disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex w-fit items-center justify-center rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold transition active:scale-[0.98] hover:bg-[color:var(--accent-soft)] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {disablePending ? "Pausing..." : "Turn reminder off"}
               </button>

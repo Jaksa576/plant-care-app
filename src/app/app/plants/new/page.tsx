@@ -7,10 +7,12 @@ import {
   previewCareProfileForPlantNamesAction,
 } from "@/app/app/plants/actions";
 import { AppShell } from "@/components/app-shell";
+import { getGoogleCalendarConnection } from "@/lib/google-calendar/data";
 import { PlantForm } from "@/components/plant-form";
 import { SignOutButton } from "@/components/sign-out-button";
 import { getAuthState } from "@/lib/auth";
 import { listPlantRoomsForUser } from "@/lib/rooms/data";
+import { getUserAppPreferencesForUser } from "@/lib/user-preferences/data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 type NewPlantPageProps = {
@@ -36,7 +38,14 @@ export default async function NewPlantPage({ searchParams }: NewPlantPageProps) 
     redirect("/login?missingEnv=1");
   }
 
-  const roomsResult = await listPlantRoomsForUser(supabase, authState.user.id);
+  const [roomsResult, preferencesResult, calendarConnectionResult] = await Promise.all([
+    listPlantRoomsForUser(supabase, authState.user.id),
+    getUserAppPreferencesForUser(supabase, authState.user.id),
+    getGoogleCalendarConnection(supabase, authState.user.id),
+  ]);
+  const calendarConnected = Boolean(calendarConnectionResult.data);
+  const defaultReminderEnabled =
+    preferencesResult.data?.default_new_plant_reminders_enabled ?? calendarConnected;
 
   return (
     <AppShell
@@ -57,12 +66,15 @@ export default async function NewPlantPage({ searchParams }: NewPlantPageProps) 
           action={createPlantAction}
           submitLabel="Save plant"
           title="Add a plant"
-          description="Add a plant in a few short steps. You can skip identification and save a manual plant record."
+          description="Add a plant in a few short steps. Identification is optional and editable."
           rooms={roomsResult.data ?? []}
           allowInitialPhoto
           startsWithPhoto
           identifyInitialPhotoAction={identifyInitialPlantPhotoAction}
           previewCareProfileAction={previewCareProfileForPlantNamesAction}
+          showReminderSetup
+          defaultReminderEnabled={defaultReminderEnabled}
+          calendarConnected={calendarConnected}
         />
       </div>
     </AppShell>

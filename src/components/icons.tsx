@@ -139,6 +139,16 @@ export function CheckCircleIcon(props: IconProps) {
   );
 }
 
+export function ImageIcon(props: IconProps) {
+  return (
+    <IconBase {...props}>
+      <rect x="4" y="5" width="16" height="14" rx="2.5" />
+      <circle cx="9" cy="10" r="1.4" />
+      <path d="m6.8 17 4.2-4.2 2.5 2.5 1.6-1.6 2.6 3.3" />
+    </IconBase>
+  );
+}
+
 export function CameraIcon(props: IconProps) {
   return (
     <IconBase {...props}>

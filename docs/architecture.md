@@ -40,8 +40,8 @@ This document describes implemented technical shape and architectural boundaries
 - Dashboard cards show a small plant thumbnail or calm fallback.
 - Plant profiles include an optional Pl@ntNet-backed identification helper when a primary photo exists.
 - Plant profiles include an app-owned watering reminder panel.
-- Settings includes Google Calendar connection status, last sync/status metadata where available, connect, and disconnect controls.
-- Google Calendar sync is implemented as a one-way reflection of app-owned reminders; setup and disconnect are app-level Settings controls.
+- Settings includes reminder default preference control plus Google Calendar connection status, last sync/status metadata where available, connect, and disconnect controls.
+- Google Calendar sync is implemented as a one-way reflection of app-owned reminders; setup and disconnect are app-level Settings controls. New-plant setup can create an app-owned reminder when the user leaves reminders on, and connected Google Calendar follows the saved app reminder through the existing sync path.
 - First-run onboarding is implemented with per-user completion state. Signed-in users with no plants and no completed onboarding state are routed from Today to onboarding; users with plants are not redirected, and Settings can revisit setup without creating a loop. Onboarding can optionally create initial user-owned rooms, then route to Today, manual Add Plant, or photo-first Add Plant.
 
 ## Auth And Session Pattern
@@ -86,10 +86,11 @@ Per-user setup state is implemented in `user_app_preferences`:
 - `user_id`
 - optional `onboarding_completed_at`
 - optional `setup_checklist_dismissed_at`
+- optional `default_new_plant_reminders_enabled`
 - `created_at`
 - `updated_at`
 
-Onboarding completion is optional and user-scoped. Existing users with plants are not redirected into onboarding when no preference row exists. Completing or skipping onboarding writes `onboarding_completed_at`; it does not require room setup, plant creation, photo upload, AI identification, reminders, or calendar sync. If optional room names are submitted during onboarding, the server creates them for the signed-in user before marking onboarding complete; duplicate active room names are skipped.
+Onboarding completion is optional and user-scoped. Existing users with plants are not redirected into onboarding when no preference row exists. Completing or skipping onboarding writes `onboarding_completed_at`; it does not require room setup, plant creation, photo upload, AI identification, reminders, or calendar sync. `default_new_plant_reminders_enabled` stores whether Add Plant should default the setup reminder choice on or off; users can still opt out per plant. If optional room names are submitted during onboarding, the server creates them for the signed-in user before marking onboarding complete; duplicate active room names are skipped.
 
 ### Plants
 
