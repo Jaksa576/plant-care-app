@@ -7,6 +7,7 @@ export type UserAppPreferencesRecord = {
   user_id: string;
   onboarding_completed_at: string | null;
   setup_checklist_dismissed_at: string | null;
+  default_new_plant_reminders_enabled: boolean | null;
   created_at: string;
   updated_at: string;
 };
@@ -68,6 +69,36 @@ export async function completeOnboardingForUser(
     return {
       data: null,
       error: getPreferencesErrorMessage("We couldn't save setup preferences right now.", error),
+    };
+  }
+
+  return {
+    data: data as UserAppPreferencesRecord,
+    error: null,
+  };
+}
+
+export async function updateDefaultNewPlantRemindersForUser(
+  supabase: PreferencesClient,
+  userId: string,
+  enabled: boolean,
+): Promise<UserAppPreferencesQueryResult<UserAppPreferencesRecord>> {
+  const { data, error } = await supabase
+    .from("user_app_preferences")
+    .upsert(
+      {
+        user_id: userId,
+        default_new_plant_reminders_enabled: enabled,
+      },
+      { onConflict: "user_id" },
+    )
+    .select("*")
+    .single();
+
+  if (error) {
+    return {
+      data: null,
+      error: getPreferencesErrorMessage("We couldn't save reminder preferences right now.", error),
     };
   }
 

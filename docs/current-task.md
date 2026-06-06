@@ -19,9 +19,15 @@ Completed campaign archive: [AI Care Setup](campaigns/archived/ai-care-setup.md)
 
 ## Active Slice
 
-Internal care profile QA patch for failed spider plant, moth orchid, and corn plant matches.
+Mobile plant setup + reminders polish patch for GitHub issues #2, #3, #4, #5, #7, #8, #9, and #10.
 
-Status: implemented and validating on `codex/care-profile-qa-scientific-fix`; no new campaign.
+Status: implemented on `codex/mobile-setup-reminders-polish`; validation in progress. No active campaign.
+
+Scope notes:
+
+- Addressed setup continuity, compact setup progress, simplified photo input, identification nickname autofill, shorter AI/setup copy, reminder mode switching, setup reminder defaults, and scoped mobile press/result feedback.
+- Deferred #1 PWA launch route because it is outside this patch and not clearly tied to the setup/reminder flow.
+- Added only a small nullable user preference column for new-plant reminder defaults; no broad schema redesign or external calendar rewrite.
 
 ## Completed Work
 
@@ -56,8 +62,24 @@ Status: implemented and validating on `codex/care-profile-qa-scientific-fix`; no
 - Preserved manual setup, optional photo/AI/care/reminder paths, private photo handling, route protection, and user-owned data boundaries.
 - Merged final pre-merge QA patches for safer identification diagnostics, JPG/PNG photo format clarity, mobile library photo selection, no duplicate profile care setup after Add Plant save, compact calendar status placement, and Add/Edit stepped-form scroll-to-top behavior.
 
+
+Mobile plant setup + reminders polish patch on `codex/mobile-setup-reminders-polish`:
+
+- Fixed Add Plant keyboard/form-submit continuity so mobile/iPhone-style submit on the first setup step advances through setup instead of creating the plant early.
+- Added a compact three-stage setup progress indicator for photo/name, room, and watering while preserving the existing final review-before-save step.
+- Simplified Add Plant photo input to two accessible icon choices: `Choose from library` and `Take photo`.
+- Auto-fills an empty editable nickname from accepted identification results while preserving user-entered nicknames and separate common/scientific fields.
+- Shortened setup and identification copy while keeping conservative, names-only AI language.
+- Added a setup reminder on/off choice in the watering step, defaulted from `user_app_preferences.default_new_plant_reminders_enabled` or Google Calendar connection state when no explicit preference exists.
+- Added Settings control for the new default reminder preference.
+- Creates an app-owned watering reminder during plant creation only when the user leaves setup reminders on; per-plant opt-out remains available.
+- Kept Google Calendar as a one-way reflection of saved app reminders; no separate calendar-sync behavior was added.
+- Hardened reminder mode UI so after-watering is selectable when a watering interval exists and clearly disabled with fixed-schedule fallback when interval data is missing.
+- Added scoped pressed/loading/disabled/success feedback and result scrolling in setup, photo identification, and reminder panels.
+
 ## Operational Deployment Notes
 
+- Apply Supabase migration `supabase/migrations/20260606_mobile_setup_reminder_default.sql` in production before relying on saved new-plant reminder default preferences.
 - Apply Supabase migration `supabase/migrations/20260518_slice_ai_care_setup_1_care_profiles.sql` in production before relying on database-backed care profile lookup.
 - Apply or confirm `supabase/seed_care_profiles.sql` in production after the migration.
 - Run `npm run validate:care-profiles` before changing care profile fixtures or regenerating seed SQL.

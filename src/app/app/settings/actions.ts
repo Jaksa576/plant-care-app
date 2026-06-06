@@ -9,6 +9,7 @@ import {
   createPlantRoomForUser,
   renamePlantRoomForUser,
 } from "@/lib/rooms/data";
+import { updateDefaultNewPlantRemindersForUser } from "@/lib/user-preferences/data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 async function getSignedInSettingsContext() {
@@ -103,4 +104,23 @@ export async function archiveRoomAction(formData: FormData) {
   revalidatePath("/app/plants");
   revalidatePath("/app/settings");
   redirectWithRoomStatus("archived");
+}
+
+
+function redirectWithReminderPreferenceStatus(status: string) {
+  redirect(`/app/settings?reminders=${encodeURIComponent(status)}`);
+}
+
+export async function updateReminderDefaultPreferenceAction(formData: FormData) {
+  const enabled = formData.get("defaultNewPlantReminders") === "on";
+  const { supabase, user } = await getSignedInSettingsContext();
+  const result = await updateDefaultNewPlantRemindersForUser(supabase, user.id, enabled);
+
+  if (result.error) {
+    redirectWithReminderPreferenceStatus("error");
+  }
+
+  revalidatePath("/app/settings");
+  revalidatePath("/app/plants/new");
+  redirectWithReminderPreferenceStatus(enabled ? "on" : "off");
 }
